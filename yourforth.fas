@@ -1,0 +1,1447 @@
+        ;  66,106
+ ;   ciforth $Revision: 6.2 $
+        include "macros.fas"
+;
+; FASM version of ciforth created by ``m4'' from generic listing.
+; This source can be assembled using the Flat Assembler,
+;  available from the Net.
+;      fasm yourforth.asm
+        FORMAT  ELF EXECUTABLE ; Instead of telling the linker.
+;
+;
+        ;
+figrel  =     6       
+cw      =     4    
+forthsize      =     (0x100000)     
+tasksize     =     0x10000    
+stacksize   = tasksize/4  
+cibsize     = tasksize/2  
+dummymask   =     0x01     
+invisiblemask   =     0x02     
+immediatemask   =     0x04     
+denotationmask   =     0x08     
+prefixmask = immediatemask+denotationmask
+epipe   =     0x20
+__NR_exit    =     0x1
+__NR_open    =     0x5
+__NR_close   =     0x6
+__NR_creat   =     0x8
+__NR_unlink  =     0xa
+__NR_chdir   =     0xc
+__NR_read    =     0x3
+__NR_select  =     0x52
+__NR_newselect      =     0x8e
+__NR_write   =     0x4
+__NR_ioctl   =     0x36
+__NR_ioperm  =     0x65
+__NR_iopl    =     0x6e
+__NR_lseek   =     0x13
+__NR_execve  =     0xb
+__NR_fork    =     0x2
+__NR_waitpid =     0x7
+__NR_pipe    =     0x2a
+               segment executable readable writable
+        ;
+        ;  bm        
+bm:
+   use32          
+        cld                     
+        mov     esp, [DSP_zero+1*cw] 
+        mov     ebp, [RSP_zero+1*cw] 
+        mov     esi, COLD+5*cw 
+        next 
+        ;
+    header  catchall,   docol, catchall+5*cw, prefixmask, lastlink, ""
+        dd      paren_NUMBER, LITERAL, EXIT
+    header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
+        dd      NAME, PRESENT
+        dd      _DUP_, zero_equal
+        dd      LIT, 11, query_ERROR
+        dd      LITERAL
+        dd      EXIT
+    header  charprefix,   docol, charprefix+5*cw, prefixmask, lastlink, "&"
+        dd      PP_fetch_fetch
+        dd      NIP
+        dd      _DUP_, query_BLANK
+        dd      LIT, 10, query_ERROR
+        dd      LITERAL
+        dd      EXIT
+    header  minusprefix,   docol, minusprefix+5*cw, prefixmask, lastlink, "-"
+        dd      paren_NUMBER, NEGATE, LITERAL
+        dd      EXIT
+    header  plusprefix,   docol, plusprefix+5*cw, prefixmask, lastlink, "+"
+        dd      paren_NUMBER, LITERAL, EXIT
+    header  stringprefix,   docol, stringprefix+5*cw, prefixmask, lastlink, '"'
+        dd      LIT, BRANCH, _comma_        
+        dd      HERE, to_R, _zero_, _comma_
+        dd      LIT, '"', PARSE         
+        dd      _DUP_, ALLOT, R_fetch, string_plus_store     
+    dd _ALIGN_
+        dd      R_fetch, CELL_plus, LITERAL
+        dd      R_from, _fetch_, LITERAL
+        dd      PP_fetch_fetch, query_BLANK, _NOT_, LIT, 10, query_ERROR           
+        dd      DROP                    
+        dd      EXIT
+dovoc:
+        dd      CONTEXT
+        dd      _store_
+        dd      EXIT
+    header  FORTH,   dodo, FORTH+5*cw, 0, lastlink, "FORTH"
+        dd      dovoc
+        dd      0, 0, dummymask, TASK, (_zero_+1*cw)
+    header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
+       next 
+    header  LIT,   LIT+5*cw, 0, 0, lastlink, "LIT"
+        lodsd           
+        push    eax
+        next           
+    header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
+        pop     eax      
+        jmp     dword[eax]  
+    header  BRANCH,   BRANCH+5*cw, 0, 0, lastlink, "BRANCH"
+BRAN1:  lodsd
+        dec     eax
+        OR      al,  4 - 1
+        inc     eax
+        add     esi,eax
+        next 
+    header  zero_BRANCH,   zero_BRANCH+5*cw, 0, 0, lastlink, "0BRANCH"
+        pop     eax      
+        OR      eax,eax   
+        jz      BRAN1   
+        lea     esi,[esi+1*cw]
+        next 
+    header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
+        mov     ebx,1    
+XLOO1:  add     [ebp],ebx 
+        mov     eax,[ebp] 
+        sub     eax,[ebp+1*cw]        
+        XOR     eax,ebx   
+        js      BRAN1   
+        lea     ebp,[ebp+3*cw]  
+        lea     esi,[esi+1*cw]       
+        next 
+    header  paren_plus_LOOP,   paren_plus_LOOP+5*cw, 0, 0, lastlink, "(+LOOP)"
+        pop     ebx      
+        jmp short     XLOO1
+        next            
+    header  paren_DO,   paren_DO+5*cw, 0, 0, lastlink, "(DO)"
+        lodsd
+        add     eax,esi  
+        pop     edx      
+        pop     ebx      
+        xchg    ebp,esp   
+        push    eax      
+        push    ebx
+        push    edx
+        xchg    ebp,esp   
+        next 
+    header  I,   (R_fetch+5*cw), I+5*cw, 0, lastlink, "I"
+    header  J,   J+5*cw, 0, 0, lastlink, "J"
+        mov     eax,[ebp+3*cw] 
+        push    eax
+        next           
+    header  DIGIT,   docol , DIGIT+5*cw, 0, lastlink, "DIGIT"
+        dd      LIT, '0'        
+        dd      OVER, LIT, '9', _greater_
+        ifto  then1    
+        dd      DROP, LIT, 'A'-10
+then1:  dd      _minus_
+        dd      _DUP_, zero_less, OVER, BASE, _fetch_, _less_, _NOT_, _OR_
+        dd      EXIT
+    header  no_MATCH,   docol, no_MATCH+5*cw, 0, lastlink, "~MATCH"
+        dd      to_R                           
+        dd      two_DUP
+        dd      R_fetch, to_NFA, _fetch_, string_fetch
+        dd      SDSWAP, MIN
+        dd      CORA
+        dd      R_from, SWAP                   
+        dd      EXIT                            
+    header  query_BLANK,   docol, query_BLANK+5*cw, 0, lastlink, "?BLANK"
+        dd      _BL_, one_plus, _less_
+        dd      EXIT
+    header  PP_fetch_fetch,   docol, PP_fetch_fetch+5*cw, 0, lastlink, "PP@@"
+        dd      SRC, CELL_plus, two_fetch
+        dd      OVER, _equal_
+        ifto  then2  
+        dd      _zero_
+        goto  else2  
+then2:
+        dd      _DUP_
+        dd      C_fetch
+        dd      _one_, PP, plus_store
+else2:
+        dd      EXIT
+    header  NAME,   docol, NAME+5*cw, 0, lastlink, "NAME"
+        dd      _
+begin1: dd      DROP
+        dd      PP_fetch_fetch, query_BLANK, _NOT_
+        dd      OVER, SRC, CELL_plus, _fetch_, _equal_ 
+        dd      _OR_
+        untilto   begin1
+        dd      _
+begin2: dd      DROP
+        dd      PP_fetch_fetch, query_BLANK
+        untilto   begin2
+        dd      OVER, _minus_
+        dd      EXIT
+    header  PARSE,   docol, PARSE+5*cw, 0, lastlink, "PARSE"
+        dd      SRC, CELL_plus, two_fetch
+        dd      OVER, _minus_
+        dd      SDSWAP, string_slash, two_SWAP
+        dd      zero_equal
+        ifto  PARSE8  
+        dd      DROP, SRC, CELL_plus, _fetch_
+PARSE8:
+        dd      PP, _store_
+        dd      EXIT
+    header  SRC,   dobuf, SRC+5*cw, 0, lastlink, "SRC"
+        dd      _,_,_
+    header  CR,   docol, CR+5*cw, 0, lastlink, "CR"
+        dd      LIT,0x0A
+        dd      EMIT
+        dd      EXIT
+    header  _MOVE_,   _MOVE_+5*cw, 0, 0, lastlink, "MOVE"
+        mov     ebx,esi   
+        pop     ecx      
+        pop     edi      
+        pop     esi      
+        cmp     esi,edi
+        jc    MOVE1
+        cld             
+        jmp short MOVE2
+MOVE1:  std
+        add     edi,ecx
+        dec     edi
+        add     esi,ecx
+        dec     esi
+MOVE2:
+        rep     movsb   
+        cld             
+        mov     esi,ebx   
+        next 
+    header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
+        pop     eax
+        pop     ebx
+        AND     eax,ebx
+        push    eax
+        next 
+    header  _OR_,   _OR_+5*cw, 0, 0, lastlink, "OR"
+        pop     eax      
+        pop     ebx
+        OR      eax,ebx
+        push    eax
+        next 
+    header  _XOR_,   _XOR_+5*cw, 0, 0, lastlink, "XOR"
+        pop     eax      
+        pop     ebx
+        XOR     eax,ebx
+        push    eax
+        next 
+    header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
+        pop     eax      
+        NOT     eax
+        push    eax
+        next 
+    header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
+        mov     eax,esp   
+        push    eax
+        next 
+    header  DSP_store,   DSP_store+5*cw, 0, 0, lastlink, "DSP!"
+        pop     eax
+        mov     esp,eax        
+        next 
+    header  DEPTH,   docol, DEPTH+5*cw, 0, lastlink, "DEPTH"
+        dd      DSP_zero
+        dd      DSP_fetch
+        dd      _minus_
+        dd      LIT, cw, _slash_
+        dd      _one_, _minus_
+        dd      EXIT
+    header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"      
+        push    ebp
+        next 
+    header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
+        pop     ebp
+        next 
+    header  EXIT,   EXIT+5*cw, 0, 0, lastlink, "EXIT"
+        mov     esi,[ebp] 
+        lea     ebp,[ebp+1*cw]
+        next 
+    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"        
+        pop     ebx      
+        lea     ebp,[ebp - 1*cw]    
+        mov     [ebp],ebx 
+        next 
+    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"      
+        mov     eax,[ebp] 
+        lea     ebp,[ebp + 1*cw]
+        push    eax
+        next 
+    header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
+        mov     eax,[ebp] 
+        push    eax
+        next           
+    header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
+        pop     eax
+        neg     eax
+        cmc
+        sbb     eax,eax
+        push    eax
+        next 
+    header  _NOT_,   (zero_equal+5*cw), _NOT_+5*cw, 0, lastlink, "NOT"
+    header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
+        pop     eax
+        OR      eax,eax   
+        mov     eax,0    
+        jns     ZLESS1
+        dec     eax      
+ZLESS1: push    eax
+        next 
+    header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
+        pop     eax      
+        pop     ebx
+        add     eax,ebx
+        push    eax
+        next 
+    header  NEGATE,   NEGATE+5*cw, 0, 0, lastlink, "NEGATE"
+        pop     eax
+        neg     eax
+        push    eax
+        next 
+    header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
+        pop     edx
+        pop     eax
+        push    eax
+        push    edx
+        push    eax
+        next 
+    header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
+        pop     eax
+        next 
+    header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
+        pop     eax
+        pop     ebx
+        push    eax
+        next 
+    header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
+        pop     eax
+        pop     eax
+        next 
+    header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
+        pop     edx
+        pop     eax
+        push    edx
+        push    eax
+        next 
+    header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
+        pop     eax
+        push    eax
+        push    eax
+        next 
+    header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
+        pop     eax
+        pop     edx
+        push    edx
+        push    eax
+        push    edx
+        push    eax
+        next 
+    header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next 
+    header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     edx
+        push     eax
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next 
+    header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
+        pop     ebx      
+        pop     eax      
+        add     [ebx],eax
+        next 
+    header  TOGGLE,   docol , TOGGLE+5*cw, 0, lastlink, "TOGGLE"
+        dd      OVER, _fetch_, _XOR_, SWAP, _store_
+        dd      EXIT
+    header  _fetch_,   _fetch_+5*cw, 0, 0, lastlink, "@"
+        pop     ebx
+        mov     eax,[ebx]
+        push    eax
+        next 
+    header  C_fetch,   C_fetch+5*cw, 0, 0, lastlink, "C@"
+        pop     ebx
+        XOR     eax,eax
+        mov     al,[ebx]
+        push    eax
+        next 
+    header  two_fetch,   two_fetch+5*cw, 0, 0, lastlink, "2@"
+        pop     ebx      
+        mov     eax,[ebx] 
+        mov     edx,[ebx+1*cw]        
+        push    edx
+        push    eax
+        next 
+    header  _store_,   _store_+5*cw, 0, 0, lastlink, "!"
+        pop     ebx      
+        pop     eax      
+        mov     [ebx],eax
+        next 
+    header  C_store,   C_store+5*cw, 0, 0, lastlink, "C!"
+        pop     ebx      
+        pop     eax      
+        mov     [ebx],al
+        next 
+    header  two_store,   two_store+5*cw, 0, 0, lastlink, "2!"
+        pop     ebx      
+        pop     eax      
+        mov     [ebx],eax
+        pop     eax      
+        mov     [ebx+1*cw],eax
+        next 
+    header  _colon_,   docol, _colon_+5*cw, 0, lastlink, ":"
+        dd      NAME
+        dd      paren_CREATE
+        dd      LATEST, HIDDEN
+        dd      LIT, docol, LATEST, to_CFA, _store_
+        dd      right_bracket
+        dd      EXIT
+docol:  lea     ebp,[ebp - 1*cw]  
+        mov     [ebp],esi 
+         mov     esi,[eax+1*cw]  
+        next 
+    header  _semis_,   docol, _semis_+5*cw, immediatemask, lastlink, ";"
+        dd      LIT, EXIT, _comma_
+        dd      LATEST, HIDDEN
+        dd      left_bracket
+        dd      EXIT
+    header  CONSTANT,   docol, CONSTANT+5*cw, 0, lastlink, "CONSTANT"
+        dd      NAME
+        dd      paren_CREATE
+        dd      LATEST, to_DFA, _store_
+        dd      LIT, docon, LATEST, to_CFA, _store_
+        dd      EXIT
+docon:  mov     eax,[eax+(1)*cw] 
+        push    eax
+        next 
+    header  VARIABLE,   docol, VARIABLE+5*cw, 0, lastlink, "VARIABLE"
+        dd      NAME
+        dd      paren_CREATE
+        dd      _zero_, _comma_
+        dd      LIT, dobuf, LATEST, to_CFA, _store_
+        dd      EXIT
+dobuf:  mov     eax,[eax+(1)*cw] 
+        push    eax
+        next 
+    header  _,   _+5*cw, 0, 0, lastlink, "_"
+        push    eax
+        next  
+    header  _zero_,   docon, 0, 0, lastlink, "0"
+    header  _one_,   docon, 1, 0, lastlink, "1"
+    header  _BL_,   docon, ' ', 0, lastlink, "BL"
+    header  string_fetch,   string_fetch+5*cw, 0, 0, lastlink, "$@"
+        pop   ebx
+        mov   eax,[ebx]
+        lea   edx, [ebx+1*cw]
+        push    edx
+        push    eax
+        next 
+    header  string_store,   docol, string_store+5*cw, 0, lastlink, "$!"
+        dd two_DUP, _store_, CELL_plus, SWAP, _MOVE_
+        dd EXIT
+    header  string_plus_store,   docol, string_plus_store+5*cw, 0, lastlink, "$+!"
+        dd   _DUP_, _fetch_, to_R 
+        dd   two_DUP, plus_store
+        dd   CELL_plus, R_from, _plus_, SWAP, _MOVE_
+        dd EXIT
+    header  string_C_plus,   docol, string_C_plus+5*cw, 0, lastlink, "$C+"
+        dd   _DUP_, to_R
+        dd   _DUP_, _fetch_, _plus_, CELL_plus, C_store
+        dd   _one_, R_from, plus_store
+        dd EXIT
+    header  string_comma,   docol, string_comma+5*cw, 0, lastlink, "$,"
+        dd HERE, to_R
+        dd _DUP_, CELL_plus, ALLOT
+        dd R_fetch, string_store, R_from
+ dd _ALIGN_
+        dd EXIT
+    header  _EM_,   docon, em, 0, lastlink, "EM"
+    header  _BM_,   docon, bm, 0, lastlink, "BM"
+    header  DSP_zero,   docon, initdsp0 , 0, lastlink, "DSP0"
+    header  RSP_zero,   docon, initrsp0  , 0, lastlink, "RSP0"
+    header  CIB,   docon, initcib , 0, lastlink, "CIB"
+    header  _DP_,   dobuf, _DP_+5*cw, 0, lastlink, "DP"
+        dd      initdp  
+    header  WHERE,   dobuf, WHERE+5*cw, 0, lastlink, "WHERE"
+        dd _,_
+    header  STATE,   dobuf, STATE+5*cw, 0, lastlink, "STATE"
+        dd      _
+    header  BASE,   dobuf, BASE+5*cw, 0, lastlink, "BASE"
+        dd      _
+    header  HLD,   dobuf, HLD+5*cw, 0, lastlink, "HLD"
+        dd      _
+    header  PP,   docol, PP+5*cw, 0, lastlink, "PP"
+        dd      SRC, CELL_plus, CELL_plus
+        dd      EXIT
+    header  HANDLER,   dobuf, HANDLER+5*cw, 0, lastlink, "HANDLER"
+        dd      _
+    header  REMAINDER,   dobuf, REMAINDER+5*cw, 0, lastlink, "REMAINDER"
+        rb      2*cw
+    header  CONTEXT,   dobuf, CONTEXT+5*cw, 0, lastlink, "CONTEXT"
+        rb      (16+1)*cw
+    header  one_plus,   docol, one_plus+5*cw, 0, lastlink, "1+"
+        dd      _one_
+        dd      _plus_
+        dd      EXIT
+    header  CELL_plus,   docol, CELL_plus+5*cw, 0, lastlink, "CELL+"
+        dd      LIT, cw
+        dd      _plus_
+        dd      EXIT
+    header  CELLS,   docol, CELLS+5*cw, 0, lastlink, "CELLS"
+        dd      LIT, 2
+        dd      LSHIFT
+        dd      EXIT
+    header  _ALIGN_,   docol , _ALIGN_+5*cw, 0, lastlink, "ALIGN"
+        dd      _DP_, _fetch_
+        dd      ALIGNED
+        dd      _DP_, _store_
+        dd      EXIT
+    header  ALIGNED ,   ALIGNED +5*cw, 0, 0, lastlink, "ALIGNED"
+        pop     eax
+        dec     eax
+        OR      eax,  1*cw-1
+        inc     eax
+        push    eax
+        next 
+    header  HERE,   docol, HERE+5*cw, 0, lastlink, "HERE"
+        dd      _DP_
+        dd      _fetch_
+        dd      EXIT
+    header  ALLOT,   docol, ALLOT+5*cw, 0, lastlink, "ALLOT"
+        dd      _DP_
+        dd      plus_store
+        dd      EXIT
+    header  _comma_,   docol, _comma_+5*cw, 0, lastlink, ","
+        dd      HERE
+        dd      LIT
+        dd      cw
+        dd      ALLOT
+        dd      _store_
+        dd      EXIT
+    header  C_comma,   docol, C_comma+5*cw, 0, lastlink, "C,"
+        dd      HERE
+        dd      _one_
+        dd      ALLOT
+        dd      C_store
+        dd      EXIT
+    header  _minus_,   _minus_+5*cw, 0, 0, lastlink, "-"
+        pop     edx      
+        pop     eax
+        sub     eax,edx
+        push    eax
+        next    
+    header  _equal_,   docol, _equal_+5*cw, 0, lastlink, "="
+        dd      _minus_
+        dd      zero_equal
+        dd      EXIT
+    header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
+        pop     edx      
+        pop     ebx      
+        XOR     eax,eax   
+        cmp     ebx,edx
+        jnl     LES1
+        dec     eax
+LES1:   push    eax
+        next 
+    header  _greater_,   docol, _greater_+5*cw, 0, lastlink, ">"
+        dd      SWAP
+        dd      _less_
+        dd      EXIT
+    header  _unequal_,   docol, _unequal_+5*cw, 0, lastlink, "<>"
+        dd      _minus_
+        dd      zero_equal
+        dd      _NOT_
+        dd      EXIT
+    header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
+        dd      to_R, SWAP, R_from, SWAP
+        dd      EXIT
+    header  SPACE,   docol, SPACE+5*cw, 0, lastlink, "SPACE"
+        dd      _BL_
+        dd      EMIT
+        dd      EXIT
+    header  LATEST,   docol, LATEST+5*cw, 0, lastlink, "LATEST"
+        dd      CONTEXT
+        dd      _fetch_
+        dd      to_LFA
+        dd      _fetch_
+        dd      EXIT
+    header  to_CFA,   docol, to_CFA+5*cw, 0, lastlink, ">CFA"
+        dd      LIT, 0*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_DFA,   docol, to_DFA+5*cw, 0, lastlink, ">DFA"
+        dd      LIT, 1*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_FFA,   docol, to_FFA+5*cw, 0, lastlink, ">FFA"
+        dd      LIT, 2*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_LFA,   docol, to_LFA+5*cw, 0, lastlink, ">LFA"
+        dd      LIT, 3*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_NFA,   docol, to_NFA+5*cw, 0, lastlink, ">NFA"
+        dd      LIT,4*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_PHA,   docol, to_PHA+5*cw, 0, lastlink, ">PHA"
+        dd      LIT,5*cw
+        dd      _plus_
+        dd      EXIT
+    header  to_BODY,   docol, to_BODY+5*cw, 0, lastlink, ">BODY"
+        dd      to_DFA, _fetch_
+        dd      CELL_plus           
+        dd      EXIT
+    header  query_ERROR,   docol, query_ERROR+5*cw, 0, lastlink, "?ERROR"
+        dd      SWAP
+        ifto  QERR1   
+        dd      PP, _fetch_
+        dd      SRC, _fetch_
+        dd      WHERE, two_store
+        dd      THROW
+        goto  QERR2    
+QERR1:  dd      DROP    
+QERR2:  dd      EXIT
+    header  left_bracket,   docol, left_bracket+5*cw, immediatemask, lastlink, "["
+        dd      _zero_
+        dd      STATE
+        dd      _store_
+        dd      EXIT
+    header  right_bracket,   docol, right_bracket+5*cw, 0, lastlink, "]"
+        dd      _one_
+        dd      STATE
+        dd      _store_
+        dd      EXIT
+    header  HIDDEN,   docol, HIDDEN+5*cw, 0, lastlink, "HIDDEN"
+        dd      to_FFA
+        dd      LIT,invisiblemask
+        dd      TOGGLE
+        dd      EXIT
+    header  HEX,   docol, HEX+5*cw, 0, lastlink, "HEX"
+        dd      LIT,16
+        dd      BASE
+        dd      _store_
+        dd      EXIT
+    header  DECIMAL,   docol, DECIMAL+5*cw, 0, lastlink, "DECIMAL"
+        dd      LIT,10
+        dd      BASE
+        dd      _store_
+        dd      EXIT
+    header  CREATE,   docol, CREATE+5*cw, 0, lastlink, "CREATE"
+        dd      NAME
+        dd      paren_CREATE
+        dd      LIT, dodo, LATEST, to_CFA, _store_
+        dd      LIT, crnoop, _comma_
+        dd      EXIT
+dodo:  lea     ebp,[ebp - 1*cw] 
+        mov     [ebp],esi
+        mov     esi,[eax+(1)*cw] 
+        lea     eax,[esi+1*cw]
+        mov     esi,[esi]
+        push    eax
+        next 
+crnoop: dd      EXIT
+    header  DOES_from,   docol, DOES_from+5*cw, 0, lastlink, "DOES>"
+        dd      R_from
+        dd      LATEST
+        dd      to_DFA
+        dd      _fetch_
+        dd      _store_
+        dd      EXIT
+    header  COUNT,   docol, COUNT+5*cw, 0, lastlink, "COUNT"
+        dd      _DUP_
+        dd      one_plus
+        dd      SWAP
+        dd      C_fetch
+        dd      EXIT
+    header  SET_SRC,   docol, SET_SRC+5*cw, 0, lastlink, "SET-SRC"
+        dd      OVER, _plus_
+        dd      OVER, SRC, two_store
+        dd      PP, _store_ 
+        dd      EXIT
+    header  EVALUATE,   docol, EVALUATE+5*cw, 0, lastlink, "EVALUATE"
+        dd      SAVE
+        dd      SET_SRC
+        dd      LIT, INTERPRET, CATCH
+        dd      RESTO
+        dd      THROW
+        dd      EXIT
+    header  FILL,   FILL+5*cw, 0, 0, lastlink, "FILL"
+        pop     eax      
+        pop     ecx      
+        pop     edi      
+        cld             
+        rep     stosb   
+        next 
+    header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
+        mov     edx,esi   
+        XOR     eax,eax   
+        pop     ecx      
+        pop     edi      
+        pop     esi      
+        cld             
+        repz    cmpsb   
+        jz      CORA3
+        mov     al,1    
+        jnc     CORA3
+        neg     eax
+CORA3:
+        mov     esi,edx  
+        push    eax
+        next 
+    header  string_pointer,   string_pointer+5*cw, 0, 0, lastlink, "$^"
+        pop     eax      
+        pop     ecx      
+        pop     edi      
+        OR      esi,esi   
+        cld             
+        repnz     scasb   
+        jz      SINDEX1
+        XOR     edi,edi    
+        inc     edi
+SINDEX1:
+        dec     edi
+        push    edi
+        next 
+    header  string_slash,   string_slash+5*cw, 0, 0, lastlink, "$/"
+        pop     eax      
+        pop     ecx      
+        mov     ebx,ecx
+        pop     edi      
+        OR      edi,edi   
+        mov     edx,edi   
+        cld             
+        repnz     scasb   
+        jz      SSLAS1
+        push    ecx   
+        jmp short SSLAS2
+SSLAS1:
+        push    edi
+        sub     ebx,ecx
+        dec     ebx      
+SSLAS2:
+        push    ecx   
+        push    edx   
+        push    ebx   
+        next 
+    header  ERASE,   docol, ERASE+5*cw, 0, lastlink, "ERASE"
+        dd      _zero_
+        dd      FILL
+        dd      EXIT
+    header  HOLD,   docol, HOLD+5*cw, 0, lastlink, "HOLD"
+        dd      LIT,-1
+        dd      HLD
+        dd      plus_store
+        dd      HLD
+        dd      _fetch_
+        dd      C_store
+        dd      EXIT
+    header  PAD,   dobuf, pad1 , 0, lastlink, "PAD"
+pad0:   rb      0x400
+pad1:   rb      0x400
+    header  paren_NUMBER,   docol, paren_NUMBER+5*cw, 0, lastlink, "(NUMBER)"
+        dd      _zero_                       ;  0
+NPNUM1:  dd      PP_fetch_fetch   
+        dd      _DUP_, query_BLANK, _NOT_            ;  DUP, query_BLANK NOT
+        whileto   NPNUM5   
+        dd      NIP                        ;  NIP
+        dd      DIGIT         ;  BASE, fetch, digit
+        dd      LIT, 10, query_ERROR
+        dd      SWAP                       ;
+        dd      BASE                       ;
+        dd      _fetch_                      ;
+        dd      M_star                      ;
+        dd      DROP
+        dd      _plus_                       ;
+        goto  NPNUM1   
+NPNUM5:                                    ;
+        dd      two_DROP
+        dd      EXIT
+    header  NUMBER,   docol, NUMBER+5*cw, 0, lastlink, "NUMBER"
+        dd      LIT, -1, PP, plus_store
+        dd      paren_NUMBER, LITERAL
+        dd      EXIT
+    header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
+        dd      CONTEXT, _fetch_
+PFIND0:                       
+        dd      no_MATCH
+        ifto  found1  
+failed:
+        dd      to_LFA, _fetch_
+        dd      _DUP_, zero_equal
+        ifto  PFIND0        
+        dd      NIP, NIP, EXIT          ; Leave a zero: "not found".
+found1:
+        dd      _DUP_, to_FFA, _fetch_
+        dd      LIT, invisiblemask OR dummymask, _AND_
+        dd      zero_equal
+        ifto  failed  
+        dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
+        ifto  PFIND1  
+        dd      NIP,NIP,EXIT         ; Leave dea
+PFIND1:
+        ; We may still have a denotation, the dea matches the string as a prefix.
+        dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
+        ifto  failed  
+        dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
+        ifto  failed  
+        dd      NIP,NIP,EXIT         
+    header  PRESENT,   docol, PRESENT+5*cw, 0, lastlink, "PRESENT"
+        dd      _DUP_, to_R
+        dd      FOUND
+        dd      _DUP_
+        ifto  PRES1  
+        dd      _DUP_
+        dd      to_NFA, _fetch_, _fetch_ 
+        dd      R_fetch, _equal_
+        dd      _AND_
+PRES1:
+        dd      R_from, DROP
+        dd      EXIT
+    header  _ERROR_,   docol, _ERROR_+5*cw, 0, lastlink, "ERROR"
+        dd      WHERE, two_fetch
+        dd      OVER
+        ifto  ERR2        
+        dd      OVER, LIT, 20, _minus_
+        dd      MAX
+        dd      SWAP
+        dd      _one_, _minus_
+ERR1:   dd      _DUP_, C_fetch, query_BLANK, _NOT_  
+        whileto    ERR2
+        dd      one_plus
+        goto  ERR1   
+ERR2:
+        dd      OVER, _minus_
+        dd      _TYPE_
+        dd      BRANCH
+sb0:
+        string    " ? ciforth ERROR # "
+        dd      LIT, sb0
+        dd      string_fetch
+        dd      _TYPE_
+        dd      BASE, _fetch_
+        dd      DECIMAL
+        dd      SWAP
+        dd      _dot_
+        dd      BASE, _store_
+        dd      EXIT
+    header  CATCH,   docol, CATCH+5*cw, 0, lastlink, "CATCH"
+        dd      DSP_fetch, CELL_plus, to_R
+        dd      HANDLER, _fetch_, to_R
+        dd      RSP_fetch, HANDLER, _store_
+        dd      EXECUTE
+        dd      R_from, HANDLER, _store_
+        dd      R_from, DROP, _zero_
+        dd      EXIT
+    header  THROW,   docol, THROW+5*cw, 0, lastlink, "THROW"
+        dd      _DUP_
+        ifto  THROW1  
+        dd      HANDLER, _fetch_, zero_equal
+        ifto  THROW2  
+        dd      _ERROR_
+        dd      DSP_zero, DSP_store
+        dd      QUIT
+THROW2:
+        dd      HANDLER, _fetch_, RSP_store
+        dd      R_from, HANDLER, _store_
+        dd      R_from, SWAP, to_R
+        dd      DSP_store
+        dd      R_from
+        dd      _
+THROW1:
+        dd      DROP
+        dd      EXIT
+    header  ID_dot,   docol, ID_dot+5*cw, 0, lastlink, "ID."
+        dd      _DUP_, to_FFA, _fetch_
+        dd      LIT, dummymask, _AND_
+        ifto  IDDOT1  
+        dd      DROP
+        goto  IDDOT2  
+IDDOT1:
+        dd      to_NFA
+        dd      _fetch_
+        dd      string_fetch
+        dd      _TYPE_
+        dd      SPACE
+        dd      SPACE
+        dd      SPACE
+IDDOT2:
+        dd      EXIT
+    header  HEADER,   docol, HEADER+5*cw, 0, lastlink, "HEADER"
+        dd      _DUP_
+        dd      zero_equal
+        dd      LIT, 5, query_ERROR
+        dd      two_DUP
+        dd      PRESENT
+        dd      _DUP_
+        ifto  CREA1   
+        dd      to_NFA, _fetch_, string_fetch
+        dd      _TYPE_
+        dd      BRANCH
+sb1:
+        string    " : ISN'T UNIQUE"
+        dd      LIT, sb1
+        dd      string_fetch
+        dd      _TYPE_, CR
+        dd      _       
+CREA1:  dd      DROP
+ dd      _ALIGN_
+        dd      string_comma
+ dd      _ALIGN_
+        dd      HERE,to_R
+        dd      R_fetch, to_PHA, _comma_         
+        dd      R_fetch, to_PHA, _comma_         
+        dd      _zero_, _comma_ 
+        dd      _zero_, _comma_ 
+        dd      _comma_   
+        dd      R_from
+        dd      EXIT
+    header  _LINK_,   docol, _LINK_+5*cw, 0, lastlink, "LINK"
+        dd      to_LFA                     
+        dd      two_DUP                     
+        dd      _fetch_                    
+        dd      SWAP, to_LFA, _store_         
+        dd      _store_                     
+        dd      EXIT
+    header  paren_CREATE,   docol, paren_CREATE+5*cw, 0, lastlink, "(CREATE)"
+        dd      HEADER
+        dd      CONTEXT, _fetch_
+        dd      _LINK_
+        dd      EXIT
+    header  POSTPONE,   docol, POSTPONE+5*cw, immediatemask, lastlink, "POSTPONE"
+        dd      NAME
+        dd      PRESENT
+        dd      _DUP_
+        dd      zero_equal
+        dd      LIT, 15, query_ERROR
+        dd      _DUP_, to_FFA, _fetch_
+        dd      LIT, immediatemask, _AND_, zero_equal
+        ifto  POSTP1  
+         dd      LIT, LIT, _comma_
+         dd      _comma_
+         dd      LIT, _comma_
+POSTP1:
+         dd      _comma_
+        dd      EXIT
+    header  LITERAL,   docol, LITERAL+5*cw, immediatemask, lastlink, "LITERAL"
+        dd      STATE
+        dd      _fetch_
+        ifto  LITE1   
+        dd      LIT, LIT, _comma_, _comma_
+LITE1:  dd      EXIT
+    header  query_STACK,   docol, query_STACK+5*cw, 0, lastlink, "?STACK"
+        dd      DSP_fetch
+        dd      DSP_zero
+        dd      SWAP
+        dd      _less_
+        dd      _one_, query_ERROR
+        dd      DSP_fetch
+        dd      HERE
+        dd      LIT,0x80
+        dd      _plus_
+        dd      _less_
+        dd      LIT, 7, query_ERROR
+        dd      EXIT
+        ;
+    header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
+INTE1:
+        dd      NAME
+        dd      _DUP_      
+        whileto   INTE8 
+        dd      OVER, to_R       ; Remember start of word.
+        dd      FOUND
+;Skip over the part that is matched, this is the whole word, unless it is a prefix
+        dd      _DUP_, to_NFA, _fetch_, _fetch_
+        dd      R_from, _plus_, PP, _store_
+        dd      _DUP_, to_FFA, _fetch_, LIT, immediatemask, _AND_
+        dd      STATE, _fetch_, zero_equal, _OR_
+        ifto  INTE3   
+        dd      EXECUTE
+        goto  INTE4   
+INTE3:   dd      _comma_
+INTE4: dd      query_STACK
+        goto  INTE1    
+INTE8:  dd      DROP, DROP
+        dd      EXIT
+    header  IMMEDIATE,   docol, IMMEDIATE+5*cw, 0, lastlink, "IMMEDIATE"
+        dd      LATEST
+        dd      to_FFA
+        dd      LIT, immediatemask
+        dd      TOGGLE
+        dd      EXIT
+    header  PREFIX,   docol, PREFIX+5*cw, 0, lastlink, "PREFIX"
+        dd      LATEST
+        dd      to_FFA
+        dd      LIT, denotationmask
+        dd      TOGGLE
+        dd      EXIT
+    header  _backslash_,   docol, _backslash_+5*cw, immediatemask, lastlink, "\"
+        dd      PP_fetch_fetch, two_DROP
+        dd      LIT,0x0A
+        dd      PARSE
+        dd      two_DROP
+        dd      EXIT
+    header  QUIT,   docol, QUIT+5*cw, 0, lastlink, "QUIT"
+        dd      left_bracket
+        dd      RSP_zero, RSP_store
+        dd      _zero_, HANDLER, _store_
+QUIT1:                  
+        dd      LIT
+        dd      paren_ACCEPT
+        dd      CATCH
+        dd      _DUP_, LIT, -epipe, _equal_
+        ifto  ENDIF7  
+        dd      BYE     
+ENDIF7:
+        dd      _zero_, MIN, _DUP_, query_ERROR
+        dd      one_plus
+        dd      SET_SRC
+        dd      INTERPRET
+        dd      OK
+        goto  QUIT1    
+        dd      EXIT   
+    header  OK,   docol, OK+5*cw, 0, lastlink, "OK"
+        dd      STATE
+        dd      _fetch_
+        dd      zero_equal
+        ifto  OK2   
+        dd      BRANCH
+sb2:
+        string    " OK"
+        dd      LIT, sb2
+        dd      string_fetch
+        dd      _TYPE_
+        dd      CR
+OK2:
+        dd      EXIT
+    header  CLS,   docol, CLS+5*cw, 0, lastlink, "CLS"
+        dd      DSP_zero, DSP_store
+        dd      EXIT   
+    header  COLD,   docol, COLD+5*cw, 0, lastlink, "COLD"
+        dd      INIT
+        dd      CLS, ABORT
+        dd      BYE     
+        dd      EXIT   
+    header  ABORT,   docol, ABORT+5*cw, 0, lastlink, "ABORT"
+        dd      QUIT
+        dd      EXIT
+    header  INIT,   docol, INIT+5*cw, 0, lastlink, "INIT"
+        dd      DSP_zero, DSP_store
+        dd      _zero_, HANDLER, _store_
+        dd      DECIMAL
+        dd      FORTH
+      dd      EXIT
+    header  _ABS_,   docol, _ABS_+5*cw, 0, lastlink, "ABS"
+        dd      _DUP_
+        dd      zero_less
+        ifto  PM1     
+        dd      NEGATE   
+PM1:
+        dd      EXIT
+    header  MIN,   docol, MIN+5*cw, 0, lastlink, "MIN"
+        dd      two_DUP
+        dd      _greater_
+        ifto  MIN1    
+        dd      SWAP    
+MIN1:   dd      DROP
+        dd      EXIT
+    header  MAX,   docol, MAX+5*cw, 0, lastlink, "MAX"
+        dd      two_DUP
+        dd      _less_
+        ifto  MAX1    
+        dd      SWAP    
+MAX1:   dd      DROP
+        dd      EXIT
+    header  LSHIFT,   LSHIFT+5*cw, 0, 0, lastlink, "LSHIFT"
+        pop     ecx
+        pop     eax
+        shl     eax,cl
+        push    eax
+        next 
+    header  RSHIFT,   RSHIFT+5*cw, 0, 0, lastlink, "RSHIFT"
+        pop     ecx
+        pop     eax
+        shr     eax,cl
+        push    eax
+        next 
+    header  M_star,   M_star+5*cw, 0, 0, lastlink, "M*"
+        pop     eax
+        pop     ebx
+        imul     ebx      
+        xchg    eax,edx   
+        push    edx
+        push    eax
+        next           
+    header  SM_slash_REM,   SM_slash_REM+5*cw, 0, 0, lastlink, "SM/REM"
+        pop     ebx      
+        pop     edx      
+        pop     eax      
+        idiv     ebx     
+        push    edx
+        push    eax
+        next           
+    header  _star_,   docol, _star_+5*cw, 0, lastlink, "*"
+        dd      M_star
+        dd      DROP
+        dd      EXIT
+    header  slash_MOD,   docol, slash_MOD+5*cw, 0, lastlink, "/MOD"
+        dd      to_R
+        dd      _DUP_, zero_less
+        dd      R_from
+        dd      SM_slash_REM
+        dd      EXIT
+    header  _slash_,   docol, _slash_+5*cw, 0, lastlink, "/"
+        dd      slash_MOD
+        dd      NIP
+        dd      EXIT
+    header  _MOD_,   docol, _MOD_+5*cw, 0, lastlink, "MOD"
+        dd      slash_MOD
+        dd      DROP
+        dd      EXIT
+    header  star_slash_MOD,   docol, star_slash_MOD+5*cw, 0, lastlink, "*/MOD"
+        dd      to_R
+        dd      M_star
+        dd      R_from
+        dd      SM_slash_REM
+        dd      EXIT
+    header  star_slash,   docol, star_slash+5*cw, 0, lastlink, "*/"
+        dd      star_slash_MOD
+        dd      NIP
+        dd      EXIT
+    header  SAVE,   docol, SAVE+5*cw, 0, lastlink, "SAVE"
+        dd      R_from
+        dd      SRC, two_fetch
+        dd      PP, _fetch_
+        dd      to_R, to_R, to_R
+        dd      to_R
+        dd EXIT
+    header  RESTO,   docol, RESTO+5*cw, 0, lastlink, "RESTORE"
+        dd      R_from
+        dd      R_from, R_from, R_from
+        dd      PP, _store_
+        dd      SRC, two_store
+        dd      to_R
+        dd EXIT
+    header  XOS,   XOS+5*cw, 0, 0, lastlink, "XOS"
+        pop     eax        
+        pop     edx        
+        pop     ecx        
+        pop     ebx        
+        int     0x80        
+        push    eax
+        next      
+        ;
+    header  ZEN,   docol, ZEN+5*cw, 0, lastlink, "ZEN"
+        dd      LIT, pad0, string_store
+        dd      _zero_, LIT, pad0, string_C_plus
+        dd      LIT, pad0, CELL_plus
+        dd      EXIT
+    header  OPEN_FILE,   docol, OPEN_FILE+5*cw, 0, lastlink, "OPEN-FILE"
+        dd      to_R, ZEN, R_from, _
+        dd      LIT, __NR_open, XOS
+        dd      _DUP_, _zero_, MIN
+        dd      EXIT
+    header  CLOSE_FILE,   docol, CLOSE_FILE+5*cw, 0, lastlink, "CLOSE-FILE"
+        dd      _, _
+        dd      LIT, __NR_close, XOS
+        dd      EXIT
+    header  CREATE_FILE,   docol, CREATE_FILE+5*cw, 0, lastlink, "CREATE-FILE"
+        dd      to_R, two_DUP, DELETE_FILE, DROP
+        dd      ZEN, R_from, _
+        dd      LIT, __NR_creat, XOS
+        dd      _DUP_, _zero_, MAX, SWAP, _zero_, MIN
+        dd      EXIT
+    header  DELETE_FILE,   docol, DELETE_FILE+5*cw, 0, lastlink, "DELETE-FILE"
+        dd      ZEN, _, _
+        dd      LIT, __NR_unlink, XOS
+        dd      EXIT
+    header  READ_FILE,   docol, READ_FILE+5*cw, 0, lastlink, "READ-FILE"
+        dd      SDSWAP, SDSWAP
+        dd      LIT, __NR_read, XOS
+        dd      _DUP_, _zero_, MAX, SWAP, _zero_, MIN
+        dd      EXIT
+    header  WRITE_FILE,   docol, WRITE_FILE+5*cw, 0, lastlink, "WRITE-FILE"
+        dd      SDSWAP, SDSWAP
+        dd      LIT, __NR_write, XOS
+        dd      _zero_, MIN
+        dd      EXIT
+    header  GET_FILE,   docol, GET_FILE+5*cw, 0, lastlink, "GET-FILE"
+        dd      two_DUP, string_comma, DROP
+        dd      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), _comma_ 
+        dd      _zero_, OPEN_FILE, THROW, to_R
+        dd      HERE, _DUP_
+        dd      _EM_, LIT, 6, _slash_, _DUP_, ALLOT
+        dd      LIT, 1000, _minus_
+        dd      R_fetch, READ_FILE, THROW
+        dd      R_from, CLOSE_FILE, THROW
+        dd      two_DUP, _plus_, _DP_, _store_        
+        dd      EXIT
+    header  PUT_FILE,   docol, PUT_FILE+5*cw, 0, lastlink, "PUT-FILE"
+        dd      LIT, 755O
+        dd      CREATE_FILE, THROW
+        dd      _DUP_, to_R
+        dd      WRITE_FILE, THROW
+        dd      R_from, CLOSE_FILE, THROW
+        dd      EXIT
+    header  _INCLUDE_,   docol, _INCLUDE_+5*cw, 0, lastlink, "INCLUDE"
+        dd      NAME
+        dd      HERE, to_R
+        dd      LIT, GET_FILE, CATCH
+        dd      _DUP_
+        ifto  INCLUD1  
+        dd      R_from, _DP_, _store_
+        dd      THROW
+        goto  INCLUD2  
+INCLUD1:
+        dd      R_from, DROP, DROP
+INCLUD2:
+        dd      EVALUATE
+        dd      EXIT
+    header  REFILL_CIB,   docol, REFILL_CIB+5*cw, 0, lastlink, "REFILL-CIB"
+        dd      REMAINDER, _fetch_, to_R
+        dd      CIB, R_fetch, _plus_
+        dd      LIT, cibsize, R_fetch, _minus_
+        dd      _zero_
+        dd      READ_FILE
+        dd      _zero_, MIN, _DUP_, query_ERROR
+        dd      _DUP_, zero_equal, LIT, -epipe, _AND_ 
+        dd      _zero_, MIN, _DUP_, query_ERROR
+        dd      CIB, SWAP, R_from, _plus_
+        dd      REMAINDER, two_store
+        dd      EXIT
+    header  ACCEPT,   docol, ACCEPT+5*cw, 0, lastlink, "ACCEPT"
+        dd      paren_ACCEPT
+        dd      two_SWAP, SDSWAP, MIN
+        dd      _DUP_, to_R, _MOVE_, R_from
+        dd      EXIT
+    header  paren_ACCEPT,   docol, paren_ACCEPT+5*cw, 0, lastlink, "(ACCEPT)"
+PACCEP2:
+        dd      REMAINDER
+        dd      two_fetch
+        dd      LIT, 0x0A, string_pointer
+        dd      zero_equal
+        whileto   PACCEP1
+        dd      REMAINDER, two_fetch
+        dd      CIB
+        dd      SWAP, _MOVE_
+        dd      CIB
+        dd      REMAINDER, CELL_plus, _store_
+        dd      REFILL_CIB
+        goto  PACCEP2  
+PACCEP1:
+        dd      REMAINDER, two_fetch
+        dd      LIT, 0x0A, string_slash
+        dd      two_SWAP, REMAINDER, two_store
+        dd      EXIT
+    header  KEY,   docol, KEY+5*cw, 0, lastlink, "KEY"
+        dd      _zero_, DSP_fetch, _one_, ACCEPT, DROP
+        dd      EXIT
+    header  _TYPE_,   docol, _TYPE_+5*cw, 0, lastlink, "TYPE"
+        dd      _one_, WRITE_FILE, THROW
+        dd      EXIT
+    header  EMIT,   docol, EMIT+5*cw, 0, lastlink, "EMIT"
+        dd      DSP_fetch, _one_, _TYPE_
+        dd      DROP
+        dd      EXIT
+        ;
+    header  FORGET,   docol, FORGET+5*cw, 0, lastlink, "FORGET"
+        dd      TICK
+        dd      to_R
+        dd      LIT, FORTH, to_BODY
+        dd      _DUP_
+FORGV3:
+        dd      to_LFA,_fetch_
+        dd      _DUP_
+        dd      R_fetch
+        dd      _less_
+        untilto   FORGV3
+        dd      SWAP            
+        dd      to_LFA
+        dd      _store_           
+        dd      R_from
+        dd      to_NFA, _fetch_, _DP_, _store_
+        dd      EXIT
+    header  paren_BACK,   docol, paren_BACK+5*cw, 0, lastlink, "(BACK"
+        dd      HERE
+        dd      EXIT
+    header  BACK_paren,   docol, BACK_paren+5*cw, 0, lastlink, "BACK)"
+        dd      HERE
+        dd      CELL_plus
+        dd      _minus_
+        dd      _comma_
+        dd      EXIT
+    header  paren_FORWARD,   docol, paren_FORWARD+5*cw, 0, lastlink, "(FORWARD"
+        dd      HERE
+        dd      _
+        dd      _comma_
+        dd      EXIT
+    header  FORWARD_paren,   docol, FORWARD_paren+5*cw, 0, lastlink, "FORWARD)"
+        dd      HERE
+        dd      OVER
+        dd      CELL_plus
+        dd      _minus_
+        dd      SWAP
+        dd      _store_
+        dd      EXIT
+    header  BEGIN,   docol, BEGIN+5*cw, immediatemask, lastlink, "BEGIN"
+        dd      paren_BACK
+        dd      EXIT
+    header  THEN,   docol, THEN+5*cw, immediatemask, lastlink, "THEN"
+        dd      FORWARD_paren
+        dd      EXIT
+    header  DO,   docol, DO+5*cw, immediatemask, lastlink, "DO"
+         dd      LIT, paren_DO, _comma_, paren_FORWARD, paren_BACK
+        dd      EXIT
+    header  _LOOP,   docol, _LOOP+5*cw, immediatemask, lastlink, "LOOP"
+        dd      LIT, paren_LOOP, _comma_, BACK_paren
+        dd      FORWARD_paren 
+        dd      EXIT
+    header  plus_LOOP,   docol, plus_LOOP+5*cw, immediatemask, lastlink, "+LOOP"
+        dd      LIT, paren_plus_LOOP, _comma_, BACK_paren
+        dd      FORWARD_paren 
+        dd      EXIT
+    header  UNTIL,   docol, UNTIL+5*cw, immediatemask, lastlink, "UNTIL"
+        dd      LIT, zero_BRANCH, _comma_, BACK_paren
+        dd      EXIT
+    header  AGAIN,   docol, AGAIN+5*cw, immediatemask, lastlink, "AGAIN"
+        dd      LIT, BRANCH, _comma_, BACK_paren
+        dd      EXIT
+    header  _REPEAT_,   docol, _REPEAT_+5*cw, immediatemask, lastlink, "REPEAT"
+        dd      LIT, BRANCH, _comma_, BACK_paren
+        dd      FORWARD_paren 
+        dd      EXIT
+    header  _IF_,   docol, _IF_+5*cw, immediatemask, lastlink, "IF"
+        dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
+        dd      EXIT
+    header  _ELSE_,   docol, _ELSE_+5*cw, immediatemask, lastlink, "ELSE"
+        dd      LIT, BRANCH, _comma_, paren_FORWARD
+        dd      SWAP
+        dd      FORWARD_paren
+        dd      EXIT
+    header  _WHILE_,   docol, _WHILE_+5*cw, immediatemask, lastlink, "WHILE"
+        dd      to_R    
+        dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
+        dd      R_from
+        dd      EXIT
+    header  to_percent,   docol, to_percent+5*cw, 0, lastlink, "<%"
+        dd      PAD
+        dd      HLD
+        dd      _store_
+        dd      EXIT
+    header  percent_from,   docol, percent_from+5*cw, 0, lastlink, "%>"
+        dd      DROP
+        dd      HLD
+        dd      _fetch_
+        dd      PAD
+        dd      OVER
+        dd      _minus_
+        dd      EXIT
+    header  percent,   docol, percent+5*cw, 0, lastlink, "%"
+        dd      _zero_
+        dd      BASE
+        dd      _fetch_
+        dd      SM_slash_REM
+        dd      SWAP
+        dd      LIT,9
+        dd      OVER
+        dd      _less_
+        ifto  perc1    
+        dd      LIT,7
+        dd      _plus_    
+perc1:   dd      LIT,0x30
+        dd      _plus_
+        dd      HOLD
+        dd      EXIT
+    header  percent_S,   docol, percent_S+5*cw, 0, lastlink, "%S"
+perc_S1:  dd      percent     
+        dd      _DUP_
+        dd      zero_equal
+        untilto   perc_S1 
+        dd      EXIT
+    header  SIGN,   docol, SIGN+5*cw, 0, lastlink, "SIGN"
+        dd      zero_less
+        ifto  SIGN1   
+        dd      LIT, '-'
+        dd      HOLD    
+SIGN1:  dd      EXIT
+    header  _dot_,   docol, _dot_+5*cw, 0, lastlink, "."
+        dd      _DUP_, _ABS_
+        dd      to_percent
+        dd      _BL_, HOLD, percent_S, SWAP, SIGN
+        dd      percent_from
+        dd      _TYPE_
+        dd      EXIT
+    header  U_dot,   docol, U_dot+5*cw, 0, lastlink, "U."
+        dd      to_percent
+        dd      _BL_, HOLD, percent_S
+        dd      percent_from
+        dd      _TYPE_
+        dd      EXIT
+    header  WORDS,   docol, WORDS+5*cw, 0, lastlink, "WORDS"
+        dd      _zero_            
+        dd      CONTEXT
+        dd      _fetch_
+WORDS0:
+        dd      to_LFA, _fetch_
+        dd      _DUP_
+        dd      _DUP_, zero_equal
+        untilto   WORDS0        ; until_to(WORDS0)
+        dd      two_DROP
+WORDS1:
+        dd      ID_dot
+        dd      _DUP_, zero_equal
+        untilto   WORDS1
+        dd DROP
+        dd      EXIT
+    header  BYE,   docol, BYE+5*cw, 0, lastlink, "BYE"
+        dd      _zero_, _, _, LIT, __NR_exit, XOS
+        dd      EXIT   
+    header  dot_S,   docol, dot_S+5*cw, 0, lastlink, ".S"
+        dd      CR
+        dd      LIT, 'S', EMIT
+        dd      LIT, '[', EMIT
+        dd      SPACE
+        dd      DSP_fetch, DSP_zero
+DOC2:   dd      two_DUP, _less_
+        whileto   DOC1
+        dd      _zero_, CELL_plus, _minus_, _DUP_, _fetch_, _dot_
+        goto  DOC2  
+DOC1:    dd DROP, DROP
+        dd      LIT, ']', EMIT
+        dd      EXIT
+    header  TASK,   docol, TASK+5*cw, 0, lastlink, "TASK"
+        dd      EXIT
+initdp:                 
+dictsize       =     initdp - bm
+         rb  (forthsize - dictsize - tasksize ) 
+        rb  (stacksize )    
+initdsp0:                         
+initcib: rb  (cibsize )     
+        rb  (stacksize )       
+initrsp0:                         
+em:
+        ;

@@ -1,0 +1,6845 @@
+
+
+
+
+
+
+<HTML>
+<HEAD>
+   <META http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+   <TITLE>ci86.yourforth.html snapshot 6.51 Manual</TITLE>
+</HEAD>
+<BODY>
+
+<style type="text/css">
+h1   { color: green; background: #CCFFCC; font-family: verdana; font: 24px; font-weight: bold; }
+h2   { color: red; background: #CCFFCC; font-family: verdana; font: 20px; }
+a    { color: blue; background: #CCFFCC; font-family: verdana; font: 18px; font-weight: bold; }
+body { background: #CCFFCC; }
+</style>
+
+<H1>
+   ci86.yourforth.html Version [ snapshot 6.51 ] GLOSSARY </H1>
+
+
+
+
+
+<P>
+<HR><A NAME=GLOSSARY_INDEX></A>
+<H1>
+GLOSSARY INDEX</H1>
+<P>
+Here you can select the glossary entry of a
+word. All words in the basic set are documented.
+<P>
+<A HREF="#!">!</A> &nbsp; &nbsp; 
+<A HREF="#$!">$!</A> &nbsp; &nbsp; 
+<A HREF="#$+!">$+!</A> &nbsp; &nbsp; 
+<A HREF="#$,">$,</A> &nbsp; &nbsp; 
+<A HREF="#$/">$/</A> &nbsp; &nbsp; 
+<A HREF="#$@">$@</A> &nbsp; &nbsp; 
+<A HREF="#$C+">$C+</A> &nbsp; &nbsp; 
+<A HREF="#$^">$^</A> &nbsp; &nbsp; 
+<A HREF="#%>">%></A> &nbsp; &nbsp; 
+<A HREF="#%S">%S</A> &nbsp; &nbsp; 
+<A HREF="#%">%</A> &nbsp; &nbsp; 
+<A HREF="#&lt;%">&lt;%</A> &nbsp; &nbsp; 
+<A HREF="#&lt;>">&lt;></A> &nbsp; &nbsp; 
+<A HREF="#&lt;">&lt;</A> &nbsp; &nbsp; 
+<A HREF="#(+LOOP)">(+LOOP)</A> &nbsp; &nbsp; 
+<A HREF="#(ACCEPT)">(ACCEPT)</A> &nbsp; &nbsp; 
+<A HREF="#(BACK">(BACK</A> &nbsp; &nbsp; 
+<A HREF="#(CREATE)">(CREATE)</A> &nbsp; &nbsp; 
+<A HREF="#(DO)">(DO)</A> &nbsp; &nbsp; 
+<A HREF="#(FORWARD">(FORWARD</A> &nbsp; &nbsp; 
+<A HREF="#(LOOP)">(LOOP)</A> &nbsp; &nbsp; 
+<A HREF="#(NUMBER)">(NUMBER)</A> &nbsp; &nbsp; 
+<A HREF="#*/MOD">*/MOD</A> &nbsp; &nbsp; 
+<A HREF="#*/">*/</A> &nbsp; &nbsp; 
+<A HREF="#*">*</A> &nbsp; &nbsp; 
+<A HREF="#+!">+!</A> &nbsp; &nbsp; 
+<A HREF="#+LOOP">+LOOP</A> &nbsp; &nbsp; 
+<A HREF="#+">+</A> &nbsp; &nbsp; 
+<A HREF="#,">,</A> &nbsp; &nbsp; 
+<A HREF="#-">-</A> &nbsp; &nbsp; 
+<A HREF="#.S">.S</A> &nbsp; &nbsp; 
+<A HREF="#.">.</A> &nbsp; &nbsp; 
+<A HREF="#/MOD">/MOD</A> &nbsp; &nbsp; 
+<A HREF="#/">/</A> &nbsp; &nbsp; 
+<A HREF="#0&lt;">0&lt;</A> &nbsp; &nbsp; 
+<A HREF="#0=">0=</A> &nbsp; &nbsp; 
+<A HREF="#0BRANCH">0BRANCH</A> &nbsp; &nbsp; 
+<A HREF="#0">0</A> &nbsp; &nbsp; 
+<A HREF="#1+">1+</A> &nbsp; &nbsp; 
+<A HREF="#2!">2!</A> &nbsp; &nbsp; 
+<A HREF="#2@">2@</A> &nbsp; &nbsp; 
+<A HREF="#2DROP">2DROP</A> &nbsp; &nbsp; 
+<A HREF="#2DUP">2DUP</A> &nbsp; &nbsp; 
+<A HREF="#2OVER">2OVER</A> &nbsp; &nbsp; 
+<A HREF="#2SWAP">2SWAP</A> &nbsp; &nbsp; 
+<A HREF="#:">:</A> &nbsp; &nbsp; 
+<A HREF="#;">;</A> &nbsp; &nbsp; 
+<A HREF="#=">=</A> &nbsp; &nbsp; 
+<A HREF="#>BODY">>BODY</A> &nbsp; &nbsp; 
+<A HREF="#>CFA">>CFA</A> &nbsp; &nbsp; 
+<A HREF="#>DFA">>DFA</A> &nbsp; &nbsp; 
+<A HREF="#>FFA">>FFA</A> &nbsp; &nbsp; 
+<A HREF="#>LFA">>LFA</A> &nbsp; &nbsp; 
+<A HREF="#>NFA">>NFA</A> &nbsp; &nbsp; 
+<A HREF="#>PHA">>PHA</A> &nbsp; &nbsp; 
+<A HREF="#>R">>R</A> &nbsp; &nbsp; 
+<A HREF="#>">></A> &nbsp; &nbsp; 
+<A HREF="#?BLANK">?BLANK</A> &nbsp; &nbsp; 
+<A HREF="#?ERROR">?ERROR</A> &nbsp; &nbsp; 
+<A HREF="#?STACK">?STACK</A> &nbsp; &nbsp; 
+<A HREF="#@">@</A> &nbsp; &nbsp; 
+<A HREF="#ABORT">ABORT</A> &nbsp; &nbsp; 
+<A HREF="#ABS">ABS</A> &nbsp; &nbsp; 
+<A HREF="#ACCEPT">ACCEPT</A> &nbsp; &nbsp; 
+<A HREF="#AGAIN">AGAIN</A> &nbsp; &nbsp; 
+<A HREF="#ALIGNED">ALIGNED</A> &nbsp; &nbsp; 
+<A HREF="#ALIGN">ALIGN</A> &nbsp; &nbsp; 
+<A HREF="#ALLOT">ALLOT</A> &nbsp; &nbsp; 
+<A HREF="#AND">AND</A> &nbsp; &nbsp; 
+<A HREF="#BACK)">BACK)</A> &nbsp; &nbsp; 
+<A HREF="#BASE">BASE</A> &nbsp; &nbsp; 
+<A HREF="#BEGIN">BEGIN</A> &nbsp; &nbsp; 
+<A HREF="#BL">BL</A> &nbsp; &nbsp; 
+<A HREF="#BM">BM</A> &nbsp; &nbsp; 
+<A HREF="#BRANCH">BRANCH</A> &nbsp; &nbsp; 
+<A HREF="#C!">C!</A> &nbsp; &nbsp; 
+<A HREF="#C,">C,</A> &nbsp; &nbsp; 
+<A HREF="#C@">C@</A> &nbsp; &nbsp; 
+<A HREF="#CATCH">CATCH</A> &nbsp; &nbsp; 
+<A HREF="#CELL+">CELL+</A> &nbsp; &nbsp; 
+<A HREF="#CELLS">CELLS</A> &nbsp; &nbsp; 
+<A HREF="#CIB">CIB</A> &nbsp; &nbsp; 
+<A HREF="#CLOSE-FILE">CLOSE-FILE</A> &nbsp; &nbsp; 
+<A HREF="#CLS">CLS</A> &nbsp; &nbsp; 
+<A HREF="#COLD">COLD</A> &nbsp; &nbsp; 
+<A HREF="#CONSTANT">CONSTANT</A> &nbsp; &nbsp; 
+<A HREF="#CONTEXT">CONTEXT</A> &nbsp; &nbsp; 
+<A HREF="#CORA">CORA</A> &nbsp; &nbsp; 
+<A HREF="#COUNT">COUNT</A> &nbsp; &nbsp; 
+<A HREF="#CREATE-FILE">CREATE-FILE</A> &nbsp; &nbsp; 
+<A HREF="#CREATE">CREATE</A> &nbsp; &nbsp; 
+<A HREF="#CR">CR</A> &nbsp; &nbsp; 
+<A HREF="#DECIMAL">DECIMAL</A> &nbsp; &nbsp; 
+<A HREF="#DELETE-FILE">DELETE-FILE</A> &nbsp; &nbsp; 
+<A HREF="#DEPTH">DEPTH</A> &nbsp; &nbsp; 
+<A HREF="#DIGIT">DIGIT</A> &nbsp; &nbsp; 
+<A HREF="#DOES>">DOES></A> &nbsp; &nbsp; 
+<A HREF="#DO">DO</A> &nbsp; &nbsp; 
+<A HREF="#DP">DP</A> &nbsp; &nbsp; 
+<A HREF="#DROP">DROP</A> &nbsp; &nbsp; 
+<A HREF="#DSP!">DSP!</A> &nbsp; &nbsp; 
+<A HREF="#DSP0">DSP0</A> &nbsp; &nbsp; 
+<A HREF="#DSP@">DSP@</A> &nbsp; &nbsp; 
+<A HREF="#DUP">DUP</A> &nbsp; &nbsp; 
+<A HREF="#ELSE">ELSE</A> &nbsp; &nbsp; 
+<A HREF="#EMIT">EMIT</A> &nbsp; &nbsp; 
+<A HREF="#EM">EM</A> &nbsp; &nbsp; 
+<A HREF="#ERASE">ERASE</A> &nbsp; &nbsp; 
+<A HREF="#ERROR">ERROR</A> &nbsp; &nbsp; 
+<A HREF="#EVALUATE">EVALUATE</A> &nbsp; &nbsp; 
+<A HREF="#EXECUTE">EXECUTE</A> &nbsp; &nbsp; 
+<A HREF="#EXIT">EXIT</A> &nbsp; &nbsp; 
+<A HREF="#FILL">FILL</A> &nbsp; &nbsp; 
+<A HREF="#FORGET">FORGET</A> &nbsp; &nbsp; 
+<A HREF="#FORTH">FORTH</A> &nbsp; &nbsp; 
+<A HREF="#FORWARD)">FORWARD)</A> &nbsp; &nbsp; 
+<A HREF="#FOUND">FOUND</A> &nbsp; &nbsp; 
+<A HREF="#GET-FILE">GET-FILE</A> &nbsp; &nbsp; 
+<A HREF="#HANDLER">HANDLER</A> &nbsp; &nbsp; 
+<A HREF="#HEADER">HEADER</A> &nbsp; &nbsp; 
+<A HREF="#HERE">HERE</A> &nbsp; &nbsp; 
+<A HREF="#HEX">HEX</A> &nbsp; &nbsp; 
+<A HREF="#HIDDEN">HIDDEN</A> &nbsp; &nbsp; 
+<A HREF="#HLD">HLD</A> &nbsp; &nbsp; 
+<A HREF="#HOLD">HOLD</A> &nbsp; &nbsp; 
+<A HREF="#ID.">ID.</A> &nbsp; &nbsp; 
+<A HREF="#IF">IF</A> &nbsp; &nbsp; 
+<A HREF="#IMMEDIATE">IMMEDIATE</A> &nbsp; &nbsp; 
+<A HREF="#INCLUDE">INCLUDE</A> &nbsp; &nbsp; 
+<A HREF="#INIT">INIT</A> &nbsp; &nbsp; 
+<A HREF="#INTERPRET">INTERPRET</A> &nbsp; &nbsp; 
+<A HREF="#INVERT">INVERT</A> &nbsp; &nbsp; 
+<A HREF="#I">I</A> &nbsp; &nbsp; 
+<A HREF="#J">J</A> &nbsp; &nbsp; 
+<A HREF="#KEY">KEY</A> &nbsp; &nbsp; 
+<A HREF="#LATEST">LATEST</A> &nbsp; &nbsp; 
+<A HREF="#LINK">LINK</A> &nbsp; &nbsp; 
+<A HREF="#LITERAL">LITERAL</A> &nbsp; &nbsp; 
+<A HREF="#LIT">LIT</A> &nbsp; &nbsp; 
+<A HREF="#LOOP">LOOP</A> &nbsp; &nbsp; 
+<A HREF="#LSHIFT">LSHIFT</A> &nbsp; &nbsp; 
+<A HREF="#M*">M*</A> &nbsp; &nbsp; 
+<A HREF="#MAX">MAX</A> &nbsp; &nbsp; 
+<A HREF="#MIN">MIN</A> &nbsp; &nbsp; 
+<A HREF="#MOD">MOD</A> &nbsp; &nbsp; 
+<A HREF="#MOVE">MOVE</A> &nbsp; &nbsp; 
+<A HREF="#NAME">NAME</A> &nbsp; &nbsp; 
+<A HREF="#NEGATE">NEGATE</A> &nbsp; &nbsp; 
+<A HREF="#NIP">NIP</A> &nbsp; &nbsp; 
+<A HREF="#NOOP">NOOP</A> &nbsp; &nbsp; 
+<A HREF="#NOT">NOT</A> &nbsp; &nbsp; 
+<A HREF="#NUMBER">NUMBER</A> &nbsp; &nbsp; 
+<A HREF="#Number_1">Number_1</A> &nbsp; &nbsp; 
+<A HREF="#OK">OK</A> &nbsp; &nbsp; 
+<A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp; &nbsp; 
+<A HREF="#OR">OR</A> &nbsp; &nbsp; 
+<A HREF="#OVER">OVER</A> &nbsp; &nbsp; 
+<A HREF="#PAD">PAD</A> &nbsp; &nbsp; 
+<A HREF="#PARSE">PARSE</A> &nbsp; &nbsp; 
+<A HREF="#POSTPONE">POSTPONE</A> &nbsp; &nbsp; 
+<A HREF="#PP@">PP@</A> &nbsp; &nbsp; 
+<A HREF="#PP">PP</A> &nbsp; &nbsp; 
+<A HREF="#PREFIX">PREFIX</A> &nbsp; &nbsp; 
+<A HREF="#PRESENT">PRESENT</A> &nbsp; &nbsp; 
+<A HREF="#PUT-FILE">PUT-FILE</A> &nbsp; &nbsp; 
+<A HREF="#Prefix_"">Prefix_"</A> &nbsp; &nbsp; 
+<A HREF="#Prefix_&">Prefix_&</A> &nbsp; &nbsp; 
+<A HREF="#Prefix_+">Prefix_+</A> &nbsp; &nbsp; 
+<A HREF="#Prefix_-">Prefix_-</A> &nbsp; &nbsp; 
+<A HREF="#Prefix__TICK">Prefix__TICK</A> &nbsp; &nbsp; 
+<A HREF="#Prefix_">Prefix_</A> &nbsp; &nbsp; 
+<A HREF="#QUIT">QUIT</A> &nbsp; &nbsp; 
+<A HREF="#R>">R></A> &nbsp; &nbsp; 
+<A HREF="#R@">R@</A> &nbsp; &nbsp; 
+<A HREF="#READ-FILE">READ-FILE</A> &nbsp; &nbsp; 
+<A HREF="#REFILL-CIB">REFILL-CIB</A> &nbsp; &nbsp; 
+<A HREF="#REMAINDER">REMAINDER</A> &nbsp; &nbsp; 
+<A HREF="#REPEAT">REPEAT</A> &nbsp; &nbsp; 
+<A HREF="#RESTORE">RESTORE</A> &nbsp; &nbsp; 
+<A HREF="#RSHIFT">RSHIFT</A> &nbsp; &nbsp; 
+<A HREF="#RSP!">RSP!</A> &nbsp; &nbsp; 
+<A HREF="#RSP0">RSP0</A> &nbsp; &nbsp; 
+<A HREF="#RSP@">RSP@</A> &nbsp; &nbsp; 
+<A HREF="#RW-BUFFER">RW-BUFFER</A> &nbsp; &nbsp; 
+<A HREF="#SAVE">SAVE</A> &nbsp; &nbsp; 
+<A HREF="#SDSWAP">SDSWAP</A> &nbsp; &nbsp; 
+<A HREF="#SET-SRC">SET-SRC</A> &nbsp; &nbsp; 
+<A HREF="#SIGN">SIGN</A> &nbsp; &nbsp; 
+<A HREF="#SM/REM">SM/REM</A> &nbsp; &nbsp; 
+<A HREF="#SPACE">SPACE</A> &nbsp; &nbsp; 
+<A HREF="#SRC">SRC</A> &nbsp; &nbsp; 
+<A HREF="#STATE">STATE</A> &nbsp; &nbsp; 
+<A HREF="#SWAP">SWAP</A> &nbsp; &nbsp; 
+<A HREF="#TASK">TASK</A> &nbsp; &nbsp; 
+<A HREF="#THEN">THEN</A> &nbsp; &nbsp; 
+<A HREF="#THROW">THROW</A> &nbsp; &nbsp; 
+<A HREF="#TOGGLE">TOGGLE</A> &nbsp; &nbsp; 
+<A HREF="#TYPE">TYPE</A> &nbsp; &nbsp; 
+<A HREF="#U.">U.</A> &nbsp; &nbsp; 
+<A HREF="#UNTIL">UNTIL</A> &nbsp; &nbsp; 
+<A HREF="#VARIABLE">VARIABLE</A> &nbsp; &nbsp; 
+<A HREF="#WHERE">WHERE</A> &nbsp; &nbsp; 
+<A HREF="#WHILE">WHILE</A> &nbsp; &nbsp; 
+<A HREF="#WORDS">WORDS</A> &nbsp; &nbsp; 
+<A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp; &nbsp; 
+<A HREF="#XOR">XOR</A> &nbsp; &nbsp; 
+<A HREF="#XOS">XOS</A> &nbsp; &nbsp; 
+<A HREF="#ZEN">ZEN</A> &nbsp; &nbsp; 
+<A HREF="#[">[</A> &nbsp; &nbsp; 
+<A HREF="#\">\</A> &nbsp; &nbsp; 
+<A HREF="#]">]</A> &nbsp; &nbsp; 
+<A HREF="#_">_</A> &nbsp; &nbsp; 
+<A HREF="#~MATCH">~MATCH</A> &nbsp; &nbsp; 
+<P>
+<HR><A NAME=WORDSET_INDEX></A>
+<H1>
+GLOSSARY INDEX BY WORDSET</H1>
+Here you can select the description of a
+Wordsets: small sets of words that work together.
+These are intended to give more insight in how to use the
+words in cooperation.
+<P>
+Note: the first reference under `see also' of a word is the wordset to
+which it belongs.
+<P>
+<A HREF="#COMPILINGINDEX">COMPILING</A> &nbsp; &nbsp; 
+<A HREF="#CONTROLINDEX">CONTROL</A> &nbsp; &nbsp; 
+<A HREF="#DEFININGINDEX">DEFINING</A> &nbsp; &nbsp; 
+<A HREF="#DENOTATIONSINDEX">DENOTATIONS</A> &nbsp; &nbsp; 
+<A HREF="#DICTIONARYINDEX">DICTIONARY</A> &nbsp; &nbsp; 
+<A HREF="#DOUBLEINDEX">DOUBLE</A> &nbsp; &nbsp; 
+<A HREF="#ERRORSINDEX">ERRORS</A> &nbsp; &nbsp; 
+<A HREF="#FILESINDEX">FILES</A> &nbsp; &nbsp; 
+<A HREF="#FORMATTINGINDEX">FORMATTING</A> &nbsp; &nbsp; 
+<A HREF="#INITIALISATIONSINDEX">INITIALISATIONS</A> &nbsp; &nbsp; 
+<A HREF="#INPUTINDEX">INPUT</A> &nbsp; &nbsp; 
+<A HREF="#JUGGLINGINDEX">JUGGLING</A> &nbsp; &nbsp; 
+<A HREF="#LIBRARYINDEX">LIBRARY</A> &nbsp; &nbsp; 
+<A HREF="#LOGICINDEX">LOGIC</A> &nbsp; &nbsp; 
+<A HREF="#MEMORYINDEX">MEMORY</A> &nbsp; &nbsp; 
+<A HREF="#MISCINDEX">MISC</A> &nbsp; &nbsp; 
+<A HREF="#MULTIPLYINGINDEX">MULTIPLYING</A> &nbsp; &nbsp; 
+<A HREF="#OPERATINGSYSTEMINDEX">OPERATINGSYSTEM</A> &nbsp; &nbsp; 
+<A HREF="#OPERATORINDEX">OPERATOR</A> &nbsp; &nbsp; 
+<A HREF="#OUTPUTINDEX">OUTPUT</A> &nbsp; &nbsp; 
+<A HREF="#PARSINGINDEX">PARSING</A> &nbsp; &nbsp; 
+<A HREF="#SECURITYINDEX">SECURITY</A> &nbsp; &nbsp; 
+<A HREF="#STACKSINDEX">STACKS</A> &nbsp; &nbsp; 
+<A HREF="#STRINGINDEX">STRING</A> &nbsp; &nbsp; 
+<A HREF="#SUPERFLUOUSINDEX">SUPERFLUOUS</A> &nbsp; &nbsp; 
+
+
+
+
+
+
+
+
+
+
+<LI>
+<A HREF="#RESTORE">RESTORE</A></LI>
+<LI>
+<A HREF="#SAVE">SAVE</A></LI>
+<P>
+<A NAME="COMPILINGINDEX"></A>
+<H4>WORDSET COMPILING</H4>
+<LI>
+<A HREF="#COMPILING">OVERVIEW OF COMPILING</A></LI>
+<LI>
+<A HREF="#LITERAL">LITERAL</A></LI>
+<LI>
+<A HREF="#POSTPONE">POSTPONE</A></LI>
+<LI>
+<A HREF="#LIT">LIT</A></LI>
+<P>
+<A NAME="CONTROLINDEX"></A>
+<H4>WORDSET CONTROL</H4>
+<LI>
+<A HREF="#CONTROL">OVERVIEW OF CONTROL</A></LI>
+<LI>
+<A HREF="#+LOOP">+LOOP</A></LI>
+<LI>
+<A HREF="#AGAIN">AGAIN</A></LI>
+<LI>
+<A HREF="#BEGIN">BEGIN</A></LI>
+<LI>
+<A HREF="#DO">DO</A></LI>
+<LI>
+<A HREF="#ELSE">ELSE</A></LI>
+<LI>
+<A HREF="#EXIT">EXIT</A></LI>
+<LI>
+<A HREF="#IF">IF</A></LI>
+<LI>
+<A HREF="#I">I</A></LI>
+<LI>
+<A HREF="#J">J</A></LI>
+<LI>
+<A HREF="#LOOP">LOOP</A></LI>
+<LI>
+<A HREF="#REPEAT">REPEAT</A></LI>
+<LI>
+<A HREF="#THEN">THEN</A></LI>
+<LI>
+<A HREF="#UNTIL">UNTIL</A></LI>
+<LI>
+<A HREF="#WHILE">WHILE</A></LI>
+<LI>
+<A HREF="#(+LOOP)">(+LOOP)</A></LI>
+<LI>
+<A HREF="#(BACK">(BACK</A></LI>
+<LI>
+<A HREF="#(DO)">(DO)</A></LI>
+<LI>
+<A HREF="#(FORWARD">(FORWARD</A></LI>
+<LI>
+<A HREF="#(LOOP)">(LOOP)</A></LI>
+<LI>
+<A HREF="#0BRANCH">0BRANCH</A></LI>
+<LI>
+<A HREF="#BACK)">BACK)</A></LI>
+<LI>
+<A HREF="#BRANCH">BRANCH</A></LI>
+<LI>
+<A HREF="#FORWARD)">FORWARD)</A></LI>
+<P>
+<A NAME="DEFININGINDEX"></A>
+<H4>WORDSET DEFINING</H4>
+<LI>
+<A HREF="#DEFINING">OVERVIEW OF DEFINING</A></LI>
+<LI>
+<A HREF="#:">:</A></LI>
+<LI>
+<A HREF="#;">;</A></LI>
+<LI>
+<A HREF="#CONSTANT">CONSTANT</A></LI>
+<LI>
+<A HREF="#CREATE">CREATE</A></LI>
+<LI>
+<A HREF="#DOES>">DOES></A></LI>
+<LI>
+<A HREF="#VARIABLE">VARIABLE</A></LI>
+<LI>
+<A HREF="#(CREATE)">(CREATE)</A></LI>
+<LI>
+<A HREF="#HEADER">HEADER</A></LI>
+<LI>
+<A HREF="#LINK">LINK</A></LI>
+<P>
+<A NAME="DENOTATIONSINDEX"></A>
+<H4>WORDSET DENOTATIONS</H4>
+<LI>
+<A HREF="#DENOTATIONS">OVERVIEW OF DENOTATIONS</A></LI>
+<LI>
+<A HREF="#Prefix_"">Prefix_"</A></LI>
+<LI>
+<A HREF="#Prefix_&">Prefix_&</A></LI>
+<LI>
+<A HREF="#Prefix_+">Prefix_+</A></LI>
+<LI>
+<A HREF="#Prefix_-">Prefix_-</A></LI>
+<LI>
+<A HREF="#Prefix__TICK">Prefix__TICK</A></LI>
+<LI>
+<A HREF="#Prefix_">Prefix_</A></LI>
+<P>
+<A NAME="DICTIONARYINDEX"></A>
+<H4>WORDSET DICTIONARY</H4>
+<LI>
+<A HREF="#DICTIONARY">OVERVIEW OF DICTIONARY</A></LI>
+<LI>
+<A HREF="#,">,</A></LI>
+<LI>
+<A HREF="#>BODY">>BODY</A></LI>
+<LI>
+<A HREF="#ALLOT">ALLOT</A></LI>
+<LI>
+<A HREF="#C,">C,</A></LI>
+<LI>
+<A HREF="#DP">DP</A></LI>
+<LI>
+<A HREF="#FORGET">FORGET</A></LI>
+<LI>
+<A HREF="#FOUND">FOUND</A></LI>
+<LI>
+<A HREF="#HERE">HERE</A></LI>
+<LI>
+<A HREF="#ID.">ID.</A></LI>
+<LI>
+<A HREF="#IMMEDIATE">IMMEDIATE</A></LI>
+<LI>
+<A HREF="#PAD">PAD</A></LI>
+<LI>
+<A HREF="#PREFIX">PREFIX</A></LI>
+<LI>
+<A HREF="#PRESENT">PRESENT</A></LI>
+<LI>
+<A HREF="#WORDS">WORDS</A></LI>
+<LI>
+<A HREF="#>CFA">>CFA</A></LI>
+<LI>
+<A HREF="#>DFA">>DFA</A></LI>
+<LI>
+<A HREF="#>FFA">>FFA</A></LI>
+<LI>
+<A HREF="#>LFA">>LFA</A></LI>
+<LI>
+<A HREF="#>NFA">>NFA</A></LI>
+<LI>
+<A HREF="#>PHA">>PHA</A></LI>
+<LI>
+<A HREF="#HIDDEN">HIDDEN</A></LI>
+<LI>
+<A HREF="#~MATCH">~MATCH</A></LI>
+<P>
+<A NAME="DOUBLEINDEX"></A>
+<H4>WORDSET DOUBLE</H4>
+<LI>
+<A HREF="#DOUBLE">OVERVIEW OF DOUBLE</A></LI>
+<P>
+<A NAME="ERRORSINDEX"></A>
+<H4>WORDSET ERRORS</H4>
+<LI>
+<A HREF="#ERRORS">OVERVIEW OF ERRORS</A></LI>
+<LI>
+<A HREF="#?ERROR">?ERROR</A></LI>
+<LI>
+<A HREF="#CATCH">CATCH</A></LI>
+<LI>
+<A HREF="#ERROR">ERROR</A></LI>
+<LI>
+<A HREF="#THROW">THROW</A></LI>
+<LI>
+<A HREF="#WHERE">WHERE</A></LI>
+<LI>
+<A HREF="#HANDLER">HANDLER</A></LI>
+<P>
+<A NAME="FILESINDEX"></A>
+<H4>WORDSET FILES</H4>
+<LI>
+<A HREF="#FILES">OVERVIEW OF FILES</A></LI>
+<LI>
+<A HREF="#CLOSE-FILE">CLOSE-FILE</A></LI>
+<LI>
+<A HREF="#CREATE-FILE">CREATE-FILE</A></LI>
+<LI>
+<A HREF="#DELETE-FILE">DELETE-FILE</A></LI>
+<LI>
+<A HREF="#GET-FILE">GET-FILE</A></LI>
+<LI>
+<A HREF="#INCLUDE">INCLUDE</A></LI>
+<LI>
+<A HREF="#OPEN-FILE">OPEN-FILE</A></LI>
+<LI>
+<A HREF="#PUT-FILE">PUT-FILE</A></LI>
+<LI>
+<A HREF="#READ-FILE">READ-FILE</A></LI>
+<LI>
+<A HREF="#WRITE-FILE">WRITE-FILE</A></LI>
+<LI>
+<A HREF="#RW-BUFFER">RW-BUFFER</A></LI>
+<P>
+<A NAME="FORMATTINGINDEX"></A>
+<H4>WORDSET FORMATTING</H4>
+<LI>
+<A HREF="#FORMATTING">OVERVIEW OF FORMATTING</A></LI>
+<LI>
+<A HREF="#%>">%></A></LI>
+<LI>
+<A HREF="#%S">%S</A></LI>
+<LI>
+<A HREF="#%">%</A></LI>
+<LI>
+<A HREF="#&lt;%">&lt;%</A></LI>
+<LI>
+<A HREF="#BASE">BASE</A></LI>
+<LI>
+<A HREF="#DECIMAL">DECIMAL</A></LI>
+<LI>
+<A HREF="#HEX">HEX</A></LI>
+<LI>
+<A HREF="#HOLD">HOLD</A></LI>
+<LI>
+<A HREF="#SIGN">SIGN</A></LI>
+<LI>
+<A HREF="#(NUMBER)">(NUMBER)</A></LI>
+<LI>
+<A HREF="#DIGIT">DIGIT</A></LI>
+<LI>
+<A HREF="#HLD">HLD</A></LI>
+<LI>
+<A HREF="#NUMBER">NUMBER</A></LI>
+<P>
+<A NAME="INITIALISATIONSINDEX"></A>
+<H4>WORDSET INITIALISATIONS</H4>
+<LI>
+<A HREF="#INITIALISATIONS">OVERVIEW OF INITIALISATIONS</A></LI>
+<LI>
+<A HREF="#ABORT">ABORT</A></LI>
+<LI>
+<A HREF="#CLS">CLS</A></LI>
+<LI>
+<A HREF="#COLD">COLD</A></LI>
+<LI>
+<A HREF="#INIT">INIT</A></LI>
+<LI>
+<A HREF="#OK">OK</A></LI>
+<LI>
+<A HREF="#QUIT">QUIT</A></LI>
+<P>
+<A NAME="INPUTINDEX"></A>
+<H4>WORDSET INPUT</H4>
+<LI>
+<A HREF="#INPUT">OVERVIEW OF INPUT</A></LI>
+<LI>
+<A HREF="#(ACCEPT)">(ACCEPT)</A></LI>
+<LI>
+<A HREF="#ACCEPT">ACCEPT</A></LI>
+<LI>
+<A HREF="#CIB">CIB</A></LI>
+<LI>
+<A HREF="#KEY">KEY</A></LI>
+<LI>
+<A HREF="#PP">PP</A></LI>
+<LI>
+<A HREF="#REFILL-CIB">REFILL-CIB</A></LI>
+<LI>
+<A HREF="#REMAINDER">REMAINDER</A></LI>
+<P>
+<A NAME="JUGGLINGINDEX"></A>
+<H4>WORDSET JUGGLING</H4>
+<LI>
+<A HREF="#JUGGLING">OVERVIEW OF JUGGLING</A></LI>
+<LI>
+<A HREF="#2DROP">2DROP</A></LI>
+<LI>
+<A HREF="#2DUP">2DUP</A></LI>
+<LI>
+<A HREF="#2OVER">2OVER</A></LI>
+<LI>
+<A HREF="#2SWAP">2SWAP</A></LI>
+<LI>
+<A HREF="#DROP">DROP</A></LI>
+<LI>
+<A HREF="#DUP">DUP</A></LI>
+<LI>
+<A HREF="#NIP">NIP</A></LI>
+<LI>
+<A HREF="#OVER">OVER</A></LI>
+<LI>
+<A HREF="#SDSWAP">SDSWAP</A></LI>
+<LI>
+<A HREF="#SWAP">SWAP</A></LI>
+<P>
+<A NAME="LIBRARYINDEX"></A>
+<H4>WORDSET LIBRARY</H4>
+<LI>
+<A HREF="#LIBRARY">OVERVIEW OF LIBRARY</A></LI>
+<P>
+<A NAME="LOGICINDEX"></A>
+<H4>WORDSET LOGIC</H4>
+<LI>
+<A HREF="#LOGIC">OVERVIEW OF LOGIC</A></LI>
+<LI>
+<A HREF="#0&lt;">0&lt;</A></LI>
+<LI>
+<A HREF="#0=">0=</A></LI>
+<LI>
+<A HREF="#&lt;>">&lt;></A></LI>
+<LI>
+<A HREF="#&lt;">&lt;</A></LI>
+<LI>
+<A HREF="#=">=</A></LI>
+<LI>
+<A HREF="#>">></A></LI>
+<LI>
+<A HREF="#AND">AND</A></LI>
+<LI>
+<A HREF="#INVERT">INVERT</A></LI>
+<LI>
+<A HREF="#NOT">NOT</A></LI>
+<LI>
+<A HREF="#OR">OR</A></LI>
+<LI>
+<A HREF="#XOR">XOR</A></LI>
+<P>
+<A NAME="MEMORYINDEX"></A>
+<H4>WORDSET MEMORY</H4>
+<LI>
+<A HREF="#MEMORY">OVERVIEW OF MEMORY</A></LI>
+<LI>
+<A HREF="#!">!</A></LI>
+<LI>
+<A HREF="#+!">+!</A></LI>
+<LI>
+<A HREF="#2!">2!</A></LI>
+<LI>
+<A HREF="#2@">2@</A></LI>
+<LI>
+<A HREF="#@">@</A></LI>
+<LI>
+<A HREF="#ALIGNED">ALIGNED</A></LI>
+<LI>
+<A HREF="#ALIGN">ALIGN</A></LI>
+<LI>
+<A HREF="#BM">BM</A></LI>
+<LI>
+<A HREF="#C!">C!</A></LI>
+<LI>
+<A HREF="#C@">C@</A></LI>
+<LI>
+<A HREF="#CELL+">CELL+</A></LI>
+<LI>
+<A HREF="#CELLS">CELLS</A></LI>
+<LI>
+<A HREF="#CORA">CORA</A></LI>
+<LI>
+<A HREF="#EM">EM</A></LI>
+<LI>
+<A HREF="#ERASE">ERASE</A></LI>
+<LI>
+<A HREF="#FILL">FILL</A></LI>
+<LI>
+<A HREF="#MOVE">MOVE</A></LI>
+<LI>
+<A HREF="#TOGGLE">TOGGLE</A></LI>
+<P>
+<A NAME="MISCINDEX"></A>
+<H4>WORDSET MISC</H4>
+<LI>
+<A HREF="#MISC">OVERVIEW OF MISC</A></LI>
+<LI>
+<A HREF="#EXECUTE">EXECUTE</A></LI>
+<LI>
+<A HREF="#NOOP">NOOP</A></LI>
+<LI>
+<A HREF="#TASK">TASK</A></LI>
+<LI>
+<A HREF="#_">_</A></LI>
+<P>
+<A NAME="MULTIPLYINGINDEX"></A>
+<H4>WORDSET MULTIPLYING</H4>
+<LI>
+<A HREF="#MULTIPLYING">OVERVIEW OF MULTIPLYING</A></LI>
+<LI>
+<A HREF="#*/MOD">*/MOD</A></LI>
+<LI>
+<A HREF="#*/">*/</A></LI>
+<LI>
+<A HREF="#M*">M*</A></LI>
+<LI>
+<A HREF="#SM/REM">SM/REM</A></LI>
+<P>
+<A NAME="OPERATINGSYSTEMINDEX"></A>
+<H4>WORDSET OPERATINGSYSTEM</H4>
+<LI>
+<A HREF="#OPERATINGSYSTEM">OVERVIEW OF OPERATINGSYSTEM</A></LI>
+<LI>
+<A HREF="#XOS">XOS</A></LI>
+<LI>
+<A HREF="#ZEN">ZEN</A></LI>
+<P>
+<A NAME="OPERATORINDEX"></A>
+<H4>WORDSET OPERATOR</H4>
+<LI>
+<A HREF="#OPERATOR">OVERVIEW OF OPERATOR</A></LI>
+<LI>
+<A HREF="#*">*</A></LI>
+<LI>
+<A HREF="#+">+</A></LI>
+<LI>
+<A HREF="#-">-</A></LI>
+<LI>
+<A HREF="#/MOD">/MOD</A></LI>
+<LI>
+<A HREF="#/">/</A></LI>
+<LI>
+<A HREF="#ABS">ABS</A></LI>
+<LI>
+<A HREF="#LSHIFT">LSHIFT</A></LI>
+<LI>
+<A HREF="#MAX">MAX</A></LI>
+<LI>
+<A HREF="#MIN">MIN</A></LI>
+<LI>
+<A HREF="#MOD">MOD</A></LI>
+<LI>
+<A HREF="#NEGATE">NEGATE</A></LI>
+<LI>
+<A HREF="#RSHIFT">RSHIFT</A></LI>
+<P>
+<A NAME="OUTPUTINDEX"></A>
+<H4>WORDSET OUTPUT</H4>
+<LI>
+<A HREF="#OUTPUT">OVERVIEW OF OUTPUT</A></LI>
+<LI>
+<A HREF="#.">.</A></LI>
+<LI>
+<A HREF="#CR">CR</A></LI>
+<LI>
+<A HREF="#EMIT">EMIT</A></LI>
+<LI>
+<A HREF="#SPACE">SPACE</A></LI>
+<LI>
+<A HREF="#TYPE">TYPE</A></LI>
+<LI>
+<A HREF="#U.">U.</A></LI>
+<P>
+<A NAME="PARSINGINDEX"></A>
+<H4>WORDSET PARSING</H4>
+<LI>
+<A HREF="#PARSING">OVERVIEW OF PARSING</A></LI>
+<LI>
+<A HREF="#?BLANK">?BLANK</A></LI>
+<LI>
+<A HREF="#EVALUATE">EVALUATE</A></LI>
+<LI>
+<A HREF="#INTERPRET">INTERPRET</A></LI>
+<LI>
+<A HREF="#NAME">NAME</A></LI>
+<LI>
+<A HREF="#PARSE">PARSE</A></LI>
+<LI>
+<A HREF="#PP@">PP@</A></LI>
+<LI>
+<A HREF="#SET-SRC">SET-SRC</A></LI>
+<LI>
+<A HREF="#SRC">SRC</A></LI>
+<LI>
+<A HREF="#STATE">STATE</A></LI>
+<LI>
+<A HREF="#[">[</A></LI>
+<LI>
+<A HREF="#\">\</A></LI>
+<LI>
+<A HREF="#]">]</A></LI>
+<P>
+<A NAME="SECURITYINDEX"></A>
+<H4>WORDSET SECURITY</H4>
+<LI>
+<A HREF="#SECURITY">OVERVIEW OF SECURITY</A></LI>
+<LI>
+<A HREF="#?STACK">?STACK</A></LI>
+<P>
+<A NAME="STACKSINDEX"></A>
+<H4>WORDSET STACKS</H4>
+<LI>
+<A HREF="#STACKS">OVERVIEW OF STACKS</A></LI>
+<LI>
+<A HREF="#.S">.S</A></LI>
+<LI>
+<A HREF="#>R">>R</A></LI>
+<LI>
+<A HREF="#DEPTH">DEPTH</A></LI>
+<LI>
+<A HREF="#DSP!">DSP!</A></LI>
+<LI>
+<A HREF="#DSP0">DSP0</A></LI>
+<LI>
+<A HREF="#DSP@">DSP@</A></LI>
+<LI>
+<A HREF="#R>">R></A></LI>
+<LI>
+<A HREF="#R@">R@</A></LI>
+<LI>
+<A HREF="#RSP!">RSP!</A></LI>
+<LI>
+<A HREF="#RSP0">RSP0</A></LI>
+<LI>
+<A HREF="#RSP@">RSP@</A></LI>
+<P>
+<A NAME="STRINGINDEX"></A>
+<H4>WORDSET STRING</H4>
+<LI>
+<A HREF="#STRING">OVERVIEW OF STRING</A></LI>
+<LI>
+<A HREF="#$!">$!</A></LI>
+<LI>
+<A HREF="#$+!">$+!</A></LI>
+<LI>
+<A HREF="#$,">$,</A></LI>
+<LI>
+<A HREF="#$/">$/</A></LI>
+<LI>
+<A HREF="#$@">$@</A></LI>
+<LI>
+<A HREF="#$C+">$C+</A></LI>
+<LI>
+<A HREF="#$^">$^</A></LI>
+<LI>
+<A HREF="#BL">BL</A></LI>
+<LI>
+<A HREF="#COUNT">COUNT</A></LI>
+<P>
+<A NAME="SUPERFLUOUSINDEX"></A>
+<H4>WORDSET SUPERFLUOUS</H4>
+<LI>
+<A HREF="#SUPERFLUOUS">OVERVIEW OF SUPERFLUOUS</A></LI>
+<LI>
+<A HREF="#0">0</A></LI>
+<LI>
+<A HREF="#1+">1+</A></LI>
+<LI>
+<A HREF="#Number_1">Number_1</A></LI>
+<LI>
+<A HREF="#CONTEXT">CONTEXT</A></LI>
+<LI>
+<A HREF="#FORTH">FORTH</A></LI>
+<LI>
+<A HREF="#LATEST">LATEST</A></LI>
+<P>
+<HR><A NAME="RESTORE"></A>
+<H2>
+RESTORE</H2>
+<P>
+
+STACKEFFECT:  ---
+<P>
+
+DESCRIPTION:
+<P>
+This must follow a <A HREF="#SAVE">SAVE</A> in the same definition.
+Restore the content of <A HREF="#SRC">SRC</A> from the return stack
+thus restoring the <I>current input source</I> to what
+it was when the <A HREF="#SAVE">SAVE</A> was executed.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#BLOCKS">BLOCKS~</A> &nbsp; <A HREF="#SET-SRC">SET-SRC</A> &nbsp;
+ <A HREF="#RESTORE-INPUT">RESTORE-INPUT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="SAVE"></A>
+<H2>
+SAVE</H2>
+<P>
+
+STACKEFFECT:  ---
+<P>
+
+DESCRIPTION:
+<P>
+Save the content of <A HREF="#SRC">SRC</A> on the return stack
+to prepare for changing the <I>current input source</I>.
+This must be balanced by a <A HREF="#RESTORE">RESTORE</A> in the same
+definition.
+<A HREF="#CO">CO</A> can be used between the two.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#BLOCKS">BLOCKS~</A> &nbsp; <A HREF="#SET-SRC">SET-SRC</A> &nbsp;
+ <A HREF="#SAVE-INPUT">SAVE-INPUT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="COMPILING"></A>
+<H1>
+COMPILING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>COMPILING</B> contains words that compile
+<A HREF="#IMMEDIATE">See also IMMEDIATE</A> words and numbers.
+You need special precautions because these words would execute during
+compilation. Numbers are compiled <I>in line</I> , behind a word that fetches
+them.
+
+
+
+<P>
+<HR><A NAME="LITERAL"></A>
+<H2>
+LITERAL</H2>
+<P>
+
+STACKEFFECT: n --- n (executing) n --- (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+If compiling, then compile the stack value <B>n</B> as a
+32 bit literal.
+ Later execution of the definition containing the literal will
+push it to the stack. If executing in ciforth, the number will just remain on
+the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#COMPILING">COMPILING</A> &nbsp; <A HREF="#LIT">LIT</A> &nbsp;
+ <A HREF="#LITERAL">LITERAL</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="POSTPONE"></A>
+<H2>
+POSTPONE</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Used in a colon-definition in the form:
+    <P><B>: xxx POSTPONE SOME-WORD </B><P>
+<A HREF="#POSTPONE">POSTPONE</A> will postpone the
+compilation behaviour of <B>SOME-WORD</B> to the
+definition being compiled. If <B>SOME-WORD</B> is an immediate word
+this is similar to <B>[COMPILE] SOME-WORD</B>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#COMPILING">COMPILING</A> &nbsp; <A HREF="#[COMPILE]">[COMPILE]</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="LIT"></A>
+<H2>
+LIT</H2>
+<P>
+
+STACKEFFECT: --- n
+<P>
+
+DESCRIPTION:
+<P>
+Within a colon-definition, <A HREF="#LIT">LIT</A> is compiled followed by a
+32 bit literal number given during compilation.
+Later execution of <A HREF="#LIT">LIT</A> causes the contents of this
+next dictionary cell to be pushed to the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#COMPILING">COMPILING~</A> &nbsp; <A HREF="#LITERAL">LITERAL</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="CONTROL"></A>
+<H1>
+CONTROL</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>CONTROL</B> contains words that influence the control flow
+of a program, i.e. the sequence in which commands are executed in compiled words.
+With control words you can have actions performed repeatedly, or
+depending on conditions.
+
+
+
+
+<P>
+<HR><A NAME="+LOOP"></A>
+<H2>
++LOOP</H2>
+<P>
+
+STACKEFFECT: n1 --- (run)  addr n2 --- (compile)
+<P>
+
+DESCRIPTION:
+<P>
+Used in a colon-definition in the form:
+    <P><B>DO ... n1 +LOOP</B><P>
+At run-time, <A HREF="#+LOOP">+LOOP</A> selectively controls branching
+back to the corresponding <A HREF="#DO">DO</A> based on
+<B>n1</B> , the loop index and the loop limit. The signed
+increment <B>n1</B> is added to the index and the total
+compared to the limit.
+The branch back to <A HREF="#DO">DO</A> occurs until the new index
+is equal to or greater than the limit (<B>n1>0</B>), or
+until the new index is equal to or less than the limit
+(<B>n1&lt;0</B>). Upon exiting the loop, the parameters are
+discarded and execution continues ahead.
+
+At compile time, <A HREF="#+LOOP">+LOOP</A> compiles the run-time word
+<A HREF="#(+LOOP)">(+LOOP)</A> and the branch offset computed from
+<A HREF="#HERE">HERE</A> to the address left on the stack by
+<A HREF="#DO">DO</A> .
+ <B>n2</B> is used for compile time error
+checking.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="AGAIN"></A>
+<H2>
+AGAIN</H2>
+<P>
+
+STACKEFFECT: addr n --- (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+Used in a colon-definition in the form:
+    <P><B>BEGIN ... AGAIN</B><P>
+At run-time,
+<A HREF="#AGAIN">AGAIN</A> forces execution to return to the corresponding
+<A HREF="#BEGIN">BEGIN</A> . There is no effect on the stack. Execution
+cannot leave this loop except for <A HREF="#EXIT">EXIT</A>. At compile
+time, <A HREF="#AGAIN">AGAIN</A> compiles <A HREF="#BRANCH">BRANCH</A> with an
+offset from <A HREF="#HERE">HERE</A> to addr. <B>n</B> is used
+for compile-time error checking.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#BEGIN">BEGIN</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="BEGIN"></A>
+<H2>
+BEGIN</H2>
+<P>
+
+STACKEFFECT: --- addr n  (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in one of the forms:
+  <P><B>BEGIN ... UNTIL</B><P>
+  <P><B>BEGIN ... AGAIN</B><P>
+  <P><B>BEGIN ... WHILE ... REPEAT</B><P>
+At run-time, <A HREF="#BEGIN">BEGIN</A> marks the start of a sequence that may be
+repetitively executed. It serves as a return point from the
+corresponding <A HREF="#UNTIL">UNTIL</A> , <A HREF="#AGAIN">AGAIN</A> or <A HREF="#REPEAT">REPEAT</A> .
+When executing <A HREF="#UNTIL">UNTIL</A> a return
+to <A HREF="#BEGIN">BEGIN</A> will occur if the top of the stack is false;
+for <A HREF="#AGAIN">AGAIN</A> and <A HREF="#REPEAT">REPEAT</A> a return to <A HREF="#BEGIN">BEGIN</A> always occurs.
+
+At compile time <A HREF="#BEGIN">BEGIN</A> leaves its return address and <B>n</B> for compiler
+error checking.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#(BACK">(BACK</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DO"></A>
+<H2>
+DO</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- (execute) addr n --- (compile)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in form: <B>DO ... LOOP</B>
+At run time, <A HREF="#DO">DO</A> begins a sequence with repetitive
+execution controlled by a loop limit <B>n1</B> and an
+index with initial value <B>n2</B> .
+<A HREF="#DO">DO</A> removes
+these from the stack. Upon reaching <A HREF="#LOOP">LOOP</A> the
+index is incremented by one. Until the new index equals or
+exceeds the limit, execution loops back to just after
+<A HREF="#DO">DO</A> ; otherwise the loop parameters are discarded
+and execution continues ahead. Both <B>n1</B> and
+<B>n2</B> are determined at run-time and may be the result
+of other operations. Within a loop <A HREF="#I">I</A> will copy the
+current value of the index to the stack.
+
+When compiling within the colon definition, <A HREF="#DO">DO</A> compiles
+<A HREF="#(DO)">(DO)</A> and leaves the following address <B>addr</B> and
+<B>n</B> for later error checking.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#I">I</A> &nbsp;
+ <A HREF="#LOOP">LOOP</A> &nbsp;
+ <A HREF="#+LOOP">+LOOP</A> &nbsp;
+ <A HREF="#LEAVE">LEAVE</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="ELSE"></A>
+<H2>
+ELSE</H2>
+<P>
+
+STACKEFFECT: addr1 n1 --- addr2 n2 (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs within a colon-definition in the form:
+               <P><B>IF ... ELSE ... THEN</B><P>
+At run-time, <A HREF="#ELSE">ELSE</A> executes after the true part
+following <A HREF="#IF">IF</A> . <A HREF="#ELSE">ELSE</A> forces execution
+to skip over the following false part and resumes execution
+after the <A HREF="#THEN">THEN</A> . It has no stack effect.
+
+At compile-time <A HREF="#ELSE">ELSE</A> emplaces
+<A HREF="#BRANCH">BRANCH</A> reserving a branch offset, leaves the
+address <B>addr2</B> and <B>n2</B> for error
+testing. <A HREF="#ELSE">ELSE</A> also resolves the pending forward
+branch from <A HREF="#IF">IF</A> by calculating the offset from
+<B>addr1</B> to <A HREF="#HERE">HERE</A> and storing at
+<B>addr1</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#(FORWARD">(FORWARD</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="EXIT"></A>
+<H2>
+EXIT</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+ Stop interpretation of the current definition. The return
+stack must not be engaged, such as between <A HREF="#>R">>R</A> and
+<A HREF="#R>">R></A> , or <A HREF="#DO">DO</A> and <A HREF="#LOOP">LOOP</A> . In
+ciforth it can also be used to terminate
+interpretation from a
+string, block or file, or a line from the current input stream.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#(;)">(;)</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="IF"></A>
+<H2>
+IF</H2>
+<P>
+
+STACKEFFECT: f --- (run-time) / --- addr n (compile)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in form:
+      <P><B>IF (tp) ...  THEN</B><P>
+    or
+      <P><B>IF (tp) ... ELSE (fp) ... THEN</B><P>
+At run-time, <A HREF="#IF">IF</A> selects execution based on a
+boolean flag. If <B>f</B> is true (non-zero), execution
+continues ahead thru the true part. If <B>f</B> is false
+(zero), execution skips till just after <A HREF="#ELSE">ELSE</A> to
+execute the false part. After either part, execution resumes
+after <A HREF="#THEN">THEN</A>.
+<A HREF="#ELSE">ELSE</A> and its false part are optional; if missing,
+false execution skips to just after <A HREF="#THEN">THEN</A> .
+
+At compile-time <A HREF="#IF">IF</A> compiles
+<A HREF="#0BRANCH">0BRANCH</A> and reserves space for an offset at
+<B>addr</B> . <B>addr</B> and <B>n</B> are
+used later for resolution of the offset and error testing.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#(FORWARD">(FORWARD</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="I"></A>
+<H2>
+I</H2>
+<P>
+
+STACKEFFECT: --- n
+<P>
+
+DESCRIPTION:
+<P>
+Used within a do-loop to copy the loop index to the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#DO">DO</A> &nbsp;
+ <A HREF="#LOOP">LOOP</A> &nbsp;
+ <A HREF="#+LOOP">+LOOP</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="J"></A>
+<H2>
+J</H2>
+<P>
+
+STACKEFFECT: --- n
+<P>
+
+DESCRIPTION:
+<P>
+Used within a nested do-loop to copy the loop index of the
+outer do-loop to the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#DO">DO</A> &nbsp;
+ <A HREF="#LOOP">LOOP</A> &nbsp;
+ <A HREF="#+LOOP">+LOOP</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="LOOP"></A>
+<H2>
+LOOP</H2>
+<P>
+
+STACKEFFECT:  --- (run) addr n --- (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in form:
+    <P><B>DO ... LOOP</B><P>
+At run-time, <A HREF="#LOOP">LOOP</A> selectively controls branching
+back to the corresponding <A HREF="#DO">DO</A> based on the loop
+index and limit. The loop index is incremented by one and
+compared to the limit. The branch back to
+<A HREF="#DO">DO</A> occurs until the index equals or exceeds the
+limit; at that time, the parameters are discarded and execution
+continues ahead.
+
+At compile-time, <A HREF="#LOOP">LOOP</A> compiles
+<A HREF="#(LOOP)">(LOOP)</A> and uses <B>addr</B> to calculate an
+offset to <B>DO</B> . <B>n2</B> is used for compile
+time error checking.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#+LOOP">+LOOP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="REPEAT"></A>
+<H2>
+REPEAT</H2>
+<P>
+
+STACKEFFECT: addr1 n1 addr2 n2--- (compiling)
+<P>
+
+DESCRIPTION:
+<P>
+Used within a colon-definition in the form:
+    <P><B>BEGIN ... WHILE ... REPEAT</B><P>
+At run-time, <A HREF="#REPEAT">REPEAT</A> forces an unconditional branch
+back to just after the corresponding <A HREF="#BEGIN">BEGIN</A> .
+
+At compile-time, <A HREF="#REPEAT">REPEAT</A> compiles
+<A HREF="#BRANCH">BRANCH</A> and the offset from <A HREF="#HERE">HERE</A> to
+<B>addr2</B> . Then it fills in another branch offset at
+<B>addr1</B> left there by <A HREF="#WHILE">WHILE</A> .
+<B>n1 n2</B> is used for error testing.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#WHILE">WHILE</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="THEN"></A>
+<H2>
+THEN</H2>
+<P>
+
+STACKEFFECT: addr n --- (compile)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in form:
+ <P><B>IF ... THEN</B><P>
+ <P><B>IF ... ELSE ... THEN</B><P>
+At run-time, <A HREF="#THEN">THEN</A> serves only as the destination
+of a forward branch from <A HREF="#IF">IF</A> or <A HREF="#ELSE">ELSE</A> .
+It marks the conclusion of the conditional structure. At
+compile-time, <A HREF="#THEN">THEN</A> computes the forward branch
+offset from <B>addr</B> to <A HREF="#HERE">HERE</A> and stores it
+at <B>addr</B> . <B>n</B> is used for error tests.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#FORWARD)">FORWARD)</A> &nbsp;
+ <A HREF="#IF">IF</A> &nbsp;
+ <A HREF="#ELSE">ELSE</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="UNTIL"></A>
+<H2>
+UNTIL</H2>
+<P>
+
+STACKEFFECT: f --- (run-time) addr n --- (compile)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs within a colon-definition in the form:
+              <P><B>BEGIN ... UNTIL</B><P>
+At run-time, <A HREF="#UNTIL">UNTIL</A> controls the conditional branch
+back to the corresponding <A HREF="#BEGIN">BEGIN</A> If f is false,
+execution returns to just after <A HREF="#BEGIN">BEGIN</A> , otherwise
+execution continues ahead.
+
+At compile-time, <A HREF="#UNTIL">UNTIL</A> compiles
+<A HREF="#0BRANCH">0BRANCH</A> and an offset from <A HREF="#HERE">HERE</A> to
+addr. <B>n</B> is used for error tests.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#BEGIN">BEGIN</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="WHILE"></A>
+<H2>
+WHILE</H2>
+<P>
+
+STACKEFFECT: f --- (run-time) addr1 nl --- addr2 n1 addr1 n2(compile-time)
+<P>
+
+DESCRIPTION:
+<P>
+Occurs in a colon-definition in the form:
+         <B>BEGIN ... WHILE (tp) ... REPEAT</B>
+At run-time, <A HREF="#WHILE">WHILE</A> selects conditional execution
+based on boolean flag <B>f</B> . If <B>f</B> is true
+(non-zero), <A HREF="#WHILE">WHILE</A> continues execution of the true
+part thru to <A HREF="#REPEAT">REPEAT</A> , which then branches back to
+<A HREF="#BEGIN">BEGIN</A> . If <B>f</B> is false (zero),
+execution skips to just after <A HREF="#REPEAT">REPEAT</A> , exiting the
+structure.
+
+At compile time, <A HREF="#WHILE">WHILE</A> compiles
+<A HREF="#0BRANCH">0BRANCH</A> and tucks the
+target address <B>addr2</B>
+under the <B>addr1</B> left there by
+<A HREF="#BEGIN">BEGIN</A> . The stack values will be resolved by
+<A HREF="#REPEAT">REPEAT</A> . <B>n1</B> and <B>n2</B>
+provide checks for compiler security.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL</A> &nbsp; <A HREF="#(FORWARD">(FORWARD</A> &nbsp;
+ <A HREF="#BEGIN">BEGIN</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="(+LOOP)"></A>
+<H2>
+(+LOOP)</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+The run-time proceedure compiled by <A HREF="#+LOOP">+LOOP</A>, which increments the loop
+index by n and tests for loop completion.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#+LOOP">+LOOP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="(BACK"></A>
+<H2>
+(BACK</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Start a backward branch by leaving the target address
+<A HREF="#HERE">HERE</A> into <B>addr</B>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#BACK)">BACK)</A> &nbsp;
+ <A HREF="#BEGIN">BEGIN</A> &nbsp;
+ <A HREF="#DO">DO</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="(DO)"></A>
+<H2>
+(DO)</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+The run-time proceedure compiled by <A HREF="#DO">DO</A> which
+prepares the return stack, where the looping bookkeeping is kept.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#DO">DO</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="(FORWARD"></A>
+<H2>
+(FORWARD</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Start a forward branch by leaving the address that must be
+backpatched with an offset into <B>addr</B>.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#IF">IF</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="(LOOP)"></A>
+<H2>
+(LOOP)</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+The run-time proceedure compiled by LOOP which increments the loop
+index and tests for loop completion.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#LOOP">LOOP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="0BRANCH"></A>
+<H2>
+0BRANCH</H2>
+<P>
+
+STACKEFFECT: f ---
+<P>
+
+DESCRIPTION:
+<P>
+The run-time proceedure to conditionally branch. If <B>f</B> is false
+(zero), the following in-line parameter is added to the interpretive
+pointer to branch ahead or back.
+Compiled by <A HREF="#IF">IF</A> , <A HREF="#UNTIL">UNTIL</A> , and <A HREF="#WHILE">WHILE</A> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#BRANCH">BRANCH</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="BACK)"></A>
+<H2>
+BACK)</H2>
+<P>
+
+STACKEFFECT: addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Complete a backward branch by compiling an offset from
+<A HREF="#HERE">HERE</A> to <B>addr</B>, left there by
+<A HREF="#{{{(BACK}}}">{{{(BACK}}}</A> . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#LOOP">LOOP</A> &nbsp;
+ <A HREF="#UNTIL">UNTIL</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="BRANCH"></A>
+<H2>
+BRANCH</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+The run-time proceedure to unconditionally branch. An in-line
+offset is added to the interpretive pointer <A HREF="#IP">IP</A> to
+branch ahead or back. <A HREF="#BRANCH">BRANCH</A> is compiled by
+<A HREF="#ELSE">ELSE</A> <A HREF="#AGAIN">AGAIN</A> <A HREF="#REPEAT">REPEAT</A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#0BRANCH">0BRANCH</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="FORWARD)"></A>
+<H2>
+FORWARD)</H2>
+<P>
+
+STACKEFFECT: addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Complete a forward branch by backpatching an offset from
+<A HREF="#HERE">HERE</A> into <B>addr</B>, left there by <A HREF="#{{{(FORWARD}}}">{{{(FORWARD}}}</A> .
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#CONTROL">CONTROL~</A> &nbsp; <A HREF="#LOOP">LOOP</A> &nbsp;
+ <A HREF="#UNTIL">UNTIL</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="DEFINING"></A>
+<H1>
+DEFINING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>DEFINING</B> contains words that add new entries
+to the dictionary. A number of such <I>defining word</I>'s
+are predefined, but there is
+also the possibility to make new defining words, using
+<A HREF="#CREATE">CREATE</A> and <A HREF="#DOES>">DOES></A> .
+
+
+
+
+<P>
+<HR><A NAME=":"></A>
+<H2>
+:</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Used in the form called a colon-definition:
+<P><B>: cccc     ...     ;</B><P>
+Creates a dictionary entry defining <B>cccc</B> as equivalent to the
+following sequence of Forth word definitions '...' until the next
+<A HREF="#';'">';'</A> or <A HREF="#';CODE'">';CODE'</A>. The word is added as the latest
+into the <A HREF="#CONTEXT">CONTEXT</A> word list.
+The compiling process is done by the text interpreter as long as
+<A HREF="#STATE">STATE</A> is non-zero.
+Words with the immediate bit
+set (I) are executed rather than being compiled.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME=";"></A>
+<H2>
+;</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Terminate a colon-definition and stop further compilation. Compiles
+the run-time <A HREF="#EXIT">EXIT</A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; <A HREF="#:">:</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="CONSTANT"></A>
+<H2>
+CONSTANT</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+A defining word used in the form:
+    <B>n</B> <A HREF="#CONSTANT">CONSTANT</A> <B>cccc</B>
+to create word <B>cccc</B> ,
+where the content of its <I>data field address</I> is <B>n</B> .
+When <B>cccc</B> is later executed, it
+will push the value of <B>n</B> to the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; <A HREF="#VARIABLE">VARIABLE</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="CREATE"></A>
+<H2>
+CREATE</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+A defining word used in the form:
+     <B>CREATE cccc</B>
+Later execution of <B>cccc</B> returns its <I>data</I> field, i.e.
+the value of <A HREF="#HERE">HERE</A> immediately
+after executing <A HREF="#CREATE">CREATE</A> .
+
+It can be the base of a new defining word if used in the form:
+     <P><B>: CREATOR CREATE aaaa DOES> bbbb ;
+CREATOR cccc
+</B><P>
+The second line has the effect of creating a word <B>cccc</B> .
+Its datastructure is build by the code <B>aaaa</B> and when
+executing <B>cccc</B> , its data field is pushed on the stack,
+then the code <B>bbbb</B> is executed.
+
+
+ciforth is byte aligned, so no extra measures are needed.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; <A HREF="#>BODY">>BODY</A> &nbsp;
+ <A HREF="#DOES>">DOES></A> &nbsp;
+ <A HREF="#;CODE">;CODE</A> &nbsp;
+ <A HREF="#ALLOT">ALLOT</A> &nbsp;
+ <A HREF="#,">,</A> &nbsp;
+ <A HREF="#C,">C,</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="DOES>"></A>
+<H2>
+DOES></H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+A word which is used
+in combination with <A HREF="#CREATE">CREATE</A>
+to specify the run-time action
+within a high-level defining word. <A HREF="#DOES>">DOES></A> modifies
+the default behaviour of the created word so as to execute the sequence of
+compiled word addresses following <A HREF="#DOES>">DOES></A> .
+When the
+<A HREF="#DOES>">DOES></A> part executes it begins with the address of
+the data field of the word on the stack. This allows
+interpretation using this area or its contents. 
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="VARIABLE"></A>
+<H2>
+VARIABLE</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+A defining word used in the form:
+                 <B>VARIABLE cccc</B>
+When <A HREF="#VARIABLE">VARIABLE</A> is executed,
+it creates the definition <B>cccc</B>
+whose <I>data field address</I> contains a
+pointer <B>n</B> to a data location.
+When <B>cccc</B> is later executed,
+this pointer <B>n</B> is left on the stack,
+so that a fetch or store may access this location.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING</A> &nbsp; <A HREF="#USER">USER</A> &nbsp;
+ <A HREF="#CONSTANT">CONSTANT</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="(CREATE)"></A>
+<H2>
+(CREATE)</H2>
+<P>
+
+STACKEFFECT: sc ---
+<P>
+
+DESCRIPTION:
+<P>
+This is the basis for all defining words, including
+<A HREF="#:">:</A> and <A HREF="#CONSTANT">CONSTANT</A>.
+It creates a header with name <B>sc</B> in the dictionary and
+links it into the <A HREF="#CONTEXT">CONTEXT</A> word list.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING~</A> &nbsp; <A HREF="#HEADER">HEADER</A> &nbsp;
+ <A HREF="#LINK">LINK</A> &nbsp;
+ <A HREF="#CREATE">CREATE</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="HEADER"></A>
+<H2>
+HEADER</H2>
+<P>
+
+STACKEFFECT: sc --- dea
+<P>
+
+DESCRIPTION:
+<P>
+Create a dictionary entry structure for the word <B>sc</B> and
+returns its address into <B>dea</B>.
+
+The <I>code field addres</I> and <I>data field address</I> addres
+contain a same pointer,
+to the area owned by this header,
+i.e. immediately following the completed header .
+The flag and link fields are initialised to
+zero .
+The name <B>sc</B> is layed down in the dictionary before
+the header and filled in into the name field.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING~</A> &nbsp; <A HREF="#(CREATE)">(CREATE)</A> &nbsp;
+ <A HREF="#LINK">LINK</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ <A HREF="#>XFA">>XFA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="LINK"></A>
+<H2>
+LINK</H2>
+<P>
+
+STACKEFFECT: dea wid ---
+<P>
+
+DESCRIPTION:
+<P>
+Links the Forth word represented by <B>dea</B> into the wordlist
+represented by <B>wid</B> as the latest entry.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DEFINING">DEFINING~</A> &nbsp; <A HREF="#HEADER">HEADER</A> &nbsp;
+ <A HREF="#(CREATE)">(CREATE)</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="DENOTATIONS"></A>
+<H1>
+DENOTATIONS</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>DENOTATIONS</B> contains prefixes (mostly one letter
+words) that introduce a <I>denotation</I>, i.e. a generalisation of
+<A HREF="#NUMBER">NUMBER</A> . <A HREF="#PREFIX">PREFIX</A> turns the latest definition into
+a prefix, similar to <A HREF="#IMMEDIATE">IMMEDIATE</A>.
+If a word starting with the prefix is looked up in the dictionary,
+the prefix is found and executed.
+Prefix words parse input and leave a constant
+(number, char or string) on the stack, or compile such constant,
+depending on <A HREF="#STATE">STATE</A>.
+For a kernel system it is guaranteed that they reside in the minimum search
+order wordlist, associated with the namespace <A HREF="#ONLY">ONLY</A>.
+To make a distinction with the same words in other wordlists,
+the names of denotations are prepended with ``Prefix_'' in the
+documentation. Actual names consists of the one character following
+``Prefix''.
+Apart from <A HREF="#Prefix_0">Prefix_0</A> , <A HREF="#ONLY">ONLY</A>
+contains entries for all hex digits 1...9 and A...F.
+Like <A HREF="#NUMBER">NUMBER</A> always did, all denotations behave
+identical in interpret and compile mode and they are not supposed to be
+postponed. 
+
+
+
+<P>
+<HR><A NAME="Prefix_""></A>
+<H2>
+Prefix_"</H2>
+<P>
+
+STACKEFFECT: --- sc
+<P>
+
+DESCRIPTION:
+<P>
+Parse a <B>"</B> delimited string and leave it on the stack.
+A <B>"</B> can be embedded in a string by doubling it.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="Prefix_&"></A>
+<H2>
+Prefix_&</H2>
+<P>
+
+STACKEFFECT: --- c
+<P>
+
+DESCRIPTION:
+<P>
+Leave <B>c</B> the non blank char that follows.
+Skip another blank character.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; <A HREF="#^">^</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="Prefix_+"></A>
+<H2>
+Prefix_+</H2>
+<P>
+
+STACKEFFECT: --- s/d
+<P>
+
+DESCRIPTION:
+<P>
+Implements <A HREF="#NUMBER">NUMBER</A> for numbers that start with <B>+</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="Prefix_-"></A>
+<H2>
+Prefix_-</H2>
+<P>
+
+STACKEFFECT: --- s/d
+<P>
+
+DESCRIPTION:
+<P>
+Implements <A HREF="#NUMBER">NUMBER</A> for numbers that start with <B>-</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="Prefix__TICK"></A>
+<H2>
+Prefix__TICK</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Used in the form: <P><B>'nnnn</B><P>
+In interpret mode it
+leaves the <I>execution token</I> (equivalent to the
+dictionary entry address) of dictionary word <B>nnnn</B>.
+If the word is not found after a search of the search order
+an appropriate error message is given.
+In ciforth it can be used in compilation mode too, it
+then compiles the address as a literal.
+It is recommended that
+one never compiles or postpones it.
+(Use a
+combination of <A HREF="#WORD">WORD</A> and <A HREF="#FIND">FIND</A> 
+instead.)
+Furthermore it is recommended
+that for non-portable code <A HREF="#'">'</A> is used in its
+<I>denotation</I> form without the space.
+.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ <A HREF="#[']">[']</A> &nbsp;
+ <A HREF="#PRESENT">PRESENT</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="Prefix_"></A>
+<H2>
+Prefix_</H2>
+<P>
+
+STACKEFFECT: --- s/d
+<P>
+
+DESCRIPTION:
+<P>
+Implements <A HREF="#NUMBER">NUMBER</A> for numbers that start with nothing, i.e. anything.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DENOTATIONS">DENOTATIONS</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="DICTIONARY"></A>
+<H1>
+DICTIONARY</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>DICTIONARY</B> contains words that at a
+lower level than the wordset <B>DEFINING</B> concern the
+memory area that is allocated to the dictionary. They may add
+data to the dictionary at the expense of the free space, one
+cell or one byte at a time, or allocate a buffer at once. The
+dictionary space may also be shrunk, and the words that were
+there are lost. The <I>dictionary entry address</I> or
+<I>DEA</I> represents a word. It is the lowest address of
+a record with fields. Words to access those fields also belong
+to this wordset.
+
+
+
+<P>
+<HR><A NAME=","></A>
+<H2>
+,</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Store <B>n</B> into the next available dictionary memory cell, advancing
+the <I>dictionary pointer</I>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
+ <A HREF="#C,">C,</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME=">BODY"></A>
+<H2>
+>BODY</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given the <I>dictionary entry address</I> <B>dea</B> of a
+definition created with a <A HREF="#CREATE">CREATE</A> /
+<A HREF="#DOES>">DOES></A> construct, return its <I>data</I> field (in the ISO sense)
+<B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>PHA">>PHA</A> &nbsp;
+ <A HREF="#BODY>">BODY></A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="ALLOT"></A>
+<H2>
+ALLOT</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Add the signed number to the <I>dictionary pointer</I> <A HREF="#DP">DP</A> . May be used to
+reserve dictionary space or re-origin memory. As the Pentium is a byte-addressable
+machine <B>n</B> counts bytes. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#CELL+">CELL+</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="C,"></A>
+<H2>
+C,</H2>
+<P>
+
+STACKEFFECT: b ---
+<P>
+
+DESCRIPTION:
+<P>
+Store 8 bits of <B>b</B> into the next available dictionary byte, advancing
+the <I>dictionary pointer</I>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
+ <A HREF="#,">,</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="DP"></A>
+<H2>
+DP</H2>
+<P>
+
+STACKEFFECT: ---- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable, the <I>dictionary pointer</I>, which contains the address
+of the next free memory above the dictionary. The value may be read
+by <A HREF="#HERE">HERE</A> and altered by <A HREF="#ALLOT">ALLOT</A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="FORGET"></A>
+<H2>
+FORGET</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Executed in the form:
+               <A HREF="#FORGET">FORGET</A> <B>cccc</B>
+Deletes definition named <B>cccc</B> from the dictionary
+with all entries physically following it. Recover the space
+that was in use.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#FENCE">FENCE</A> &nbsp;
+ <A HREF="#FORGET-VOC">FORGET-VOC</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="FOUND"></A>
+<H2>
+FOUND</H2>
+<P>
+
+STACKEFFECT: sc --- dea
+<P>
+
+DESCRIPTION:
+<P>
+ Look up the string <B>sc</B> in the dictionary observing
+the current search order. If found, leave the dictionary
+entry address <B>dea</B> of the first entry found, else
+leave a <I>nil pointer</I>. If the first part of the string
+matches a <I>denotation</I> word, that word is found, whether
+the denotation is correct or not.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#PRESENT">PRESENT</A> &nbsp;
+ <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ <A HREF="#(FIND)">(FIND)</A> &nbsp;
+ <A HREF="#PREFIX">PREFIX</A> &nbsp;
+ <A HREF="#FIND ">FIND </A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="HERE"></A>
+<H2>
+HERE</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Leave the address <B>addr</B> of the next available
+dictionary location.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="ID."></A>
+<H2>
+ID.</H2>
+<P>
+
+STACKEFFECT: dea ---
+<P>
+
+DESCRIPTION:
+<P>
+Print a definition's name from its dictionary entry address.
+For dummy entries print nothing. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="IMMEDIATE"></A>
+<H2>
+IMMEDIATE</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Mark the most recently made definition so that when encountered at
+compile time, it will be executed rather than being compiled, i.e.
+the immediate bit in its header is set.
+This method allows definitions to handle unusual compiling
+situations, rather than build them into the fundamental compiler.
+The user may force compilation of an immediate definition by
+preceding it with <A HREF="#POSTPONE">POSTPONE</A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="PAD"></A>
+<H2>
+PAD</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Leave the address of the text output buffer, which is a fixed offset
+above <A HREF="#HERE">HERE</A>. The area growing downward from <A HREF="#PAD">PAD</A> is used
+for numeric conversion.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="PREFIX"></A>
+<H2>
+PREFIX</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Mark the most recently made definition a <I>prefix</I>.
+If searching the wordlists for a name that starts with the prefix,
+the prefix is a match for that name.
+This method allows to define numbers, and other
+<I>denotations</I> such as strings, in a modular and extensible
+fashion.
+A prefix word finds the interpreter pointer pointing to
+the remainder of the name (or number) sought for, and must compile
+that remainder.
+Prefix words are mostly both immediate and <I>smart</I>,
+i.e. they behave differently when compiled, than interpreted.
+The result is that the compiled code looks the same and behaves the
+same than the interpreted code.
+  
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#PP@">PP@</A> &nbsp;
+ <A HREF="#IMMEDIATE">IMMEDIATE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="PRESENT"></A>
+<H2>
+PRESENT</H2>
+<P>
+
+STACKEFFECT: sc --- dea
+<P>
+
+DESCRIPTION:
+<P>
+ If the string <B>sc</B> is present as a word name in the
+current search order, return its <B>dea</B>, else leave a
+<I>nil pointer</I>. For a <I>denotation</I> word, the
+name must match <B>sc</B> exactly.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#FOUND">FOUND</A> &nbsp;
+ <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ <A HREF="#(FIND)">(FIND)</A> &nbsp;
+ <A HREF="#FIND ">FIND </A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="WORDS"></A>
+<H2>
+WORDS</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+List the names of the definitions in the topmost word list of the
+search order.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY</A> &nbsp; <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME=">CFA"></A>
+<H2>
+>CFA</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres <B>dea</B> return its
+<I>code field address</I> <B>addr</B>. By jumping
+indirectly via this address the definition <B>dea</B> is
+executed. This is the address that is compiled within high
+level definitions, so it serves as an execution token.
+.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#CFA>">CFA></A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ <A HREF="#>PHA">>PHA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME=">DFA"></A>
+<H2>
+>DFA</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres return
+its <I>data field address</I> <B>addr</B> .
+This points to the code for a
+code word, to the high level code for a colon-definition, and
+to the <A HREF="#DOES>">DOES></A> pointer for a word build using
+<A HREF="#CREATE">CREATE</A>. Normally this is the area behind the
+header, found via <A HREF="#>PHA">>PHA</A> . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>BODY">>BODY</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ <A HREF="#>PHA">>PHA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME=">FFA"></A>
+<H2>
+>FFA</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres return its
+<I>flag field address</I> <B>addr</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME=">LFA"></A>
+<H2>
+>LFA</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres return its
+<I>link field address</I> <B>addr</B>. It contains
+the DEA of the previous word. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>NFA">>NFA</A> &nbsp;
+ <A HREF="#>PHA">>PHA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME=">NFA"></A>
+<H2>
+>NFA</H2>
+<P>
+
+STACKEFFECT: dea --- nfa
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres return the
+ <I>name field address</I>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>DFA">>DFA</A> &nbsp;
+ <A HREF="#>FFA">>FFA</A> &nbsp;
+ <A HREF="#>LFA">>LFA</A> &nbsp;
+ <A HREF="#>SFA">>SFA</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME=">PHA"></A>
+<H2>
+>PHA</H2>
+<P>
+
+STACKEFFECT: dea --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Given a dictionary entry addres return the
+<I>past header address</I>. Here starts the area that no
+longer belongs to the header of a dictionary entry, but most
+often it is owned by it. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ <A HREF="#>BODY">>BODY</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="HIDDEN"></A>
+<H2>
+HIDDEN</H2>
+<P>
+
+STACKEFFECT: dea ---
+<P>
+
+DESCRIPTION:
+<P>
+Make the word with dictionary entry address <B>dea</B>
+unfindable, by toggling the "smudge bit" in a definitions' flag
+field. If however it was the <B>dea</B> of an unfindable
+word, it is made findable again.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#IMMEDIATE">IMMEDIATE</A> &nbsp;
+ <A HREF="#RECURSE">RECURSE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="~MATCH"></A>
+<H2>
+~MATCH</H2>
+<P>
+
+STACKEFFECT: sc dea --- sc dea n
+<P>
+
+DESCRIPTION:
+<P>
+Intended to cooperate with <A HREF="#(FIND)">(FIND)</A> . Compares
+the <I>string constant</I> <B>sc</B> with the dea
+<B>dea</B>.
+Returns into <B>n</B> the difference between the first characters
+that compare unequal, or zero if the strings are the same up to the
+smallest length.
+It is required that the dea has a non-zero name field.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#DICTIONARY">DICTIONARY~</A> &nbsp; <A HREF="#FIND">FIND</A> &nbsp;
+ <A HREF="#CORA">CORA</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="DOUBLE"></A>
+<H1>
+DOUBLE</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>DOUBLE</B> contains words that manipulate <I>double</I>'s.
+In this 32 Forth you would hardly need doubles if it weren't
+for the NUMBER formatting wordset that uses them exclusively.
+
+
+
+<P>
+<HR><A NAME="ERRORS"></A>
+<H1>
+ERRORS</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>ERRORS</B> contains words to handle errors
+and exceptions.
+
+
+
+<P>
+<HR><A NAME="?ERROR"></A>
+<H2>
+?ERROR</H2>
+<P>
+
+STACKEFFECT: f n ---
+<P>
+
+DESCRIPTION:
+<P>
+
+If the boolean flag is true, <I>signal an error</I> with
+number <B>n</B>.
+This means that an exception is thrown,
+and it is remembered that this is the original place where the
+exception originated.
+If the exception is never caught, an error message is displayed
+using <A HREF="#ERROR">ERROR</A> .
+All errors signaled by the kernel go through this word.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS</A> &nbsp; <A HREF="#ERROR">ERROR</A> &nbsp;
+ <A HREF="#?ERRUR">?ERRUR</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="CATCH"></A>
+<H2>
+CATCH</H2>
+<P>
+
+STACKEFFECT: ... xt --- ... tc 
+<P>
+
+DESCRIPTION:
+<P>
+Execute <B>xt</B>. If it executes successfully, i.e. no
+<A HREF="#THROW">THROW</A> is executed by <B>xt</B>, leave a zero
+into <B>tc</B> in addition to any stack effect
+<B>xt</B> itself might have. Otherwise in <B>tc</B>
+the non-zero throw code is left, and the stack depth is
+restored. The values of the parameters for
+<B>xt</B> could have been modified.  Since the stack depth is known, the application
+may <A HREF="#DROP">DROP</A> those items.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS</A> &nbsp; <A HREF="#THROW">THROW</A> &nbsp;
+ <A HREF="#QUIT">QUIT</A> &nbsp;
+ <A HREF="#HANDLER">HANDLER</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="ERROR"></A>
+<H2>
+ERROR</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Notify the user that an uncaught exception or
+error with number <B>n</B> has occurred.
+The word that caused it is found using <A HREF="#WHERE">WHERE</A> and displayed .
+Also <B>n</B> is passed to <A HREF="#MESSAGE">MESSAGE</A> in order to give a description
+ of the error, clamped to the range [-256, 63].
+This word is executed by <A HREF="#THROW">THROW</A> before restarting the interpreter
+and can be revectored to give more elaborate diagnostics. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS</A> &nbsp; <A HREF="#MESSAGE">MESSAGE</A> &nbsp;
+ <A HREF="#?ERROR">?ERROR</A> &nbsp;
+ <A HREF="#WARNING">WARNING</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="THROW"></A>
+<H2>
+THROW</H2>
+<P>
+
+STACKEFFECT: ... tc --- ... / ... tc
+<P>
+
+DESCRIPTION:
+<P>
+If <B>tc</B> is zero, it is merely discarded. If we are
+executing under control of a <A HREF="#CATCH">CATCH</A> , see
+<A HREF="#CATCH">CATCH</A> for the effect of a non-zero
+<B>tc</B>. If we are executing not under control of a
+<A HREF="#CATCH">CATCH</A>, a non-zero <B>tc</B> gives a message to the effect
+that this exception has occurred and starts Forth anew.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS</A> &nbsp; <A HREF="#CATCH">CATCH</A> &nbsp;
+ <A HREF="#QUIT">QUIT</A> &nbsp;
+ <A HREF="#HANDLER">HANDLER</A> &nbsp;
+ <A HREF="#?ERROR">?ERROR</A> &nbsp;
+ <A HREF="#ERROR">ERROR</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="WHERE"></A>
+<H2>
+WHERE</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable pair which contains the start of the source and the
+position after the last character parsed when an error thrown by
+<A HREF="#?ERROR">?ERROR</A> .
+The contents of <A HREF="#WHERE">WHERE</A> is interpreted by
+<A HREF="#ERROR">ERROR</A> if the corresponding exception was never
+caught. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS</A> &nbsp; <A HREF="#THROW">THROW</A> &nbsp;
+ <A HREF="#CATCH ">CATCH </A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="HANDLER"></A>
+<H2>
+HANDLER</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable address containing a pointer to the
+last exception intercepting frame activated by <A HREF="#CATCH">CATCH</A> .
+It points into the return stack.
+If there is a <A HREF="#THROW">THROW</A>, the return stack
+is restored from <A HREF="#HANDLER">HANDLER</A> effecting a multiple level return.
+It is called a frame because more things are restored, such as the
+position of the data stack top, and the previous value of <A HREF="#HANDLER">HANDLER</A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#ERRORS">ERRORS~</A> &nbsp; <A HREF="#CATCH">CATCH</A> &nbsp;
+ <A HREF="#THROW">THROW</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="FILES"></A>
+<H1>
+FILES</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>FILES</B> contains words to input and output
+to files, or load words from files.
+They are underlying the <B>BLOCKS</B> facilities.
+
+
+
+<P>
+<HR><A NAME="CLOSE-FILE"></A>
+<H2>
+CLOSE-FILE</H2>
+<P>
+
+STACKEFFECT: fileid --- ior 
+<P>
+
+DESCRIPTION:
+<P>
+Close the file with file handle in <B>fileid</B>. Return
+a result code into <B>ior</B>. The latter is the Linux
+error code negated, to be inspected using <A HREF="#MESSAGE">MESSAGE</A>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp;
+ <A HREF="#CREATE-FILE">CREATE-FILE</A> &nbsp;
+ <A HREF="#DELETE-FILE">DELETE-FILE</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="CREATE-FILE"></A>
+<H2>
+CREATE-FILE</H2>
+<P>
+
+STACKEFFECT: sc u --- fileid ior 
+<P>
+
+DESCRIPTION:
+<P>
+
+.
+ Create a file with name <B>sc</B> and file
+access privileges <B>u</B> 
+If the file already exists,
+it is truncated to zero length. Return a file handle into
+<B>fileid</B> and a result code into <B>ior</B>.
+The latter is the  
+<B>errno</B>  negated, to be inspected using
+<A HREF="#MESSAGE">MESSAGE</A> .
+The handle is open for READ_WRITE. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp;
+ <A HREF="#CREATE-FILE">CREATE-FILE</A> &nbsp;
+ <A HREF="#DELETE-FILE">DELETE-FILE</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="DELETE-FILE"></A>
+<H2>
+DELETE-FILE</H2>
+<P>
+
+STACKEFFECT: sc --- ior 
+<P>
+
+DESCRIPTION:
+<P>
+Delete the file with name <B>sc</B>. Return
+a result code into <B>ior</B>.
+The latter is the  
+<B>errno</B>  negated, to be inspected using
+<A HREF="#MESSAGE">MESSAGE</A> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp;
+ <A HREF="#CREATE-FILE">CREATE-FILE</A> &nbsp;
+ <A HREF="#DELETE-FILE">DELETE-FILE</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="GET-FILE"></A>
+<H2>
+GET-FILE</H2>
+<P>
+
+STACKEFFECT: sc1 --- sc2
+<P>
+
+DESCRIPTION:
+<P>
+Get the content of the file with name <B>sc1</B>;
+leave it as a string <B>sc2</B>. Any errors are thrown. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#PUT-FILE">PUT-FILE</A> &nbsp;
+ <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#THROW">THROW</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="INCLUDE"></A>
+<H2>
+INCLUDE</H2>
+<P>
+
+STACKEFFECT:  "" --- i*x
+<P>
+
+DESCRIPTION:
+<P>
+Interpret the content of the file with name from the input
+stream
+as if it was typed from the console, leaving result
+<B>i*x</B>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#LOAD">LOAD</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="OPEN-FILE"></A>
+<H2>
+OPEN-FILE</H2>
+<P>
+
+STACKEFFECT: sc fam --- fileid ior 
+<P>
+
+DESCRIPTION:
+<P>
+Open the file with name <B>sc</B> and file access method
+<B>fam</B>. Return a file handle into <B>fileid</B>
+and a result code into <B>ior</B>. The latter is the   <B>errno</B> 
+error code negated, to be inspected using <A HREF="#MESSAGE">MESSAGE</A>.
+ <B>fam</B> is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp;
+ <A HREF="#CREATE-FILE">CREATE-FILE</A> &nbsp;
+ <A HREF="#DELETE-FILE">DELETE-FILE</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="PUT-FILE"></A>
+<H2>
+PUT-FILE</H2>
+<P>
+
+STACKEFFECT: sc1 sc2 ---
+<P>
+
+DESCRIPTION:
+<P>
+Save the <I>string constant</I> <B>sc1</B> to a file with
+the name <B>sc2</B>. Any errors are thrown. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#GET-FILE">GET-FILE</A> &nbsp;
+ <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#THROW">THROW</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="READ-FILE"></A>
+<H2>
+READ-FILE</H2>
+<P>
+
+STACKEFFECT: addr n1 fd --- n2 ior 
+<P>
+
+DESCRIPTION:
+<P>
+Read <B>n</B> characters to <B>addr</B> from current
+position of the file that is open at <B>fd</B> .
+<B>n2</B> is the number of characters successfully read,
+this may be zero. <B>ior</B> is 0 for success, or
+otherwise   <B>errno</B> 
+error code negated, to be inspected using <A HREF="#MESSAGE">MESSAGE</A>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#WRITE-FILE">WRITE-FILE</A> &nbsp;
+ <A HREF="#REPOSITION-FILE">REPOSITION-FILE</A> &nbsp;
+ <A HREF="#BLOCK-READ">BLOCK-READ</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="WRITE-FILE"></A>
+<H2>
+WRITE-FILE</H2>
+<P>
+
+STACKEFFECT: addr n fd --- u1 
+<P>
+
+DESCRIPTION:
+<P>
+Write <B>n</B> characters from <B>addr</B> to the file that is
+open at <B>fd</B> , starting at its current position.
+<B>u1</B> is 0 for success,
+or otherwise   <B>errno</B> 
+error code
+negated, to be inspected using <A HREF="#MESSAGE">MESSAGE</A>.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#REPOSITION-FILE">REPOSITION-FILE</A> &nbsp;
+ <A HREF="#BLOCK-WRITE">BLOCK-WRITE</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="RW-BUFFER"></A>
+<H2>
+RW-BUFFER</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A constant that leaves the address of a disk buffer used by
+file i/o words.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FILES">FILES~</A> &nbsp; <A HREF="#READ-FILE">READ-FILE</A> &nbsp;
+ <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="FORMATTING"></A>
+<H1>
+FORMATTING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>FORMATTING</B> generates formatted output for
+numbers, i.e. printing the digits in a field with a certain width,
+possibly with sign etc.
+This is possible in any <I>number base</I>. (Normally base 10 is used,
+which means that digits are found as a remainder by dividing by 10).
+Formatting in Forth is always based on <I>double</I> numbers.
+Single numbers are handled by converting them to <I>double</I> first.
+This requires some double precision operators to be present in the Forth core.
+<A HREF="#DOUBLE">See also DOUBLE</A> wordset. <A HREF="#MULTIPLYING">See also MULTIPLYING</A> wordset.
+
+
+
+
+<P>
+<HR><A NAME="%>"></A>
+<H2>
+%></H2>
+<P>
+
+STACKEFFECT: d --- sc 
+<P>
+
+DESCRIPTION:
+<P>
+Terminates numeric output conversion by dropping <B>d</B>, leaving
+the formatted string <B>sc</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#&lt;%">&lt;%</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="%S"></A>
+<H2>
+%S</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Generates ASCII text in the text output buffer, by the use of
+<A HREF="#{{{%}}}">{{{%}}}</A>, until a zero number
+<B>n2</B> results. Used between <A HREF="#&lt;%">&lt;%</A> and
+<A HREF="#%>">%></A>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="%"></A>
+<H2>
+%</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Generate from a number <B>n1</B>, the next ASCII
+character which is placed in an output string. Result
+<B>n2</B> is the quotient after division by
+<A HREF="#BASE">BASE</A>, and is maintained for further processing.
+Used between <A HREF="#&lt;%">&lt;%</A> and <A HREF="#%>">%></A>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#%S">%S</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="&lt;%"></A>
+<H2>
+&lt;%</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Setup for pictured numeric output formatting using the words:
+<A HREF="#&lt;%">&lt;%</A> <A HREF="#%">%</A> <A HREF="#%S">%S</A>
+<A HREF="#SIGN">SIGN</A> <A HREF="#%>">%></A> The conversion is done on a
+double number producing text growing down from <A HREF="#PAD">PAD</A>
+.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="BASE"></A>
+<H2>
+BASE</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable containing the current number base used for input
+and output conversion.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#DECIMAL">DECIMAL</A> &nbsp;
+ <A HREF="#HEX">HEX</A> &nbsp;
+ <A HREF="#&lt;%">&lt;%</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="DECIMAL"></A>
+<H2>
+DECIMAL</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Set the numeric conversion <A HREF="#BASE">BASE</A> for decimal input-output.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#HEX">HEX</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="HEX"></A>
+<H2>
+HEX</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Set the numeric conversion <A HREF="#BASE">BASE</A> for hexadecimal (base 16) input-output.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#DECIMAL">DECIMAL</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="HOLD"></A>
+<H2>
+HOLD</H2>
+<P>
+
+STACKEFFECT: c ---
+<P>
+
+DESCRIPTION:
+<P>
+Add the character <B>c</B> to the beginning of the output
+string. It must be executed for numeric formatting inside a
+<A HREF="#&lt;%">&lt;%</A> and <A HREF="#%>">%></A> construct . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="##">#</A> &nbsp;
+ <A HREF="#DIGIT">DIGIT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="SIGN"></A>
+<H2>
+SIGN</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Stores an ASCII minus-sign <B>-</B> just before a converted numeric output
+string in the text output buffer when <B>n</B> is negative.
+Must be used between <A HREF="#&lt;%">&lt;%</A> and
+<A HREF="#%>">%></A> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING</A> &nbsp; <A HREF="#HOLD">HOLD</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="(NUMBER)"></A>
+<H2>
+(NUMBER)</H2>
+<P>
+
+STACKEFFECT:  --- n1
+<P>
+
+DESCRIPTION:
+<P>
+Convert the ASCII text at the
+<I>current input source</I> with regard to <A HREF="#BASE">BASE</A> .
+The new value is
+accumulated into double number <B>n1</B> , being left. A
+decimal point, anywhere, signifies that the input is to be
+considered as a double. ISO requires it to be at the end of the
+number. ciforth allows any number of decimal points with the
+same meaning. ciforth also allows any number of comma's that
+are just ignored, to improve readability. If the first
+unconvertible digit is not a blank, this is an error. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING~</A> &nbsp; <A HREF="#NUMBER">NUMBER</A> &nbsp;
+ <A HREF="#?BLANK">?BLANK</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="DIGIT"></A>
+<H2>
+DIGIT</H2>
+<P>
+
+STACKEFFECT: c --- n2 false (ok) c --- x true (bad)
+<P>
+
+DESCRIPTION:
+<P>
+Converts the ASCII character <B>c</B> (using the current <A HREF="#BASE">BASE</A> ) to its binary
+equivalent <B>n2</B> , accompanied by a true flag. If the conversion is
+invalid, leaves only a don't care value and a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING~</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="HLD"></A>
+<H2>
+HLD</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable that holds the address of the latest character of
+text during numeric output conversion.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING~</A> &nbsp; <A HREF="#&lt;%">&lt;%</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="NUMBER"></A>
+<H2>
+NUMBER</H2>
+<P>
+
+STACKEFFECT:  ---  s/d
+<P>
+
+DESCRIPTION:
+<P>
+
+This word is intended to be called from (aliased as)
+single character denotation
+words, marked as <A HREF="#PREFIX">PREFIX</A> <A HREF="#IMMEDIATE">IMMEDIATE</A>.
+Therefore it decrements the parse pointer to include this first
+character.
+Starting with this character, it converts characters from the current input source
+into a number, and compile or execute this number, depending on <A HREF="#STATE">STATE</A>.
+If the string contains a decimal point it is a double else a single integer number.
+If numeric conversion is not possible, an error message will be given.
+Any comma's in the number are ignored, to help in structuring large numbers.
+
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#FORMATTING">FORMATTING~</A> &nbsp; <A HREF="#BASE">BASE</A> &nbsp;
+ <A HREF="#(NUMBER)">(NUMBER)</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="INITIALISATIONS"></A>
+<H1>
+INITIALISATIONS</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>INITIALISATIONS</B> contains words to initialise,
+reinitialise or configure Forth.
+
+
+
+<P>
+<HR><A NAME="ABORT"></A>
+<H2>
+ABORT</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Restart the interpreter. This is a patch point to replace the actions of
+<A HREF="#QUIT">QUIT</A>, into a turnkey.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#QUIT">QUIT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="CLS"></A>
+<H2>
+CLS</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+
+Clear the data stack.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#WARM">WARM</A> &nbsp;
+ <A HREF="#INIT">INIT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="COLD"></A>
+<H2>
+COLD</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Initialise
+the stacks
+Initialise the system as per <A HREF="#INIT">INIT</A>.
+Handle command line options, if any.
+Show signon message and restart via <A HREF="#ABORT">ABORT</A> .
+May be called from the terminal to remove application
+programs and restart, as long as there are no
+new vocabularies with definitions.
+But it is better to say <A HREF="#BYE">BYE</A> to Forth and start again.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#WARM">WARM</A> &nbsp;
+ <A HREF="#INIT">INIT</A> &nbsp;
+ <A HREF="#OPTIONS">OPTIONS</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="INIT"></A>
+<H2>
+INIT</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Initialise or reinitialise the system.
+Reset the data stack, the wordlists, the number base and the
+exception mechanism.
+Initialise the block mechanism.
+Any blocks that have not yet been
+written back to mass storage are discarded.
+.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#WARM">WARM</A> &nbsp;
+ <A HREF="#COLD">COLD</A> &nbsp;
+ <A HREF="#FORTH">FORTH</A> &nbsp;
+ <A HREF="#BLOCK-INIT">BLOCK-INIT</A> &nbsp;
+ <A HREF="#BASE">BASE</A> &nbsp;
+ <A HREF="#DSP0">DSP0</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="OK"></A>
+<H2>
+OK</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Takes care of printing the okay-message, after interpreting
+a line. Default it prints ``OK'' only for an interactive session
+in interpret <A HREF="#STATE">STATE</A>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#QUIT">QUIT</A> &nbsp;
+ <A HREF="#COLD">COLD</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="QUIT"></A>
+<H2>
+QUIT</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Restart the interpreter. Clear the return stack, stop
+compilation, and return control to the operators terminal,
+or to the redirected input stream.
+This means <A HREF="#(ACCEPT)">(ACCEPT)</A> user input to somewhere in the
+terminal input buffer, and
+then <A HREF="#INTERPRET">INTERPRET</A> with that as a <A HREF="#SOURCE">SOURCE</A> .
+that is still busy or that has aborted.
+Reset the exception mechanism.
+
+No message is given.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INITIALISATIONS">INITIALISATIONS</A> &nbsp; <A HREF="#CIB">CIB</A> &nbsp;
+ <A HREF="#ABORT">ABORT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="INPUT"></A>
+<H1>
+INPUT</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>INPUT</B> contains words to get input from the terminal
+and such.
+<A HREF="#FILES">See also FILES</A> for disk I/O.
+<A HREF="#BLOCKS">See also BLOCKS</A> for access of blocks. 
+
+
+
+<P>
+<HR><A NAME="(ACCEPT)"></A>
+<H2>
+(ACCEPT)</H2>
+<P>
+
+STACKEFFECT:  --- sc  
+<P>
+
+DESCRIPTION:
+<P>
+Accept characters from the terminal, until a <B>RET</B>
+is received and return the result as a constant string
+<B>sc</B>.
+It doesn't contain any line ending, but the buffer still does
+and after <A HREF="#1+">1+</A> the string ends in a <B>LF</B>.
+The editing functions are the same as with <A HREF="#ACCEPT">ACCEPT</A> .
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT</A> &nbsp; <A HREF="#KEY">KEY</A> &nbsp;
+ <A HREF="#KEY?">KEY?</A> &nbsp;
+ <A HREF="#ACCEPT">ACCEPT</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="ACCEPT"></A>
+<H2>
+ACCEPT</H2>
+<P>
+
+STACKEFFECT: addr count --- n
+<P>
+
+DESCRIPTION:
+<P>
+Transfer at most <B>count</B> characters from the
+terminal to address, until a <B>RET</B> is received. The
+simple tty editing functions of Linux are observed, i.e. the
+``erase'' (delete a character) and ``kill'' (delete a line)
+characters. Typically these are the backspace key and ^U. Note
+that excess characters after <B>count</B> are ignored.
+The number of characters not
+including the <B>RET</B> is returned into <B>n</B>.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT</A> &nbsp; <A HREF="#(ACCEPT)">(ACCEPT)</A> &nbsp;
+ <A HREF="#KEY">KEY</A> &nbsp;
+ <A HREF="#KEY?">KEY?</A> &nbsp;
+ <A HREF="#(ACCEPT)">(ACCEPT)</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="CIB"></A>
+<H2>
+CIB</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable containing the address of the terminal input buffer.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT</A> &nbsp; <A HREF="#QUIT">QUIT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="KEY"></A>
+<H2>
+KEY</H2>
+<P>
+
+STACKEFFECT: --- c
+<P>
+
+DESCRIPTION:
+<P>
+Leave the ASCII value of the next terminal key struck.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT</A> &nbsp; <A HREF="#ACCEPT">ACCEPT</A> &nbsp;
+ <A HREF="#KEY?">KEY?</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="PP"></A>
+<H2>
+PP</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable containing a pointer within the current input
+text buffer (terminal or disc) from which the next text will be
+accepted. All parsing words use and move the value of <A HREF="#PP">PP</A> .
+This is not conforming to ISO, in the sense that clearing it
+doesn't reset the parse pointer to the start of the current line.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT</A> &nbsp; <A HREF="#>IN">>IN</A> &nbsp;
+ <A HREF="#WORD">WORD</A> &nbsp;
+ <A HREF="#NAME">NAME</A> &nbsp;
+ <A HREF="#NUMBER">NUMBER</A> &nbsp;
+ <A HREF="#PARSE">PARSE</A> &nbsp;
+ <A HREF="#PP@">PP@</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="REFILL-CIB"></A>
+<H2>
+REFILL-CIB</H2>
+<P>
+
+STACKEFFECT:  --- 
+<P>
+
+DESCRIPTION:
+<P>
+Accept characters from the terminal input stream such as to
+fill up <A HREF="#CIB">CIB</A> . Normally this means until a
+<B>RET</B>.
+It is now consumable
+by <A HREF="#ACCEPT">ACCEPT</A> or after <A HREF="#SET-SRC">SET-SRC</A>
+by Forth parsing words like <A HREF="#WORD">WORD</A> .
+The editing functions
+are those described by <A HREF="#ACCEPT">ACCEPT</A>.
+Immediately, after <A HREF="#REFILL-CIB">REFILL-CIB</A> <B>REMAINDER 2@</B> defines
+the characters ready in the input buffer. All characters are
+retained including the <B>RET</B>.
+
+If the input is redirected (such that reading
+after a <B>RET</B> occurs)
+<B>REMAINDER 2@</B> contains the part of
+<A HREF="#CIB">CIB</A> that is not yet consumed by <A HREF="#(ACCEPT)">(ACCEPT)</A> ,
+and outside the reach of <A HREF="#SRC">SRC</A> .
+
+All system call errors result in an exception.
+For redirected I/O this word may generate an end-of-pipe exception.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT~</A> &nbsp; <A HREF="#ACCEPT">ACCEPT</A> &nbsp;
+ <A HREF="#(ACCEPT)">(ACCEPT)</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="REMAINDER"></A>
+<H2>
+REMAINDER</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A pointer to a constant string that contains the balance of
+characters fetched into the input buffer, but not yet consumed.
+Used as in <B>REMAINDER 2@</B> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#INPUT">INPUT~</A> &nbsp; <A HREF="#REFILL-CIB">REFILL-CIB</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="JUGGLING"></A>
+<H1>
+JUGGLING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>JUGGLING</B> contains words that change order
+of data on the <I>data stack</I> .
+The necessity for this arise, because the data you want to feed to a Forth word
+is not directly accessible, i.e. on top of the stack.
+It is also possible that  you need the same data twice, because you have to feed
+it to two different words.
+Design your word such that you need them as little as possible,
+because they are confusing.
+
+
+
+<P>
+<HR><A NAME="2DROP"></A>
+<H2>
+2DROP</H2>
+<P>
+
+STACKEFFECT: n1 n2 ---
+<P>
+
+DESCRIPTION:
+<P>
+Drop the topmost two
+numbers (or one double number)
+ from the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#DROP">DROP</A> &nbsp;
+ <A HREF="#2DUP">2DUP</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="2DUP"></A>
+<H2>
+2DUP</H2>
+<P>
+
+STACKEFFECT: d --- d d
+<P>
+
+DESCRIPTION:
+<P>
+Duplicate the double number on the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#OVER">OVER</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="2OVER"></A>
+<H2>
+2OVER</H2>
+<P>
+
+STACKEFFECT: d1 d2 --- d1 d2 d1
+<P>
+
+DESCRIPTION:
+<P>
+Copy the second stack double, placing it as the new top.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#2DUP">2DUP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="2SWAP"></A>
+<H2>
+2SWAP</H2>
+<P>
+
+STACKEFFECT: d1 d2 --- d2 d1
+<P>
+
+DESCRIPTION:
+<P>
+Exchange the top doubles on the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#ROT">ROT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DROP"></A>
+<H2>
+DROP</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Drop the number from the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#DUP">DUP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DUP"></A>
+<H2>
+DUP</H2>
+<P>
+
+STACKEFFECT: n --- n n
+<P>
+
+DESCRIPTION:
+<P>
+Duplicate the value on the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#OVER">OVER</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="NIP"></A>
+<H2>
+NIP</H2>
+<P>
+
+STACKEFFECT: n1 n2---n2
+<P>
+
+DESCRIPTION:
+<P>
+Drop the second number from the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#DUP">DUP</A> &nbsp;
+ <A HREF="#DROP">DROP</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="OVER"></A>
+<H2>
+OVER</H2>
+<P>
+
+STACKEFFECT: nl n2 --- nl n2 n1
+<P>
+
+DESCRIPTION:
+<P>
+Copy the second stack value, placing it as the new top.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#DUP">DUP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="SDSWAP"></A>
+<H2>
+SDSWAP</H2>
+<P>
+
+STACKEFFECT: nl n2 n3 --- n2 n3 nl
+<P>
+
+DESCRIPTION:
+<P>
+Rotate the top three values on the stack, bringing the third to the
+top.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#SWAP">SWAP</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="SWAP"></A>
+<H2>
+SWAP</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- n2 n1
+<P>
+
+DESCRIPTION:
+<P>
+Exchange the top two values on the stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#JUGGLING">JUGGLING</A> &nbsp; <A HREF="#ROT">ROT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="LIBRARY"></A>
+<H1>
+LIBRARY</H1>
+<P>
+
+OVERVIEW:
+<P>
+The words described into library have nothing particular in common,
+except that they are available in the <I>LAB</I> and not the
+ciforth kernel.
+They are either words from the library that are sufficiently useful
+to merit being described here, or legacy words that
+were in the kernel in earlier versions.
+All of them can be loaded from the library by <B>WANT</B>
+<B>LEGACY_WORD</B>.
+
+
+
+
+<P>
+<HR><A NAME="LOGIC"></A>
+<H1>
+LOGIC</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>LOGIC</B> contains logic operators and
+comparison operators.
+A comparison operator (such as <A HREF="#=">=</A> ) delivers a
+<I>Forth flag</I>, -1 for true, 0 for false, representing a
+condition (such as equality of two numbers).
+
+The logical operators ( <A HREF="#AND">AND</A> etc.)
+work on all 32 bits, one by one.
+In this way they are useful for mask operations, as well
+as for combining conditions
+represented as flag's.
+But beware that <A HREF="#IF">IF</A> only cares whether
+the top of the stack is non-zero, such that
+<A HREF="#-">-</A> can mean non-equal to <A HREF="#IF">IF</A>.
+Such conditions (often named just <I>flag</I>'s)
+cannot be directly combined using logical operators,
+but <B>0= 0=</B> can help.
+
+
+
+<P>
+<HR><A NAME="0&lt;"></A>
+<H2>
+0&lt;</H2>
+<P>
+
+STACKEFFECT: n --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag if the number is less than zero (negative),
+otherwise leave a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#&lt;">&lt;</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="0="></A>
+<H2>
+0=</H2>
+<P>
+
+STACKEFFECT: n --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag <B>ff</B> is the number <B>n</B>
+is equal to zero, otherwise leave a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#=">=</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="&lt;>"></A>
+<H2>
+&lt;></H2>
+<P>
+
+STACKEFFECT: n1 n2 --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag if <B>n1</B> is not equal than
+<B>n2</B> ; otherwise leave a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#>">></A> &nbsp;
+ <A HREF="#=">=</A> &nbsp;
+ <A HREF="#0&lt;">0&lt;</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="&lt;"></A>
+<H2>
+&lt;</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag if <B>n1</B> is less than <B>n2</B> ;
+otherwise leave a false
+flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#=">=</A> &nbsp;
+ <A HREF="#>">></A> &nbsp;
+ <A HREF="#0&lt;">0&lt;</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="="></A>
+<H2>
+=</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag if <B>n1=n2</B> ; otherwise leave a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#&lt;">&lt;</A> &nbsp;
+ <A HREF="#>">></A> &nbsp;
+ <A HREF="#0=">0=</A> &nbsp;
+ <A HREF="#-">-</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME=">"></A>
+<H2>
+></H2>
+<P>
+
+STACKEFFECT: n1 n2 --- ff
+<P>
+
+DESCRIPTION:
+<P>
+Leave a true flag if <B>n1</B> is greater than
+<B>n2</B> ; otherwise leave a false flag.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#&lt;">&lt;</A> &nbsp;
+ <A HREF="#=">=</A> &nbsp;
+ <A HREF="#0&lt;">0&lt;</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="AND"></A>
+<H2>
+AND</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- n3
+<P>
+
+DESCRIPTION:
+<P>
+Leave the bitwise logical and of <B>n1</B> and
+<B>n2</B> as <B>n3</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#XOR">XOR</A> &nbsp;
+ <A HREF="#OR">OR</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="INVERT"></A>
+<H2>
+INVERT</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Invert all bits of <B>n1</B> leaving <B>n2</B> .
+For pure flags (0 or -1) this is the <I>logical not</I> operator.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#AND">AND</A> &nbsp;
+ <A HREF="#OR">OR</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="NOT"></A>
+<H2>
+NOT</H2>
+<P>
+
+STACKEFFECT: ff --- ff1
+<P>
+
+DESCRIPTION:
+<P>
+Invert the flag <B>ff</B> leaving the inverted flag <B>ff1</B>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#=">=</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="OR"></A>
+<H2>
+OR</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- n3
+<P>
+
+DESCRIPTION:
+<P>
+Leave the bit-wise logical or of two 32-bit
+values.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#AND">AND</A> &nbsp;
+ <A HREF="#XOR">XOR</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="XOR"></A>
+<H2>
+XOR</H2>
+<P>
+
+STACKEFFECT: nl n2 --- n3
+<P>
+
+DESCRIPTION:
+<P>
+Leave the bitwise logical exclusive or of two
+ 32-bit values.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#LOGIC">LOGIC</A> &nbsp; <A HREF="#AND">AND</A> &nbsp;
+ <A HREF="#OR">OR</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="MEMORY"></A>
+<H1>
+MEMORY</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>MEMORY</B> contains words to fetch and
+store numbers from <I>double</I>s, <I>cell</I>s or bytes in memory.
+There are also words to copy blocks of memory or fill them, and words that
+fetch a <I>cell</I>, operate on it and store it back.
+
+
+
+<P>
+<HR><A NAME="!"></A>
+<H2>
+!</H2>
+<P>
+
+STACKEFFECT: n addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Store all 32 bits of n at <B>addr</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#@">@</A> &nbsp;
+ <A HREF="#C!">C!</A> &nbsp;
+ <A HREF="#2!">2!</A> &nbsp;
+ <A HREF="#FAR!">FAR!</A> &nbsp;
+ <A HREF="#PW!">PW!</A> &nbsp;
+ <A HREF="#PC!">PC!</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="+!"></A>
+<H2>
++!</H2>
+<P>
+
+STACKEFFECT: n addr ---
+<P>
+
+DESCRIPTION:
+<P>
+ Add <B>n</B> to the value at <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#TOGGLE">TOGGLE</A> &nbsp;
+ <A HREF="#!">!</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="2!"></A>
+<H2>
+2!</H2>
+<P>
+
+STACKEFFECT: x1 x2 addr --- 
+<P>
+
+DESCRIPTION:
+<P>
+Store a pair of 32 bits values <B>x1</B>
+<B>x2</B> to consecutive cells at <B>addr</B> .
+<B>x2</B> is stored at the lowest address.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#2@">2@</A> &nbsp;
+ <A HREF="#!">!</A> &nbsp;
+ <A HREF="#C!">C!</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="2@"></A>
+<H2>
+2@</H2>
+<P>
+
+STACKEFFECT: addr--- x1 x2
+<P>
+
+DESCRIPTION:
+<P>
+Leave a pair of 32 bits values <B>x1</B> <B>x2</B> from
+consecutive cells at <B>addr</B> . <B>x2</B> is fetched from
+the lowest address. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#2!">2!</A> &nbsp;
+ <A HREF="#@">@</A> &nbsp;
+ <A HREF="#C@">C@</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="@"></A>
+<H2>
+@</H2>
+<P>
+
+STACKEFFECT: addr --- n
+<P>
+
+DESCRIPTION:
+<P>
+Leave the 32 bit contents <B>n</B>
+of <B>addr</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#!">!</A> &nbsp;
+ <A HREF="#C@">C@</A> &nbsp;
+ <A HREF="#2@">2@</A> &nbsp;
+ <A HREF="#PW@">PW@</A> &nbsp;
+ <A HREF="#PC@">PC@</A> &nbsp;
+ <A HREF="#FAR@">FAR@</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="ALIGNED"></A>
+<H2>
+ALIGNED</H2>
+<P>
+
+STACKEFFECT: addr1 --- addr2
+<P>
+
+DESCRIPTION:
+<P>
+Make sure that <B>addr1</B> is <I>aligned</I> by advancing
+it if necessary to <B>addr2</B>.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#ALIGN">ALIGN</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="ALIGN"></A>
+<H2>
+ALIGN</H2>
+<P>
+
+STACKEFFECT:  ---
+<P>
+
+DESCRIPTION:
+<P>
+Make sure that <A HREF="#HERE">HERE</A> is <I>aligned</I> by advancing
+it if necessary.
+This means that data of any size can be fetched from that address efficiently.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#ALIGNED">ALIGNED</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="BM"></A>
+<H2>
+BM</H2>
+<P>
+
+STACKEFFECT: ---- addr
+<P>
+
+DESCRIPTION:
+<P>
+A constant leaving the address of the lowest memory
+in use by Forth.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
+ <A HREF="#EM">EM</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="C!"></A>
+<H2>
+C!</H2>
+<P>
+
+STACKEFFECT: b addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Store 8 bits of <B>b</B> at <B>addr</B> .
+In ciforth , running on the Intel architectures
+there are no restrictions regarding byte
+addressing.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#C@">C@</A> &nbsp;
+ <A HREF="#!">!</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="C@"></A>
+<H2>
+C@</H2>
+<P>
+
+STACKEFFECT: addr --- b
+<P>
+
+DESCRIPTION:
+<P>
+Leave the 8 bit contents of memory address.
+In ciforth , running on the Intel architectures
+there are no restrictions regarding byte
+addressing.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#C!">C!</A> &nbsp;
+ <A HREF="#@">@</A> &nbsp;
+ <A HREF="#2@">2@</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="CELL+"></A>
+<H2>
+CELL+</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Advance the memory pointer <B>n1</B> by one (in this case  32 bits) cell to
+<B>n2</B>. 
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="CELLS"></A>
+<H2>
+CELLS</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Return the equivalent of <B>n1</B> cells in bytes:
+<B>n2</B>. 
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#CELL+">CELL+</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="CORA"></A>
+<H2>
+CORA</H2>
+<P>
+
+STACKEFFECT: addr1 addr2 len  --- n
+<P>
+
+DESCRIPTION:
+<P>
+Compare the memory areas at <B>addr1</B> and <B>addr2</B>
+over a length <B>len</B> .
+For the first bytes that differ, return -1 if the byte
+from <B>addr1</B> is less (unsigned) than the one from <B>addr2</B>,
+and 1 if it is greater.
+If all <B>len</B> bytes are equal, return
+zero.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="EM"></A>
+<H2>
+EM</H2>
+<P>
+
+STACKEFFECT: ---- addr
+<P>
+
+DESCRIPTION:
+<P>
+A constant leaving the address just above the highest memory
+in use by Forth.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
+ <A HREF="#BM">BM</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="ERASE"></A>
+<H2>
+ERASE</H2>
+<P>
+
+STACKEFFECT: addr n ---
+<P>
+
+DESCRIPTION:
+<P>
+This is shorthand for <B>0 FILL</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#BLANK">BLANK</A> &nbsp;
+ <A HREF="#FILL">FILL</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="FILL"></A>
+<H2>
+FILL</H2>
+<P>
+
+STACKEFFECT: addr u b ---
+<P>
+
+DESCRIPTION:
+<P>
+ If <B>u</B> is not zero, store <B>b</B>
+in each of <B>u</B> consecutive bytes of memory beginning at
+<B>addr</B> . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#BLANK">BLANK</A> &nbsp;
+ <A HREF="#ERASE">ERASE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="MOVE"></A>
+<H2>
+MOVE</H2>
+<P>
+
+STACKEFFECT: from to count ---
+<P>
+
+DESCRIPTION:
+<P>
+Move <B>count</B>
+bytes beginning at address <B>from</B> to
+address <B>to</B>, such that the destination area contains
+what the source area contained, regardless of overlaps.
+As the Intel 86-family is byte-addressing there are
+no restrictions. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="TOGGLE"></A>
+<H2>
+TOGGLE</H2>
+<P>
+
+STACKEFFECT: addr b ---
+<P>
+
+DESCRIPTION:
+<P>
+Complement the contents of <B>addr</B> by the bit pattern
+<B>b</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#XOR">XOR</A> &nbsp;
+ <A HREF="#+! ">+! </A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="MISC"></A>
+<H1>
+MISC</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>MISC</B> contains words that defy categorisation.
+
+
+
+<P>
+<HR><A NAME="EXECUTE"></A>
+<H2>
+EXECUTE</H2>
+<P>
+
+STACKEFFECT: xt ---
+<P>
+
+DESCRIPTION:
+<P>
+Execute the definition whose <I>execution token</I> is
+given by <B>xt</B> . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MISC">MISC</A> &nbsp; <A HREF="#'">'</A> &nbsp;
+ <A HREF="#>CFA">>CFA</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="NOOP"></A>
+<H2>
+NOOP</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Do nothing. Primarily useful as a placeholder.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MISC">MISC</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="TASK"></A>
+<H2>
+TASK</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+A no-operation word which marks the boundary between
+the Forth system and applications. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MISC">MISC</A> &nbsp; <A HREF="#COLD">COLD</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="_"></A>
+<H2>
+_</H2>
+<P>
+
+STACKEFFECT: --- x
+<P>
+
+DESCRIPTION:
+<P>
+Leave an undefined value <B>x</B>.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MISC">MISC</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="MULTIPLYING"></A>
+<H1>
+MULTIPLYING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The original 16 bits Forth's have problems with overflow (<A HREF="#OPERATOR">See also OPERATOR</A>).
+Operators with intermediate results of double precision, mostly scaling operators,
+solve this and are
+present in the <B>MULTIPLYING</B> wordset. In this 32 bit Forth
+you will have less need, but scaling remains tricky.
+Formatting is done with <I>double</I>'s exclusively, and relies
+on this wordset. Operators with mixed precision and unsigned operators
+allow to build arbitrary precision operators from them in <I>high level</I> code.
+
+
+
+<P>
+<HR><A NAME="*/MOD"></A>
+<H2>
+*/MOD</H2>
+<P>
+
+STACKEFFECT: n1 n2 n3 --- n4 n5
+<P>
+
+DESCRIPTION:
+<P>
+Leave the quotient <B>n5</B> and remainder
+<B>n4</B> of the operation <B>n1*n2/n3</B> (using <I>symmetric division</I>).
+A double precision
+intermediate product is used giving correct results, unless
+<B>n4</B> or <B>n5</B> overflows.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MULTIPLYING">MULTIPLYING</A> &nbsp; <A HREF="#*/">*/</A> &nbsp;
+ <A HREF="#/MOD">/MOD</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="*/"></A>
+<H2>
+*/</H2>
+<P>
+
+STACKEFFECT: n1 n2 n3 --- n4
+<P>
+
+DESCRIPTION:
+<P>
+Leave the ratio <B>n4 = n1*n2/n3</B> where all are signed
+numbers(using <I>symmetric division</I>).
+A double precision
+intermediate product is used giving correct results, unless
+<B>n4</B> overflows.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MULTIPLYING">MULTIPLYING</A> &nbsp; <A HREF="#*/MOD">*/MOD</A> &nbsp;
+ <A HREF="#/MOD">/MOD</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="M*"></A>
+<H2>
+M*</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- d
+<P>
+
+DESCRIPTION:
+<P>
+A mixed magnitude math operation which leaves the double
+number <B>d</B> : the signed product of two signed number
+<B>n1</B> and <B>n2</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MULTIPLYING">MULTIPLYING</A> &nbsp; <A HREF="#M/MOD">M/MOD</A> &nbsp;
+ <A HREF="#SM/REM">SM/REM</A> &nbsp;
+ <A HREF="#*">*</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="SM/REM"></A>
+<H2>
+SM/REM</H2>
+<P>
+
+STACKEFFECT: d n1 --- n2 n3
+<P>
+
+DESCRIPTION:
+<P>
+A mixed magnitude math operator which leaves the signed
+remainder <B>n2</B> and signed quotient <B>n3</B>
+from a double number dividend <B>d</B> and divisor
+<B>n1</B>. This is a symmetric division{}
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#MULTIPLYING">MULTIPLYING</A> &nbsp; <A HREF="#M/MOD">M/MOD</A> &nbsp;
+ <A HREF="#/">/</A> &nbsp;
+ <A HREF="#M*">M*</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="OPERATINGSYSTEM"></A>
+<H1>
+OPERATINGSYSTEM</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>OPERATINGSYSTEM</B> contains words that call the underlying operating
+system or functions available in the BIOS-rom.
+
+
+
+<P>
+<HR><A NAME="XOS"></A>
+<H2>
+XOS</H2>
+<P>
+
+STACKEFFECT: n1 n2 n3 n---ret
+<P>
+
+DESCRIPTION:
+<P>
+ Do a traditional Unix type
+system call <B>n</B>
+(man 2) with parameters <B>n1 n2 n3</B>.
+<B>ret</B> is the return value of the call. If it is negative, it
+is mostly an error, such as known by <B>errno</B> . This makes
+available all facilities present in Linux, except those with 4 or 5 parameters
+that are handled by <A HREF="#XOS5">XOS5</A> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATINGSYSTEM">OPERATINGSYSTEM</A> &nbsp; <A HREF="#?ERRUR">?ERRUR</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="ZEN"></A>
+<H2>
+ZEN</H2>
+<P>
+
+STACKEFFECT: sc --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Leaves an address that contains a zero-ended (c-type) equivalent of <B>sc</B>.
+The same buffer is reused, such that this word is not reentrant.
+
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATINGSYSTEM">OPERATINGSYSTEM</A> &nbsp; <A HREF="#OPEN-FILE">OPEN-FILE</A> &nbsp;
+ <A HREF="#XOS">XOS</A> &nbsp;
+ <A HREF="#XOS5">XOS5</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="OPERATOR"></A>
+<H1>
+OPERATOR</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>OPERATOR</B> contains the familiar operators for addition, multiplication etc.
+The result of the operation is always
+an integer number, so division can't be precise.
+On ciforth all division operations are compatible with <I>symmetric division</I>.
+
+
+Divisions involving negative numbers have an interpretation problem.
+In any case we want the combination of <A HREF="#/">/</A> and
+<A HREF="#MOD">MOD</A> (remainder) to be such that you can get the
+original <B>n</B> back from the two values left by
+<B>n m MOD</B> and  <B>n m /</B> by performing <B>m * +</B> .
+This is true for all Forth's.
+On ciforth the <A HREF="#/">/</A> is a <I>symmetric division</I>, i.e.
+<B>-n m /</B> give the same result as <B>n m /</B>, but negated.
+The foregoing rule now has the consequence that <B>m MOD</B>
+has <B>2|m|-1</B> possible outcomes instead of <B>|m|</B> .
+This is very worrisome for mathematicians, who stick to the
+rule that <B>m MOD</B> has <B>|m|</B> outcomes:
+<B>0 ... |m|-1</B>, or <B>-|m|+1 ... 0 </B> for
+negative numbers. (<I>floored division</I>). 
+
+
+
+<P>
+<HR><A NAME="*"></A>
+<H2>
+*</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- n3
+<P>
+
+DESCRIPTION:
+<P>
+Leave the signed product <B>n3</B> of two signed numbers
+<B>n1</B> and <B>n2</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#+">+</A> &nbsp;
+ <A HREF="#-">-</A> &nbsp;
+ <A HREF="#/">/</A> &nbsp;
+ <A HREF="#MOD">MOD</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="+"></A>
+<H2>
++</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- sum
+<P>
+
+DESCRIPTION:
+<P>
+Leave the sum of <B>n1</B> and <B>n2</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#-">-</A> &nbsp;
+ <A HREF="#*">*</A> &nbsp;
+ <A HREF="#/">/</A> &nbsp;
+ <A HREF="#MOD">MOD</A> &nbsp;
+ 
+
+
+
+
+
+
+<P>
+<HR><A NAME="-"></A>
+<H2>
+-</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- diff
+<P>
+
+DESCRIPTION:
+<P>
+Leave the difference of <B>n1</B> and <B>n2</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#NEGATE">NEGATE</A> &nbsp;
+ <A HREF="#+">+</A> &nbsp;
+ <A HREF="#*">*</A> &nbsp;
+ <A HREF="#/">/</A> &nbsp;
+ <A HREF="#MOD">MOD</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="/MOD"></A>
+<H2>
+/MOD</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- rem quot
+<P>
+
+DESCRIPTION:
+<P>
+Leave the remainder and signed quotient of <B>n1</B> and <B>n2</B> .
+The remainder has the sign of the dividend
+(i.e. <I>symmetric division</I>). 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#*/MOD">*/MOD</A> &nbsp;
+ <A HREF="#*/">*/</A> &nbsp;
+ <A HREF="#SM/REM">SM/REM</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="/"></A>
+<H2>
+/</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- quot
+<P>
+
+DESCRIPTION:
+<P>
+Leave the signed quotient of <B>n1</B> and <B>n2</B> .
+(using <I>symmetric division</I>). 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#+">+</A> &nbsp;
+ <A HREF="#-">-</A> &nbsp;
+ <A HREF="#*">*</A> &nbsp;
+ <A HREF="#MOD">MOD</A> &nbsp;
+ <A HREF="#*/MOD">*/MOD</A> &nbsp;
+ 
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="ABS"></A>
+<H2>
+ABS</H2>
+<P>
+
+STACKEFFECT: n --- u
+<P>
+
+DESCRIPTION:
+<P>
+Leave the absolute value of <B>n</B> as <B>u</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#DABS">DABS</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="LSHIFT"></A>
+<H2>
+LSHIFT</H2>
+<P>
+
+STACKEFFECT: u1 n --- u2
+<P>
+
+DESCRIPTION:
+<P>
+Perform a <B>logical {{{shift}}} </B> of the bits of
+<B>u1</B> to the left by <B>n</B> places.
+ 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#RSHIFT">RSHIFT</A> &nbsp;
+ <A HREF="#2*">2*</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="MAX"></A>
+<H2>
+MAX</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- max
+<P>
+
+DESCRIPTION:
+<P>
+Leave the greater of two numbers.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#MIN">MIN</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="MIN"></A>
+<H2>
+MIN</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- min
+<P>
+
+DESCRIPTION:
+<P>
+Leave the smaller of two numbers.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#MAX">MAX</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="MOD"></A>
+<H2>
+MOD</H2>
+<P>
+
+STACKEFFECT: n1 n2 --- mod
+<P>
+
+DESCRIPTION:
+<P>
+Leave the remainder of <B>n1</B> divided by <B>n2</B> , with the same sign
+as <B>n1</B> (i.e. <I>symmetric division</I>).
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#+">+</A> &nbsp;
+ <A HREF="#-">-</A> &nbsp;
+ <A HREF="#*">*</A> &nbsp;
+ <A HREF="#/">/</A> &nbsp;
+ <A HREF="#MOD">MOD</A> &nbsp;
+ <A HREF="#*/MOD">*/MOD</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="NEGATE"></A>
+<H2>
+NEGATE</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+Leave the two's complement of a number, i.e.
+ <B>n2</B> is <B>-n1</B>
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#-">-</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="RSHIFT"></A>
+<H2>
+RSHIFT</H2>
+<P>
+
+STACKEFFECT: u1 n --- u2
+<P>
+
+DESCRIPTION:
+<P>
+Perform a <B>logical {{{shift}}} </B> of the bits of
+<B>u1</B> to the right by <B>n</B> places.
+ 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OPERATOR">OPERATOR</A> &nbsp; <A HREF="#LSHIFT">LSHIFT</A> &nbsp;
+ <A HREF="#2/">2/</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="OUTPUT"></A>
+<H1>
+OUTPUT</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>OUTPUT</B>
+contains words to output to the terminal and such.
+<A HREF="#FILES">See also FILES</A> for disk I/O.
+<A HREF="#BLOCKS">See also BLOCKS</A> for blocks.
+
+
+
+<P>
+<HR><A NAME="."></A>
+<H2>
+.</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Print the number <B>n1</B>
+observing the current <A HREF="#BASE">BASE</A>, followed by a blank.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#OUT">OUT</A> &nbsp;
+ <A HREF="#U.">U.</A> &nbsp;
+ <A HREF="#.R">.R</A> &nbsp;
+ <A HREF="#D.R">D.R</A> &nbsp;
+ <A HREF="#D.">D.</A> &nbsp;
+ <A HREF="#(D.R)">(D.R)</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="CR"></A>
+<H2>
+CR</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Transmit character(s)
+to the terminal, that result in
+a "carriage return" and a "line feed".
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#OUT">OUT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="EMIT"></A>
+<H2>
+EMIT</H2>
+<P>
+
+STACKEFFECT: c ---
+<P>
+
+DESCRIPTION:
+<P>
+Transmit ASCII character <B>c</B> to the output device.
+For this ciforth all terminal I/O goes through <A HREF="#TYPE">TYPE</A>.
+In this ciforth <A HREF="#EMIT">EMIT</A> maintains <A HREF="#OUT">OUT</A>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#TYPE">TYPE</A> &nbsp;
+ <A HREF="#OUT">OUT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="SPACE"></A>
+<H2>
+SPACE</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Transmit an ASCII blank to the output device.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#EMIT">EMIT</A> &nbsp;
+ <A HREF="#OUT">OUT</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="TYPE"></A>
+<H2>
+TYPE</H2>
+<P>
+
+STACKEFFECT: addr count ---
+<P>
+
+DESCRIPTION:
+<P>
+Transmit <B>count</B> characters from <B>addr</B> to
+the output device. All terminal I/O goes through this word. It
+is high level so terminal I/O can be redirected, by
+<I>revectoring</I> it . In this
+ciforth strings may contain embedded <B>LF</B> 's with the
+effect of a new line at that point in the output, however in
+that case <A HREF="#OUT">OUT</A> is not observed. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#EMIT">EMIT</A> &nbsp;
+ <A HREF="#OUT">OUT</A> &nbsp;
+ <A HREF="#ETYPE">ETYPE</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="U."></A>
+<H2>
+U.</H2>
+<P>
+
+STACKEFFECT: u ---
+<P>
+
+DESCRIPTION:
+<P>
+Print the unsigned number <B>u</B>
+observing the current <A HREF="#BASE">BASE</A>, followed by a blank.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#OUTPUT">OUTPUT</A> &nbsp; <A HREF="#OUT">OUT</A> &nbsp;
+ <A HREF="#.">.</A> &nbsp;
+ <A HREF="#.R">.R</A> &nbsp;
+ <A HREF="#D.R">D.R</A> &nbsp;
+ <A HREF="#D.">D.</A> &nbsp;
+ <A HREF="#(D.R)">(D.R)</A> &nbsp;
+ 
+
+
+
+
+
+
+
+
+<P>
+<HR><A NAME="PARSING"></A>
+<H1>
+PARSING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The <I>outer interpreter</I> is responsible for parsing,
+i.e. it gets a word from the <I>current input source </I> and interprets or compiles it,
+advancing the <A HREF="#PP">PP</A>  pointer.
+The wordset <B>PARSING</B> contains the words used by this
+interpreter and other words that consume characters from the
+input source. In this way the outer interpreter need not be
+very smart, because its capabilities can be extended by new
+words based on those building blocks.
+
+
+
+<P>
+<HR><A NAME="?BLANK"></A>
+<H2>
+?BLANK</H2>
+<P>
+
+STACKEFFECT: c --- ff 
+<P>
+
+DESCRIPTION:
+<P>
+For the character <B>c</B> return whether this is
+considered to be white space into the flag <B>ff</B> .
+At least the space, ASCII null, the tab and the carriage return and line
+feed characters are white space.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#BL">BL</A> &nbsp;
+ <A HREF="#SPACE">SPACE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="EVALUATE"></A>
+<H2>
+EVALUATE</H2>
+<P>
+
+STACKEFFECT: sc --- ??
+<P>
+
+DESCRIPTION:
+<P>
+Interpret the content of <B>sc</B>. Afterwards return to
+the <I>current input source</I> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#LOAD">LOAD</A> &nbsp;
+ <A HREF="#INCLUDE">INCLUDE</A> &nbsp;
+ <A HREF="#SET-SRC">SET-SRC</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="INTERPRET"></A>
+<H2>
+INTERPRET</H2>
+<P>
+
+STACKEFFECT: ?? --- ??
+<P>
+
+DESCRIPTION:
+<P>
+Repeatedly fetch the next text word from the
+<I>current input source</I> and
+execute it (<A HREF="#STATE">STATE</A> is not 1) or compile it
+(<A HREF="#STATE">STATE</A> is 1). A word is blank-delimited and looked
+up in the vocabularies of <I>search-order</I>.
+It can be either matched exactly, or it can match a prefix.
+A word that matches a prefix is called a <I>denotation</I>;
+mostly this is a number.
+Prefixes are present in <A HREF="#ONLY">ONLY</A> which is the last wordlist
+in the search order, and the minimum search order.
+If it is not found at all, it
+is an <A HREF="#ERROR">ERROR</A>.
+A <I>denotation</I> is a number, a double number, a
+character or a string etc. Denotations are handled
+respectively by the words
+<A HREF="#0">0</A> ... <A HREF="#F">F</A> <A HREF="#&">&</A> <A HREF="#"">"</A> and
+any other word of the
+<A HREF="#ONLY">ONLY</A> wordlist, depending on the first
+character or characters.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#WORD">WORD</A> &nbsp;
+ <A HREF="#NUMBER">NUMBER</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="NAME"></A>
+<H2>
+NAME</H2>
+<P>
+
+STACKEFFECT: --- sc
+<P>
+
+DESCRIPTION:
+<P>
+Parse the <I>current input source</I> for a word, i.e.
+blank-delimited as per <A HREF="#?BLANK">?BLANK</A> . Skip leading delimiters then
+advance the input pointer to past the next delimiter or past
+the end of the input source. Leave the word found as a string
+constant <B>sc</B>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#WORD">WORD</A> &nbsp;
+ <A HREF="#PP">PP</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="PARSE"></A>
+<H2>
+PARSE</H2>
+<P>
+
+STACKEFFECT:  c --- sc 
+<P>
+
+DESCRIPTION:
+<P>
+Scan the <I>current input source</I> for the character <B>c</B> .
+Return <B>sc</B>: a string from the current position in the
+input stream, ending before the first such character,
+or at the end of the current input source if it isn't
+there. The character is consumed.
+
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#WORD">WORD</A> &nbsp;
+ <A HREF="#NAME">NAME</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="PP@"></A>
+<H2>
+PP@</H2>
+<P>
+
+STACKEFFECT:  ---addr c
+<P>
+
+DESCRIPTION:
+<P>
+Parse the <I>current input source</I> leaving the next
+character <B>c</B> and its address <B>addr</B> . If
+at the end of the input source, leave a pointer past the end
+and a zero. Advance the input pointer to the next character.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#WORD">WORD</A> &nbsp;
+ <A HREF="#PP">PP</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="SET-SRC"></A>
+<H2>
+SET-SRC</H2>
+<P>
+
+STACKEFFECT: sc ---
+<P>
+
+DESCRIPTION:
+<P>
+Make the <I>string constant</I> <B>sc</B> the
+<I>current input source</I>. This input is chained, i.e.
+exhausting it has the same effect as exhausting the input that
+called <A HREF="#SET-SRC">SET-SRC</A>. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#SRC">SRC</A> &nbsp;
+ <A HREF="#EVALUATE">EVALUATE</A> &nbsp;
+ <A HREF="#INTERPRET">INTERPRET</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="SRC"></A>
+<H2>
+SRC</H2>
+<P>
+
+STACKEFFECT: addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Return the address <B>addr</B>
+of the <I>current input source</I> specification.
+ It consists of three cells: the
+lowest address of the parse area,
+and the non-inclusive highest address of the parse area
+and a pointer to the next character to be parsed.
+ Changing <B>SRC</B> takes immediate effect,
+and must be atomic,
+by changing only the third cell or
+by e.g. using <A HREF="#SET-SRC">SET-SRC</A>.
+The third cell has the alias <B>PP</B> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#SAVE">SAVE</A> &nbsp;
+ <A HREF="#RESTORE">RESTORE</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="STATE"></A>
+<H2>
+STATE</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable containing the compilation state. A non-zero value
+indicates compilation.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="["></A>
+<H2>
+[</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Used in a colon-definition in form:
+<P><B>:  xxx    [  words   ]    more   ;</B><P>
+Suspend compilation. The words after <A HREF="#[">[</A> are executed, not compiled.
+This allows calculation or compilation exceptions before resuming
+compilation with <A HREF="#]">]</A>
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#LITERAL ">LITERAL </A> &nbsp;
+ <A HREF="#]">]</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="\"></A>
+<H2>
+\</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Used in the form:
+<B>\ cccc</B>
+Ignore a comment that will be delimited by the end of the current line.
+May occur during execution or in a colon-definition.
+Blank space after the word <A HREF="#\">\</A> is required.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#(">(</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="]"></A>
+<H2>
+]</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Resume compilation, to the completion of a colon-definition.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#PARSING">PARSING</A> &nbsp; <A HREF="#[">[</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="SECURITY"></A>
+<H1>
+SECURITY</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>SECURITY</B> contains words that are used by control
+words to abort with an error message if the control structure is not
+correct. 
+You only need to know them if you want to extend the
+<B>CONTROL</B> wordset.
+This version of ciforth contains no security, so the remainder
+of the chapter is empty.
+
+
+
+
+
+
+<P>
+<HR><A NAME="?STACK"></A>
+<H2>
+?STACK</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+Issue an error message if the stack is out of bounds.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#SECURITY">SECURITY</A> &nbsp; <A HREF="#?ERROR">?ERROR</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="STACKS"></A>
+<H1>
+STACKS</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>STACKS</B> contains words related to the
+<I>data stack</I> and <I>return stack</I>.
+Words can be moved between both stacks.
+Stacks can be reinitialised and the value used to initialise the
+<I>stack pointer</I>'s can be altered.
+
+
+
+<P>
+<HR><A NAME=".S"></A>
+<H2>
+.S</H2>
+<P>
+
+STACKEFFECT: from to ---
+<P>
+
+DESCRIPTION:
+<P>
+Print the stack, in the current base.
+For stack underflow print nothing.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#LIST">LIST</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME=">R"></A>
+<H2>
+>R</H2>
+<P>
+
+STACKEFFECT: n ---
+<P>
+
+DESCRIPTION:
+<P>
+Remove a number from the <I>data stack</I> and place as the most
+accessable on the <I>return stack</I>. Use
+should be balanced with <A HREF="#R>">R></A> in
+the same definition.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#R@">R@</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DEPTH"></A>
+<H2>
+DEPTH</H2>
+<P>
+
+STACKEFFECT: --- n1
+<P>
+
+DESCRIPTION:
+<P>
+Leave into <B>n1</B> the number of items on the data stack,
+before <B>n1</B> was pushed.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#DSP@">DSP@</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DSP!"></A>
+<H2>
+DSP!</H2>
+<P>
+
+STACKEFFECT: addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Initialize the data stack pointer with <B>addr</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#DSP@">DSP@</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DSP0"></A>
+<H2>
+DSP0</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable that contains the initial value for the data stack
+pointer.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#DSP!">DSP!</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="DSP@"></A>
+<H2>
+DSP@</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Return the address <B>addr</B> of the data stack position,
+as it was before <A HREF="#DSP@">DSP@</A> was executed.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#DSP0">DSP0</A> &nbsp;
+ <A HREF="#DSP!">DSP!</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="R>"></A>
+<H2>
+R></H2>
+<P>
+
+STACKEFFECT: --- n
+<P>
+
+DESCRIPTION:
+<P>
+Remove the top value from the <I>return stack</I> and leave it on the
+<I>data stack</I> . 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#>R">>R</A> &nbsp;
+ <A HREF="#R@">R@</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="R@"></A>
+<H2>
+R@</H2>
+<P>
+
+STACKEFFECT: --- n
+<P>
+
+DESCRIPTION:
+<P>
+Copy the top of the return stack to the data stack.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#>R">>R</A> &nbsp;
+ <A HREF="#&lt;R">&lt;R</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="RSP!"></A>
+<H2>
+RSP!</H2>
+<P>
+
+STACKEFFECT: addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Initialize the return stack
+pointer with <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#RSP@">RSP@</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="RSP0"></A>
+<H2>
+RSP0</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+A variable containing the initial location of the return stack. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#RSP!">RSP!</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="RSP@"></A>
+<H2>
+RSP@</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Return the address <B>addr</B> of the current return
+stack position, i.e. pointing the current topmost value.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STACKS">STACKS</A> &nbsp; <A HREF="#RSP0">RSP0</A> &nbsp;
+ <A HREF="#RSP!">RSP!</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="STRING"></A>
+<H1>
+STRING</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B>STRING</B> contains words that manipulate
+strings of characters.
+In ciforth strings have been given their civil rights.
+So they are entitled to a <I>denotation</I> (the word <A HREF="#"">"</A> )
+and have a proper fetch and store.
+An (address length) pair is considered a <I>string constant</I>.
+It may be trimmed, but the data referring to via the address must not be changed.
+It can be stored in a buffer, a <I>string variable</I>, that contains
+in its first cell the count. Formerly this was in the first byte, and these
+are called <I>old fashioned string</I>'s .
+
+
+
+
+<P>
+<HR><A NAME="$!"></A>
+<H2>
+$!</H2>
+<P>
+
+STACKEFFECT: sc addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Store a <I>string constant</I> <B>sc</B>
+in the string variable at address <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$@">$@</A> &nbsp;
+ <A HREF="#$+!">$+!</A> &nbsp;
+ <A HREF="#$C+">$C+</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="$+!"></A>
+<H2>
+$+!</H2>
+<P>
+
+STACKEFFECT: sc addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Append a <I>string constant</I> <B>sc</B>
+to the string variable at address <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$@">$@</A> &nbsp;
+ <A HREF="#$!">$!</A> &nbsp;
+ <A HREF="#$C+">$C+</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="$,"></A>
+<H2>
+$,</H2>
+<P>
+
+STACKEFFECT: sc --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Allocate and store a <I>string constant</I> <B>sc</B>
+in the dictionary and leave its address <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$@">$@</A> &nbsp;
+ <A HREF="#$!">$!</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="$/"></A>
+<H2>
+$/</H2>
+<P>
+
+STACKEFFECT: sc c --- sc1 sc2
+<P>
+
+DESCRIPTION:
+<P>
+Find the first <B>c</B> in the <I>string constant</I>
+<B>sc</B> and split it at that address. Return the strings
+after and before <B>c</B> into <B>sc1</B> and
+<B>sc2</B> respectively. If the character is not present
+<B>sc1</B> is a null string  and <B>sc2</B> is the original string.
+ 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$^">$^</A> &nbsp;
+ <A HREF="#CORA">CORA</A> &nbsp;
+ <A HREF="#$@">$@</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="$@"></A>
+<H2>
+$@</H2>
+<P>
+
+STACKEFFECT: addr --- sc
+<P>
+
+DESCRIPTION:
+<P>
+ From address <B>addr</B> fetch a <I>string constant</I> <B>sc</B> .
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$!">$!</A> &nbsp;
+ <A HREF="#$+!">$+!</A> &nbsp;
+ <A HREF="#$C+">$C+</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="$C+"></A>
+<H2>
+$C+</H2>
+<P>
+
+STACKEFFECT: c addr ---
+<P>
+
+DESCRIPTION:
+<P>
+Append a char <B>c</B>
+to the string variable at address <B>addr</B>.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$@">$@</A> &nbsp;
+ <A HREF="#$!">$!</A> &nbsp;
+ <A HREF="#$+!">$+!</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="$^"></A>
+<H2>
+$^</H2>
+<P>
+
+STACKEFFECT: sc c --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Find the first <B>c</B> in the <I>string constant</I> <B>sc</B> and
+return its <B>addr</B> if present.
+Otherwise return a <I>nil pointer</I>.
+A null string (0 0) or an empty string are allowed, and result in not found. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#$/">$/</A> &nbsp;
+ <A HREF="#CORA">CORA</A> &nbsp;
+ <A HREF="#$@">$@</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="BL"></A>
+<H2>
+BL</H2>
+<P>
+
+STACKEFFECT: --- c
+<P>
+
+DESCRIPTION:
+<P>
+ A constant that leaves the
+   ASCII value for "blank".
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; 
+
+
+<P>
+<HR><A NAME="COUNT"></A>
+<H2>
+COUNT</H2>
+<P>
+
+STACKEFFECT: addr1 --- addr2 n
+<P>
+
+DESCRIPTION:
+<P>
+Leave the byte address <B>addr2</B> and byte count <B>n</B> of a message text
+beginning at address <B>addr1</B> . It is presumed that the first byte at
+<B>addr1</B> contains the text byte count and the actual text starts with
+the second byte. Alternatively stated, fetch a
+<I>string constant</I> <B>addr2 n</B> from
+the brain damaged string variable at <B>addr1</B> .
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#STRING">STRING</A> &nbsp; <A HREF="#TYPE">TYPE</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="SUPERFLUOUS"></A>
+<H1>
+SUPERFLUOUS</H1>
+<P>
+
+OVERVIEW:
+<P>
+The wordset <B> SUPERFLUOUS</B> contains words that are superfluous,
+because they are equivalent to small sequences of code.
+
+
+
+
+<P>
+<HR><A NAME="0"></A>
+<H2>
+0</H2>
+<P>
+
+STACKEFFECT: --- 0
+<P>
+
+DESCRIPTION:
+<P>
+Leave the number 0. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#SUPERFLUOUS">SUPERFLUOUS</A> &nbsp; <A HREF="#CONSTANT">CONSTANT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="1+"></A>
+<H2>
+1+</H2>
+<P>
+
+STACKEFFECT: n1 --- n2
+<P>
+
+DESCRIPTION:
+<P>
+This is shorthand for ``<B>1 +</B>''.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#SUPERFLUOUS">SUPERFLUOUS</A> &nbsp; <A HREF="#CELL+">CELL+</A> &nbsp;
+ <A HREF="#1-">1-</A> &nbsp;
+ 
+
+
+
+
+<P>
+<HR><A NAME="Number_1"></A>
+<H2>
+Number_1</H2>
+<P>
+
+STACKEFFECT: --- 1
+<P>
+
+DESCRIPTION:
+<P>
+Leave the number 1. 
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#SUPERFLUOUS">SUPERFLUOUS</A> &nbsp; <A HREF="#CONSTANT">CONSTANT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="CONTEXT"></A>
+<H2>
+CONTEXT</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+ The context is the address where the WID is found of the wordlist
+that is searched first. In ciforth <B>addr</B> actually points
+to the <I>search order</I>,
+a row of WID 's
+ending with the minimum search order WID.
+The corresponding wordlists are searched in that order for definitions during
+interpretation.
+This row of WID's is allocated in the variable space .
+It may contain up to 16 WID 's in
+this ciforth, while the ISO Search-Order wordset requires a capacity of at
+least 8.
+
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#WORDLISTS">WORDLISTS</A> &nbsp; <A HREF="#PRESENT">PRESENT</A> &nbsp;
+ <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ <A HREF="#USER">USER</A> &nbsp;
+ 
+
+
+
+
+
+<P>
+<HR><A NAME="FORTH"></A>
+<H2>
+FORTH</H2>
+<P>
+
+STACKEFFECT: 
+<P>
+
+DESCRIPTION:
+<P>
+The name of the primary namespace. Execution pushes the
+<A HREF="#FORTH">FORTH</A> <I>WID</I>
+to the top of the <I>search order</I> .
+(For ISO-compliance it
+would replace the top.)
+Until additional user <I>word list</I> 's are created, new user definitions
+become a part of <A HREF="#FORTH">FORTH</A> . <A HREF="#FORTH">FORTH</A> is
+immediate, so it will execute during the creation of a
+colon-definition, to select this <I>word list</I> at compile time.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#WORDLISTS">WORDLISTS</A> &nbsp; <A HREF="#CONTEXT">CONTEXT</A> &nbsp;
+ 
+
+
+
+<P>
+<HR><A NAME="LATEST"></A>
+<H2>
+LATEST</H2>
+<P>
+
+STACKEFFECT: --- addr
+<P>
+
+DESCRIPTION:
+<P>
+Leave the dictionary entry address <B>addr</B> of the
+topmost word in the <A HREF="#CONTEXT">CONTEXT</A> word list.
+<P>
+<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
+<P>
+SEE ALSO: <A HREF="#WORDLISTS">WORDLISTS</A> &nbsp; 
+

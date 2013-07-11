@@ -1,0 +1,6 @@
+Exercise for yourforth.
+
+We follow the convention of Knuth in TAO:
+    Exercises are numbered per section.
+    Each exercise has a rating 0..50, where 40 is research project and
+    10 is an easy question just doable without pen and paper.
