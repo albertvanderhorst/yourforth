@@ -1,6 +1,45 @@
+; This is a community effort in the spirit of the Forth Interest Group.
+; It is public domain and only knows contributors, no copyright holders.
+; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.2 $
-        include "macros.fas"
+ ;   ciforth $Revision: 6.52 $
+macro string  content {
+    local startstring, endstring
+    dd    endstring -startstring
+startstring:
+    DB    content
+endstring:
+        ALIGN    cw
+}
+macro   next {
+        lodsd
+        jmp     dword[eax]
+}
+lastlink equ 0
+macro header dea, cfield,dfield,ffield,lfield,forthname {
+    local nfield, startstring, endstring
+nfield:         dd    endstring -startstring
+startstring:    DB    forthname
+endstring:
+        ALIGN    cw
+dea:  dd      cfield, dfield, ffield, lfield, nfield
+lastlink EQU dea
+}
+macro goto  label
+{ dd  BRANCH, label-$-cw   }
+macro ifto  label
+{ dd  zero_BRANCH, label-$-cw   }
+macro whileto  label
+{ dd  zero_BRANCH, label-$-cw   }
+macro untilto  label
+{ dd  zero_BRANCH, label-$-cw   }
+; They all have in common that on the preceeding condition
+; being true/non-zero/on,
+; the code following is executed. For ifto it is once, for whileto the code following
+; is part of the loop, so we stay in the loop.
+; in the loop, and for untilto the code following is outside of a loop.
+; Don't worry, Forthers hate nested loops. In the code of <your>forth you
+; will not find a single nested loop.
 ;
 ; FASM version of ciforth created by ``m4'' from generic listing.
 ; This source can be assembled using the Flat Assembler,

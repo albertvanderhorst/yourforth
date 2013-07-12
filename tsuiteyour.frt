@@ -6,9 +6,127 @@
 \ The jump out of a BEGIN loop, is refused with _SECURITY_( _yes )
 \ so NO-SECURITY is invoked.
 
+\ ==================================================================
+\ This is the ISO compatibility layer, to be phased out
 
-INCLUDE iso.frt
+HEX
+: FOR  ">R BEGIN R@ WHILE" EVALUATE ; IMMEDIATE
+: NEXT "R> 1 - >R REPEAT R> DROP" EVALUATE ; IMMEDIATE
 
+: RECURSE LATEST , ; IMMEDIATE
+
+"RDROP" (CREATE)
+ 8D C, 6D C, 04  C,     \  LEA     EBP,[EBP+(CW*(1))]
+ AD C,                  \  LODSD                 ; NEXT
+ FF C, 20 C,            \  JMP      LONG[EAX]
+
+: LEAVE         RDROP RDROP RDROP ;
+: UNLOOP        'RDROP , 'RDROP , 'RDROP , ;  IMMEDIATE
+
+: ROT SDSWAP ;
+"U<" (CREATE)
+    58 C,               \    POP     EAX
+    5A C,               \    POP     EDX
+    29 C, C2 C,         \    SUB     EDX,EAX
+    19 C, C0 C,         \    SBB     EAX,EAX
+    50 C,               \    PUSH    EAX
+    AD C,               \    LODSD                 ; NEXT
+    FF C, 20 C,         \    JMP      LONG[EAX]
+
+\     : WITHIN OVER - >R - R> U< ;
+
+\ FIXME! This definition is terribly wrong, but it helps out.
+: D+ ROT + >R + R> ;
+
+: ?DUP   DUP IF DUP THEN ;
+
+: (     PP@@ 2DROP &) PARSE 2DROP ; IMMEDIATE
+
+:  ."   PP@@ 2DROP POSTPONE " STATE @ IF 'TYPE , ELSE TYPE THEN ; IMMEDIATE
+
+"UM/MOD" (CREATE)
+5B C, \          :H_UM/MOD    POP|X, BX|
+5A C, \                         POP|X, DX|
+58 C, \                         POP|X, AX|
+F7 C, F3 C, \               DIV|AD, X| R| BX|
+52 C, \                         PUSH|X, DX|
+50 C, \                         PUSH|X, AX|
+AD C, \                    LODS, X'|
+FF C, 20 C, \                    JMPO, ZO| [AX]
+ALIGN
+
+"UM*" (CREATE)
+58 C, \               :H_UM*    POP|X, AX|
+5B C, \                         POP|X, BX|
+F7 C, E3 C, \               MUL|AD, X| R| BX|
+92 C, \                    XCHG|AX, DX|
+52 C, \                         PUSH|X, DX|
+50 C, \                         PUSH|X, AX|
+AD C, \                    LODS, X'|
+FF C, 20 C, \                    JMPO, ZO| [AX]
+ALIGN
+
+DECIMAL
+: $!-BD 2DUP C! 1+ SWAP MOVE ;
+\ Reasonable additions.
+: TRUE -1 ;
+: SOURCE SRC 2@ SWAP OVER - ;
+
+\ Words used in the preambule of the Hayes test.
+
+\ Words actually used in the Hayes test.
+
+: S" PP@@ 2DROP POSTPONE " ; IMMEDIATE
+\ : ." POSTPONE " POSTPONE TYPE ; IMMEDIATE
+
+'' HIDDEN
+: '  NAME PRESENT DUP 0= 11 ?ERROR ;
+: [']  ' POSTPONE LITERAL ; IMMEDIATE
+
+: CHAR NAME DROP C@ ;
+: [CHAR] CHAR POSTPONE LITERAL ; IMMEDIATE
+: CHARS ;
+: CHAR+ 1 + ;
+
+: WORD  PP@@ 2DROP
+    DUP BL = IF DROP NAME ELSE >R BEGIN PP@@ R@ = WHILE DROP REPEAT
+    DROP -1 PP +! R> PARSE THEN HERE 34 BL FILL HERE $!-BD HERE ;
+: FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
+    >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
+
+: >NUMBER
+    2DUP + >R 0 2DUP - IF
+    DO
+        DUP C@ DIGIT IF DROP LEAVE THEN
+        SWAP >R SWAP BASE @ UM* DROP ROT BASE @ UM* D+ R> 1+
+    LOOP
+    ELSE
+        2DROP
+    THEN
+    R> OVER - ;
+
+: SPACES  BEGIN DUP 0 > WHILE BL EMIT 1 - REPEAT DROP ;
+
+: M/MOD >R 0 R@ UM/MOD R> SWAP >R UM/MOD R> ;
+
+: FM/MOD
+    DUP >R 2DUP XOR >R SM/REM R> 0< 0BRANCH [ 44 , ]
+        OVER IF 1 - SWAP R> + SWAP
+    ELSE RDROP THEN
+;
+
+: 1- 1 - ;
+\ : 2/ DUP 0< 2 FM/MOD NIP ;
+: 2/ DUP 0< 31 RSHIFT 31 LSHIFT  SWAP 1 RSHIFT OR ;
+: 2* 2 * ;
+
+: S>D   DUP 0< ;
+: <# PAD HLD ! ;
+: #> DROP DROP HLD @ PAD OVER - ;
+: # BASE @ M/MOD ROT 9 OVER < IF 7 + THEN 48 + HOLD ;
+: #S   BEGIN #   2DUP OR   0=  UNTIL ;
+
+\ ==================================================================
 
 \ This is based on a testsuite of
 \ (C) 1993 JOHNS HOPKINS UNIVERSITY / APPLIED PHYSICS LABORATORY
@@ -27,6 +145,8 @@ VARIABLE VERBOSE
 
 : EMPTY-STACK   \ ( ... -- ) EMPTY STACK.
    DEPTH ?DUP IF 0 DO DROP LOOP THEN ;
+
+' ERROR HIDDEN
 
 : ERROR         \ ( C-ADDR U -- ) DISPLAY AN ERROR MESSAGE FOLLOWED BY
                 \ THE LINE THAT HAD THE ERROR.
@@ -884,12 +1004,14 @@ CREATE GN-BUF 0 C,
 : GN-CONSUMED   GN-BUF CHAR+ 0 ;
 : GN'           [CHAR] ' WORD CHAR+ C@ GN-BUF C!  GN-STRING ;
 
+\       : >NUMBER SAVE SET-SRC ['] (NUMBER) CATCH RESTORE THROW 0 D+ ;
+
 { 0 0 GN' 0' >NUMBER -> 0 0 GN-CONSUMED }
 { 0 0 GN' 1' >NUMBER -> 1 0 GN-CONSUMED }
 { 1 0 GN' 1' >NUMBER -> BASE @ 1+ 0 GN-CONSUMED }
 { 0 0 GN' -' >NUMBER -> 0 0 GN-STRING } \ SHOULD FAIL TO CONVERT THESE
 { 0 0 GN' +' >NUMBER -> 0 0 GN-STRING }
-{ 0 0 GN' .' >NUMBER -> 0 0 GN-STRING }
+\ { 0 0 GN' .' >NUMBER -> 0 0 GN-STRING }
 
 : >NUMBER-BASED
    BASE @ >R BASE ! >NUMBER R> BASE ! ;
