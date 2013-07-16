@@ -2,7 +2,110 @@
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.52 $
+ ;   ciforth $Revision: 6.4 $
+
+; To build:
+; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
+; That is right. Not only did you brew coffee, you've been to Columbia, picked the beans,
+; and roasted them as well! Next time you only need the last part.
+
+; The first c-compiler in existance was written in assembler (what else?)
+; but then immediately they rewrote the compiler in c.
+; Likewise a PL-1 compiler is written in PL-1, an algol68 compiler
+; is written in algol68. Can't a Forth be written in Forth?
+; Actually it is! It is even easier. If you want to add features to a c-compiler
+; you must edit the source and rebuild it. With yourforth you
+; just can include a Forth source file with the facilities
+; you want. Only the kernel here has to be written in assembler,
+; like the first c-compiler ever.
+; Even in this assembler source you will see a lot of Forth
+; code, that is compiled by the assembler (with some renaming).
+; Forth is the only language simple enough to make this feasible.
+
+; Normally an Forth-in-assembler observes the official assembler of the platform it is for.
+; The one-liner illustrates why we deviate here. A gas equivalent would download 1 Gbyte!
+
+; Forth uses memory between BM and EM. (exercise) Memory consists of bytes
+; and, yes, nothing funny, that are the bytes you buy in the store.
+; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
+; but not EM. Chunks of bytes are needed to represent numbers that large.
+; We take 4 bytes together to form a cell, resulting in a 32-bit Forth,
+; and restricting memory size to 4 Gbyte.
+
+cw      =     4                 ; Cell width
+
+; 32 bits also happens to be the word size of the processor we are using, or more
+; precisely -- because it is probably a 64-bit processor -- of the words size we
+; are instructing the processor to use.
+; The word "word" has a special meaning in Forth, so using "cell"
+; for numbers or addresses diminishes confusion.
+
+        use32
+
+; This is not enough, Linux must know that this is a 32 bit (not ELF64)
+; executable, to start the program in the right mode.
+
+        FORMAT  ELF EXECUTABLE ; fasm makes an executable directly, no linker.
+
+; We are not particularly interested in what address BM represents and leave that
+; to the assembler. We do want to make sure we have enough bytes to work with,
+; that's what we define here. It is made to fit later, by declaring enough space.
+; (exercise)
+;
+forthsize      =     (0x100000)   ; One megabyte, for starters.
+;
+tasksize     =     0x10000        ; Total uninitialised memory near EM
+stacksize   = tasksize/4          ;  with subdivision.
+cibsize     = tasksize/2
+
+; Forth is an interpreter, an environment that you can type commands into
+; to get them executed. The typing and the showing of results goes through
+; a "console" which is typically a terminal window on a Linux X-screen, but
+; could equally well be an old fashoned VT100 terminal connected with a
+; 100 m RS232 line. Linux has the convenient notions of a "standard input" and
+; a "standard output" with facilities to use them. We let Linux take care of
+; how this i/o is setup, and within Forth we just use it.
+
+; This brings us to the subject of the interface with the Operating
+; System. The interfacing with Linux is brutally direct. We use the system calls,
+; that have been given numbers.
+__NR_exit    =     0x1
+__NR_open    =     0x5
+__NR_close   =     0x6
+__NR_creat   =     0x8
+__NR_unlink  =     0xa
+__NR_chdir   =     0xc
+__NR_read    =     0x3
+__NR_select  =     0x52
+__NR_newselect      =     0x8e
+__NR_write   =     0x4
+__NR_ioctl   =     0x36
+__NR_ioperm  =     0x65
+__NR_iopl    =     0x6e
+__NR_lseek   =     0x13
+__NR_execve  =     0xb
+__NR_fork    =     0x2
+__NR_waitpid =     0x7
+__NR_pipe    =     0x2a
+
+; See XOS of how the dispatching takes place.
+; They are copied from a secret place in Linux's include hierarchy (exercise).
+;
+; Characters are glyph's, the bitmaps on the screen, that are associated
+; with the content of one byte. Forth doesn't care much what the console
+; shows you, nor what content results from pressing a particular key.
+; Internally only rows of bytes are compared, and build up,
+; and they are passed to the console for display.
+;
+; To an interpreter strings play of course an important role.
+; Forth strings are represented as an address and a length.
+; Putting two things on the stack is of course no problem.
+; This may be unfamiliar for the c-programmer, but familiar for the Pascal programmer.
+; If stored in memory the length occupies a whole cell, and the characters
+; follow one per byte. Counting those characters is a chore, as we will
+; need a string for each name of a built in command.
+; That chore is easily handled by the assembler using a macro.
+;
 macro string  content {
     local startstring, endstring
     dd    endstring -startstring
@@ -11,11 +114,19 @@ startstring:
 endstring:
         ALIGN    cw
 }
-macro   next {
-        lodsd
-        jmp     dword[eax]
-}
-lastlink equ 0
+
+; "content" is of course the string itself, and fasm treats the start
+; and the end of the string as locals, i.e. they are generated new for each
+; string and are not visible outside the macro's.
+
+; The header macro lays down the 5 fields in memory. You don't need to understand
+; the following in detail, and the examples are much easier than this.
+
+; All fields are passed
+; as is, except for the name that is passed as a string. The string is
+; to be laid out in memory just like in the string macro and a pointer
+; to that is put in the name field.
+
 macro header dea, cfield,dfield,ffield,lfield,forthname {
     local nfield, startstring, endstring
 nfield:         dd    endstring -startstring
@@ -24,6 +135,73 @@ endstring:
         ALIGN    cw
 dea:  dd      cfield, dfield, ffield, lfield, nfield
 lastlink EQU dea
+}
+; "header" makes one other thing easier. It is cumbersome to fill
+; in lfield with the name of the previous definition. By setting
+; lastlink -- changing it with every invocation of header -- the name of
+; the previous definition is always available as "lastlink".
+; So you will see that almost always all header specifies lastlink
+; for lfield.
+;; It is very inconvenient to fill in those linkfields by hand,
+;; especially if you plan to move the code around. The header macro takes
+;; this from our hands. We just always fill in "lastlink"
+;;  and within
+;; the macro lastlink is set to address of the new word,
+;; ready to fill in into the next header.
+;;
+;; We can always override this by replacing
+;; "lastlink" by the actual value we want to have.
+
+; "dea" is the name used within the assembler. Remember forthname is a
+; string like "+" that probably is not an acceptable name for the word
+; in the assembler. So we need "dea" to use the word in the assembler.
+
+; Here is the renaming convention:
+; The capitals are kept, and if the resulting name clashes in the assembler,
+; underscores are added before and after.
+; Any special characters are replaced according to the following table.
+; We'll have to write them out, like
+; !     @     %        ,    *    (     <      >      /      +    -
+; fetch store percent comma star paren less  greater slash  plus minus
+;
+; [        ~
+; bracket  not
+;
+; Sometimes < and > are used to indicate data transfer and are then
+; named to or from. I'm lazy and translate (NUMBER) to paren_NUMBER,
+; not leftparen_NUMBER_rightparen.
+;
+; fetch and store are used in forth names that fetch something from memory
+; or store something in memory.
+;
+; A denotation, a constant value that is generated on the fly by
+; the compiler or intepreter.
+; Because this is difficult, we postpone it.
+
+; The most important type of definitions are lowlevel code, high level code,
+; low level objects(constants, variables/buffers) and high level objects.
+; They are gradually introduced by example, but here is an overview of the
+; different types:
+; - cfield contains docon. The definition is a constant, i.e. when executed it
+;   puts a constant on the stack. That constant is present at the DFA.
+; - cfield contains dobuf. The definition is a variable od buffer, i.e. when executed it
+;    puts an address on the stack of an area where data can be stored.
+;    That address is present at the DFA.
+; - cfield contains docol. docol is the interpreter of Forth. It takes care that
+;   the high level code is executed, that is found via the DFA. This typically
+;   contains dea+5*cw. In other words the high level code contained at the post
+;   header address is executed.
+; - cfield contains dea+5*cw. In other words, the machine code contained at the post header
+;    address is ececuted. These are the regular low level words that make up the
+;    Forth language like "+" and "DROP". Of course this code is different for all
+;    of those words.
+; - cfield contains dodo. The Forth definition is generated using a CREATE DOES>
+;   construct, Forth's poor man's objects of the 1970's. We will elaborate on this later.
+;
+
+macro   next {
+        lodsd
+        jmp     dword[eax]
 }
 macro goto  label
 { dd  BRANCH, label-$-cw   }
@@ -45,166 +223,150 @@ macro untilto  label
 ; This source can be assembled using the Flat Assembler,
 ;  available from the Net.
 ;      fasm yourforth.asm
-        FORMAT  ELF EXECUTABLE ; Instead of telling the linker.
 ;
 ;
         ;
-figrel  =     6       
-cw      =     4    
-forthsize      =     (0x100000)     
-tasksize     =     0x10000    
-stacksize   = tasksize/4  
-cibsize     = tasksize/2  
-dummymask   =     0x01     
-invisiblemask   =     0x02     
-immediatemask   =     0x04     
-denotationmask   =     0x08     
+figrel  =     6
+dummymask   =     0x01
+invisiblemask   =     0x02
+immediatemask   =     0x04
+denotationmask   =     0x08
 prefixmask = immediatemask+denotationmask
 epipe   =     0x20
-__NR_exit    =     0x1
-__NR_open    =     0x5
-__NR_close   =     0x6
-__NR_creat   =     0x8
-__NR_unlink  =     0xa
-__NR_chdir   =     0xc
-__NR_read    =     0x3
-__NR_select  =     0x52
-__NR_newselect      =     0x8e
-__NR_write   =     0x4
-__NR_ioctl   =     0x36
-__NR_ioperm  =     0x65
-__NR_iopl    =     0x6e
-__NR_lseek   =     0x13
-__NR_execve  =     0xb
-__NR_fork    =     0x2
-__NR_waitpid =     0x7
-__NR_pipe    =     0x2a
                segment executable readable writable
-        ;
-        ;  bm        
 bm:
-   use32          
-        cld                     
-        mov     esp, [DSP_zero+1*cw] 
-        mov     ebp, [RSP_zero+1*cw] 
-        mov     esi, COLD+5*cw 
-        next 
-        ;
-    header  catchall,   docol, catchall+5*cw, prefixmask, lastlink, ""
-        dd      paren_NUMBER, LITERAL, EXIT
-    header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
-        dd      NAME, PRESENT
-        dd      _DUP_, zero_equal
-        dd      LIT, 11, query_ERROR
-        dd      LITERAL
-        dd      EXIT
-    header  charprefix,   docol, charprefix+5*cw, prefixmask, lastlink, "&"
-        dd      PP_fetch_fetch
-        dd      NIP
-        dd      _DUP_, query_BLANK
-        dd      LIT, 10, query_ERROR
-        dd      LITERAL
-        dd      EXIT
-    header  minusprefix,   docol, minusprefix+5*cw, prefixmask, lastlink, "-"
-        dd      paren_NUMBER, NEGATE, LITERAL
-        dd      EXIT
-    header  plusprefix,   docol, plusprefix+5*cw, prefixmask, lastlink, "+"
-        dd      paren_NUMBER, LITERAL, EXIT
-    header  stringprefix,   docol, stringprefix+5*cw, prefixmask, lastlink, '"'
-        dd      LIT, BRANCH, _comma_        
-        dd      HERE, to_R, _zero_, _comma_
-        dd      LIT, '"', PARSE         
-        dd      _DUP_, ALLOT, R_fetch, string_plus_store     
-    dd _ALIGN_
-        dd      R_fetch, CELL_plus, LITERAL
-        dd      R_from, _fetch_, LITERAL
-        dd      PP_fetch_fetch, query_BLANK, _NOT_, LIT, 10, query_ERROR           
-        dd      DROP                    
-        dd      EXIT
-dovoc:
-        dd      CONTEXT
-        dd      _store_
-        dd      EXIT
-    header  FORTH,   dodo, FORTH+5*cw, 0, lastlink, "FORTH"
-        dd      dovoc
-        dd      0, 0, dummymask, TASK, (_zero_+1*cw)
+;
+;  The virtual machine reserves some of the Intel registers for its own.
+;  In the first place we need an interpretation pointer, to keep track
+;  of where we are in the interpreted code. It points to the -- high
+;  level -- instruction that is to be executed after the current
+;  definitions finishes. This is similar to the program counter in an
+;  assembly program and we will use SI for it.
+;  Then of course we need a data stack, for which we use
+;  the intel stack, and the stack pointer is just SP.
+;  This leaves us with the return stack, that is keeps track of
+;  where we are when SI is needed to interpret another high
+;  level definition from the current one. Intel has run out of stacks
+;  already, but we can emulate a stack using the BP register.
+;  It just means that we have to use a couple of instructions to push
+;  SI, or pop it.
+;
+;  Within yourforth you have the constants DSP0 and RSP0 that contain
+;  the initial stack pointers for the data and the return stack
+;  respectively. [ ex. 2 ]
+;   COLD is the Forth definition that starts
+;  up Forth. So we load the registers SP and BP with the data field of
+;  DSP0 and RSP0 and SI with the post header address of COLD, where its
+;  Forth code resides.
+
+        cld
+
+        mov     esp, [DSP_zero+1*cw]
+        mov     ebp, [RSP_zero+1*cw]
+        mov     esi, COLD+5*cw
+        next
+;
+; The following word is an example of a colon definition.
+header  BYE,   docol, BYE+5*cw, 0, FORTH, "BYE"
+    dd      _zero_, _, _,   _one_, XOS
+    dd      EXIT
+; <explanation of how SI is used to accomplish this.>
+
+; Because you understand Intel assembly language a bit, I present you
+; ;; with a table of the 5 instructions of the virtual machine:
+;     Forth machine      cells    Intel equivalent
+;     DEA, invocation     1               call XXX
+;     EXIT                1               rts
+;     BRANCH rel          2               jr rel
+;     0BRANCH rel         2               jz rel
+;     LIT value           2               pushi value
+;
+; That is all there is to it. It it seems
+; few, let me remind you that all operations like + fall under the
+; invocation of a definition. The conditional jump can be used to
+; construct if-endif's (called IF THEN 's in Forth) and begin-until's.
+; Together with the unconditional jump you can have all control
+; constructs.  EXIT BRANCH 0BRANCH LIT are the names of actual
+; definitions in the dictionary. Their invocation is the same as
+; for just any DEA.
+
     header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
-       next 
+       next
     header  LIT,   LIT+5*cw, 0, 0, lastlink, "LIT"
-        lodsd           
+        lodsd
         push    eax
-        next           
+        next
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
-        pop     eax      
-        jmp     dword[eax]  
+        pop     eax
+        jmp     dword[eax]
     header  BRANCH,   BRANCH+5*cw, 0, 0, lastlink, "BRANCH"
 BRAN1:  lodsd
         dec     eax
         OR      al,  4 - 1
         inc     eax
         add     esi,eax
-        next 
+        next
     header  zero_BRANCH,   zero_BRANCH+5*cw, 0, 0, lastlink, "0BRANCH"
-        pop     eax      
-        OR      eax,eax   
-        jz      BRAN1   
+        pop     eax
+        OR      eax,eax
+        jz      BRAN1
         lea     esi,[esi+1*cw]
-        next 
+        next
     header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
-        mov     ebx,1    
-XLOO1:  add     [ebp],ebx 
-        mov     eax,[ebp] 
-        sub     eax,[ebp+1*cw]        
-        XOR     eax,ebx   
-        js      BRAN1   
-        lea     ebp,[ebp+3*cw]  
-        lea     esi,[esi+1*cw]       
-        next 
+        mov     ebx,1
+XLOO1:  add     [ebp],ebx
+        mov     eax,[ebp]
+        sub     eax,[ebp+1*cw]
+        XOR     eax,ebx
+        js      BRAN1
+        lea     ebp,[ebp+3*cw]
+        lea     esi,[esi+1*cw]
+        next
     header  paren_plus_LOOP,   paren_plus_LOOP+5*cw, 0, 0, lastlink, "(+LOOP)"
-        pop     ebx      
+        pop     ebx
         jmp short     XLOO1
-        next            
+        next
     header  paren_DO,   paren_DO+5*cw, 0, 0, lastlink, "(DO)"
         lodsd
-        add     eax,esi  
-        pop     edx      
-        pop     ebx      
-        xchg    ebp,esp   
-        push    eax      
+        add     eax,esi
+        pop     edx
+        pop     ebx
+        xchg    ebp,esp
+        push    eax
         push    ebx
         push    edx
-        xchg    ebp,esp   
-        next 
+        xchg    ebp,esp
+        next
     header  I,   (R_fetch+5*cw), I+5*cw, 0, lastlink, "I"
     header  J,   J+5*cw, 0, 0, lastlink, "J"
-        mov     eax,[ebp+3*cw] 
+        mov     eax,[ebp+3*cw]
         push    eax
-        next           
+        next
     header  DIGIT,   docol , DIGIT+5*cw, 0, lastlink, "DIGIT"
-        dd      LIT, '0'        
+        dd      LIT, '0'
         dd      OVER, LIT, '9', _greater_
-        ifto  then1    
+        ifto  then1
         dd      DROP, LIT, 'A'-10
 then1:  dd      _minus_
         dd      _DUP_, zero_less, OVER, BASE, _fetch_, _less_, _NOT_, _OR_
         dd      EXIT
     header  no_MATCH,   docol, no_MATCH+5*cw, 0, lastlink, "~MATCH"
-        dd      to_R                           
+        dd      to_R
         dd      two_DUP
         dd      R_fetch, to_NFA, _fetch_, string_fetch
         dd      SDSWAP, MIN
         dd      CORA
-        dd      R_from, SWAP                   
-        dd      EXIT                            
+        dd      R_from, SWAP
+        dd      EXIT
     header  query_BLANK,   docol, query_BLANK+5*cw, 0, lastlink, "?BLANK"
         dd      _BL_, one_plus, _less_
         dd      EXIT
     header  PP_fetch_fetch,   docol, PP_fetch_fetch+5*cw, 0, lastlink, "PP@@"
         dd      SRC, CELL_plus, two_fetch
         dd      OVER, _equal_
-        ifto  then2  
+        ifto  then2
         dd      _zero_
-        goto  else2  
+        goto  else2
 then2:
         dd      _DUP_
         dd      C_fetch
@@ -215,7 +377,7 @@ else2:
         dd      _
 begin1: dd      DROP
         dd      PP_fetch_fetch, query_BLANK, _NOT_
-        dd      OVER, SRC, CELL_plus, _fetch_, _equal_ 
+        dd      OVER, SRC, CELL_plus, _fetch_, _equal_
         dd      _OR_
         untilto   begin1
         dd      _
@@ -229,7 +391,7 @@ begin2: dd      DROP
         dd      OVER, _minus_
         dd      SDSWAP, string_slash, two_SWAP
         dd      zero_equal
-        ifto  PARSE8  
+        ifto  PARSE8
         dd      DROP, SRC, CELL_plus, _fetch_
 PARSE8:
         dd      PP, _store_
@@ -241,13 +403,13 @@ PARSE8:
         dd      EMIT
         dd      EXIT
     header  _MOVE_,   _MOVE_+5*cw, 0, 0, lastlink, "MOVE"
-        mov     ebx,esi   
-        pop     ecx      
-        pop     edi      
-        pop     esi      
+        mov     ebx,esi
+        pop     ecx
+        pop     edi
+        pop     esi
         cmp     esi,edi
         jc    MOVE1
-        cld             
+        cld
         jmp short MOVE2
 MOVE1:  std
         add     edi,ecx
@@ -255,41 +417,41 @@ MOVE1:  std
         add     esi,ecx
         dec     esi
 MOVE2:
-        rep     movsb   
-        cld             
-        mov     esi,ebx   
-        next 
+        rep     movsb
+        cld
+        mov     esi,ebx
+        next
     header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
         pop     eax
         pop     ebx
         AND     eax,ebx
         push    eax
-        next 
+        next
     header  _OR_,   _OR_+5*cw, 0, 0, lastlink, "OR"
-        pop     eax      
+        pop     eax
         pop     ebx
         OR      eax,ebx
         push    eax
-        next 
+        next
     header  _XOR_,   _XOR_+5*cw, 0, 0, lastlink, "XOR"
-        pop     eax      
+        pop     eax
         pop     ebx
         XOR     eax,ebx
         push    eax
-        next 
+        next
     header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
-        pop     eax      
+        pop     eax
         NOT     eax
         push    eax
-        next 
+        next
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
-        mov     eax,esp   
+        mov     eax,esp
         push    eax
-        next 
+        next
     header  DSP_store,   DSP_store+5*cw, 0, 0, lastlink, "DSP!"
         pop     eax
-        mov     esp,eax        
-        next 
+        mov     esp,eax
+        next
     header  DEPTH,   docol, DEPTH+5*cw, 0, lastlink, "DEPTH"
         dd      DSP_zero
         dd      DSP_fetch
@@ -297,87 +459,87 @@ MOVE2:
         dd      LIT, cw, _slash_
         dd      _one_, _minus_
         dd      EXIT
-    header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"      
+    header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"
         push    ebp
-        next 
+        next
     header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
         pop     ebp
-        next 
+        next
     header  EXIT,   EXIT+5*cw, 0, 0, lastlink, "EXIT"
-        mov     esi,[ebp] 
+        mov     esi,[ebp]
         lea     ebp,[ebp+1*cw]
-        next 
-    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"        
-        pop     ebx      
-        lea     ebp,[ebp - 1*cw]    
-        mov     [ebp],ebx 
-        next 
-    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"      
-        mov     eax,[ebp] 
+        next
+    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
+        pop     ebx
+        lea     ebp,[ebp - 1*cw]
+        mov     [ebp],ebx
+        next
+    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"
+        mov     eax,[ebp]
         lea     ebp,[ebp + 1*cw]
         push    eax
-        next 
+        next
     header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
-        mov     eax,[ebp] 
+        mov     eax,[ebp]
         push    eax
-        next           
+        next
     header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
         pop     eax
         neg     eax
         cmc
         sbb     eax,eax
         push    eax
-        next 
+        next
     header  _NOT_,   (zero_equal+5*cw), _NOT_+5*cw, 0, lastlink, "NOT"
     header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
         pop     eax
-        OR      eax,eax   
-        mov     eax,0    
+        OR      eax,eax
+        mov     eax,0
         jns     ZLESS1
-        dec     eax      
+        dec     eax
 ZLESS1: push    eax
-        next 
+        next
     header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
-        pop     eax      
+        pop     eax
         pop     ebx
         add     eax,ebx
         push    eax
-        next 
+        next
     header  NEGATE,   NEGATE+5*cw, 0, 0, lastlink, "NEGATE"
         pop     eax
         neg     eax
         push    eax
-        next 
+        next
     header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
         pop     edx
         pop     eax
         push    eax
         push    edx
         push    eax
-        next 
+        next
     header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
         pop     eax
-        next 
+        next
     header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
         pop     eax
         pop     ebx
         push    eax
-        next 
+        next
     header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
         pop     eax
         pop     eax
-        next 
+        next
     header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
         pop     edx
         pop     eax
         push    edx
         push    eax
-        next 
+        next
     header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
         pop     eax
         push    eax
         push    eax
-        next 
+        next
     header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
         pop     eax
         pop     edx
@@ -385,7 +547,7 @@ ZLESS1: push    eax
         push    eax
         push    edx
         push    eax
-        next 
+        next
     header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
         pop     ebx
         pop     ecx
@@ -395,7 +557,7 @@ ZLESS1: push    eax
         push     ebx
         push    edx
         push    eax
-        next 
+        next
     header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
         pop     ebx
         pop     ecx
@@ -407,12 +569,12 @@ ZLESS1: push    eax
         push     ebx
         push    edx
         push    eax
-        next 
+        next
     header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
-        pop     ebx      
-        pop     eax      
+        pop     ebx
+        pop     eax
         add     [ebx],eax
-        next 
+        next
     header  TOGGLE,   docol , TOGGLE+5*cw, 0, lastlink, "TOGGLE"
         dd      OVER, _fetch_, _XOR_, SWAP, _store_
         dd      EXIT
@@ -420,37 +582,37 @@ ZLESS1: push    eax
         pop     ebx
         mov     eax,[ebx]
         push    eax
-        next 
+        next
     header  C_fetch,   C_fetch+5*cw, 0, 0, lastlink, "C@"
         pop     ebx
         XOR     eax,eax
         mov     al,[ebx]
         push    eax
-        next 
+        next
     header  two_fetch,   two_fetch+5*cw, 0, 0, lastlink, "2@"
-        pop     ebx      
-        mov     eax,[ebx] 
-        mov     edx,[ebx+1*cw]        
+        pop     ebx
+        mov     eax,[ebx]
+        mov     edx,[ebx+1*cw]
         push    edx
         push    eax
-        next 
+        next
     header  _store_,   _store_+5*cw, 0, 0, lastlink, "!"
-        pop     ebx      
-        pop     eax      
+        pop     ebx
+        pop     eax
         mov     [ebx],eax
-        next 
+        next
     header  C_store,   C_store+5*cw, 0, 0, lastlink, "C!"
-        pop     ebx      
-        pop     eax      
+        pop     ebx
+        pop     eax
         mov     [ebx],al
-        next 
+        next
     header  two_store,   two_store+5*cw, 0, 0, lastlink, "2!"
-        pop     ebx      
-        pop     eax      
+        pop     ebx
+        pop     eax
         mov     [ebx],eax
-        pop     eax      
+        pop     eax
         mov     [ebx+1*cw],eax
-        next 
+        next
     header  _colon_,   docol, _colon_+5*cw, 0, lastlink, ":"
         dd      NAME
         dd      paren_CREATE
@@ -458,10 +620,10 @@ ZLESS1: push    eax
         dd      LIT, docol, LATEST, to_CFA, _store_
         dd      right_bracket
         dd      EXIT
-docol:  lea     ebp,[ebp - 1*cw]  
-        mov     [ebp],esi 
-         mov     esi,[eax+1*cw]  
-        next 
+docol:  lea     ebp,[ebp - 1*cw]
+        mov     [ebp],esi
+         mov     esi,[eax+1*cw]
+        next
     header  _semis_,   docol, _semis_+5*cw, immediatemask, lastlink, ";"
         dd      LIT, EXIT, _comma_
         dd      LATEST, HIDDEN
@@ -473,21 +635,21 @@ docol:  lea     ebp,[ebp - 1*cw]
         dd      LATEST, to_DFA, _store_
         dd      LIT, docon, LATEST, to_CFA, _store_
         dd      EXIT
-docon:  mov     eax,[eax+(1)*cw] 
+docon:  mov     eax,[eax+(1)*cw]
         push    eax
-        next 
+        next
     header  VARIABLE,   docol, VARIABLE+5*cw, 0, lastlink, "VARIABLE"
         dd      NAME
         dd      paren_CREATE
         dd      _zero_, _comma_
         dd      LIT, dobuf, LATEST, to_CFA, _store_
         dd      EXIT
-dobuf:  mov     eax,[eax+(1)*cw] 
+dobuf:  mov     eax,[eax+(1)*cw]
         push    eax
-        next 
+        next
     header  _,   _+5*cw, 0, 0, lastlink, "_"
         push    eax
-        next  
+        next
     header  _zero_,   docon, 0, 0, lastlink, "0"
     header  _one_,   docon, 1, 0, lastlink, "1"
     header  _BL_,   docon, ' ', 0, lastlink, "BL"
@@ -497,12 +659,12 @@ dobuf:  mov     eax,[eax+(1)*cw]
         lea   edx, [ebx+1*cw]
         push    edx
         push    eax
-        next 
+        next
     header  string_store,   docol, string_store+5*cw, 0, lastlink, "$!"
         dd two_DUP, _store_, CELL_plus, SWAP, _MOVE_
         dd EXIT
     header  string_plus_store,   docol, string_plus_store+5*cw, 0, lastlink, "$+!"
-        dd   _DUP_, _fetch_, to_R 
+        dd   _DUP_, _fetch_, to_R
         dd   two_DUP, plus_store
         dd   CELL_plus, R_from, _plus_, SWAP, _MOVE_
         dd EXIT
@@ -523,7 +685,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  RSP_zero,   docon, initrsp0  , 0, lastlink, "RSP0"
     header  CIB,   docon, initcib , 0, lastlink, "CIB"
     header  _DP_,   dobuf, _DP_+5*cw, 0, lastlink, "DP"
-        dd      initdp  
+        dd      initdp
     header  WHERE,   dobuf, WHERE+5*cw, 0, lastlink, "WHERE"
         dd _,_
     header  STATE,   dobuf, STATE+5*cw, 0, lastlink, "STATE"
@@ -564,7 +726,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         OR      eax,  1*cw-1
         inc     eax
         push    eax
-        next 
+        next
     header  HERE,   docol, HERE+5*cw, 0, lastlink, "HERE"
         dd      _DP_
         dd      _fetch_
@@ -587,24 +749,24 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      C_store
         dd      EXIT
     header  _minus_,   _minus_+5*cw, 0, 0, lastlink, "-"
-        pop     edx      
+        pop     edx
         pop     eax
         sub     eax,edx
         push    eax
-        next    
+        next
     header  _equal_,   docol, _equal_+5*cw, 0, lastlink, "="
         dd      _minus_
         dd      zero_equal
         dd      EXIT
     header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
-        pop     edx      
-        pop     ebx      
-        XOR     eax,eax   
+        pop     edx
+        pop     ebx
+        XOR     eax,eax
         cmp     ebx,edx
         jnl     LES1
         dec     eax
 LES1:   push    eax
-        next 
+        next
     header  _greater_,   docol, _greater_+5*cw, 0, lastlink, ">"
         dd      SWAP
         dd      _less_
@@ -653,17 +815,17 @@ LES1:   push    eax
         dd      EXIT
     header  to_BODY,   docol, to_BODY+5*cw, 0, lastlink, ">BODY"
         dd      to_DFA, _fetch_
-        dd      CELL_plus           
+        dd      CELL_plus
         dd      EXIT
     header  query_ERROR,   docol, query_ERROR+5*cw, 0, lastlink, "?ERROR"
         dd      SWAP
-        ifto  QERR1   
+        ifto  QERR1
         dd      PP, _fetch_
         dd      SRC, _fetch_
         dd      WHERE, two_store
         dd      THROW
-        goto  QERR2    
-QERR1:  dd      DROP    
+        goto  QERR2
+QERR1:  dd      DROP
 QERR2:  dd      EXIT
     header  left_bracket,   docol, left_bracket+5*cw, immediatemask, lastlink, "["
         dd      _zero_
@@ -696,13 +858,13 @@ QERR2:  dd      EXIT
         dd      LIT, dodo, LATEST, to_CFA, _store_
         dd      LIT, crnoop, _comma_
         dd      EXIT
-dodo:  lea     ebp,[ebp - 1*cw] 
+dodo:  lea     ebp,[ebp - 1*cw]
         mov     [ebp],esi
-        mov     esi,[eax+(1)*cw] 
+        mov     esi,[eax+(1)*cw]
         lea     eax,[esi+1*cw]
         mov     esi,[esi]
         push    eax
-        next 
+        next
 crnoop: dd      EXIT
     header  DOES_from,   docol, DOES_from+5*cw, 0, lastlink, "DOES>"
         dd      R_from
@@ -720,7 +882,7 @@ crnoop: dd      EXIT
     header  SET_SRC,   docol, SET_SRC+5*cw, 0, lastlink, "SET-SRC"
         dd      OVER, _plus_
         dd      OVER, SRC, two_store
-        dd      PP, _store_ 
+        dd      PP, _store_
         dd      EXIT
     header  EVALUATE,   docol, EVALUATE+5*cw, 0, lastlink, "EVALUATE"
         dd      SAVE
@@ -730,63 +892,63 @@ crnoop: dd      EXIT
         dd      THROW
         dd      EXIT
     header  FILL,   FILL+5*cw, 0, 0, lastlink, "FILL"
-        pop     eax      
-        pop     ecx      
-        pop     edi      
-        cld             
-        rep     stosb   
-        next 
+        pop     eax
+        pop     ecx
+        pop     edi
+        cld
+        rep     stosb
+        next
     header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
-        mov     edx,esi   
-        XOR     eax,eax   
-        pop     ecx      
-        pop     edi      
-        pop     esi      
-        cld             
-        repz    cmpsb   
+        mov     edx,esi
+        XOR     eax,eax
+        pop     ecx
+        pop     edi
+        pop     esi
+        cld
+        repz    cmpsb
         jz      CORA3
-        mov     al,1    
+        mov     al,1
         jnc     CORA3
         neg     eax
 CORA3:
-        mov     esi,edx  
+        mov     esi,edx
         push    eax
-        next 
+        next
     header  string_pointer,   string_pointer+5*cw, 0, 0, lastlink, "$^"
-        pop     eax      
-        pop     ecx      
-        pop     edi      
-        OR      esi,esi   
-        cld             
-        repnz     scasb   
+        pop     eax
+        pop     ecx
+        pop     edi
+        OR      esi,esi
+        cld
+        repnz     scasb
         jz      SINDEX1
-        XOR     edi,edi    
+        XOR     edi,edi
         inc     edi
 SINDEX1:
         dec     edi
         push    edi
-        next 
+        next
     header  string_slash,   string_slash+5*cw, 0, 0, lastlink, "$/"
-        pop     eax      
-        pop     ecx      
+        pop     eax
+        pop     ecx
         mov     ebx,ecx
-        pop     edi      
-        OR      edi,edi   
-        mov     edx,edi   
-        cld             
-        repnz     scasb   
+        pop     edi
+        OR      edi,edi
+        mov     edx,edi
+        cld
+        repnz     scasb
         jz      SSLAS1
-        push    ecx   
+        push    ecx
         jmp short SSLAS2
 SSLAS1:
         push    edi
         sub     ebx,ecx
-        dec     ebx      
+        dec     ebx
 SSLAS2:
-        push    ecx   
-        push    edx   
-        push    ebx   
-        next 
+        push    ecx
+        push    edx
+        push    ebx
+        next
     header  ERASE,   docol, ERASE+5*cw, 0, lastlink, "ERASE"
         dd      _zero_
         dd      FILL
@@ -804,9 +966,9 @@ pad0:   rb      0x400
 pad1:   rb      0x400
     header  paren_NUMBER,   docol, paren_NUMBER+5*cw, 0, lastlink, "(NUMBER)"
         dd      _zero_                       ;  0
-NPNUM1:  dd      PP_fetch_fetch   
+NPNUM1:  dd      PP_fetch_fetch
         dd      _DUP_, query_BLANK, _NOT_            ;  DUP, query_BLANK NOT
-        whileto   NPNUM5   
+        whileto   NPNUM5
         dd      NIP                        ;  NIP
         dd      DIGIT         ;  BASE, fetch, digit
         dd      LIT, 10, query_ERROR
@@ -816,7 +978,7 @@ NPNUM1:  dd      PP_fetch_fetch
         dd      M_star                      ;
         dd      DROP
         dd      _plus_                       ;
-        goto  NPNUM1   
+        goto  NPNUM1
 NPNUM5:                                    ;
         dd      two_DROP
         dd      EXIT
@@ -826,36 +988,46 @@ NPNUM5:                                    ;
         dd      EXIT
     header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
         dd      CONTEXT, _fetch_
-PFIND0:                       
+
+found0:
         dd      no_MATCH
-        ifto  found1  
+        whileto  found1
 failed:
         dd      to_LFA, _fetch_
         dd      _DUP_, zero_equal
-        ifto  PFIND0        
+        untilto  found0
+
         dd      NIP, NIP, EXIT          ; Leave a zero: "not found".
+
+; Exit for possible match
+; ~MATCH is sure in determining a no-match,
+; a possible match must be investigated closely.
 found1:
+        ; Require that we have a normal word (not invisible, not dummy.)
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, invisiblemask OR dummymask, _AND_
         dd      zero_equal
-        ifto  failed  
+        ifto  failed
         dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
-        ifto  PFIND1  
-        dd      NIP,NIP,EXIT         ; Leave dea
-PFIND1:
+        ifto  endif3
+            dd      NIP,NIP,EXIT         ; Leave dea
+endif3:
         ; We may still have a denotation, the dea matches the string as a prefix.
+        ; Require that the name is at least as large as the prefix.
         dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
-        ifto  failed  
+        ifto  failed
+        ; Require that it is a denotation.
         dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
-        ifto  failed  
-        dd      NIP,NIP,EXIT         
+        ifto  failed
+        dd      NIP,NIP,EXIT   ; leave dea, a denotation.
+
     header  PRESENT,   docol, PRESENT+5*cw, 0, lastlink, "PRESENT"
         dd      _DUP_, to_R
         dd      FOUND
         dd      _DUP_
-        ifto  PRES1  
+        ifto  PRES1
         dd      _DUP_
-        dd      to_NFA, _fetch_, _fetch_ 
+        dd      to_NFA, _fetch_, _fetch_
         dd      R_fetch, _equal_
         dd      _AND_
 PRES1:
@@ -864,15 +1036,15 @@ PRES1:
     header  _ERROR_,   docol, _ERROR_+5*cw, 0, lastlink, "ERROR"
         dd      WHERE, two_fetch
         dd      OVER
-        ifto  ERR2        
+        ifto  ERR2
         dd      OVER, LIT, 20, _minus_
         dd      MAX
         dd      SWAP
         dd      _one_, _minus_
-ERR1:   dd      _DUP_, C_fetch, query_BLANK, _NOT_  
+ERR1:   dd      _DUP_, C_fetch, query_BLANK, _NOT_
         whileto    ERR2
         dd      one_plus
-        goto  ERR1   
+        goto  ERR1
 ERR2:
         dd      OVER, _minus_
         dd      _TYPE_
@@ -898,9 +1070,9 @@ sb0:
         dd      EXIT
     header  THROW,   docol, THROW+5*cw, 0, lastlink, "THROW"
         dd      _DUP_
-        ifto  THROW1  
+        ifto  THROW1
         dd      HANDLER, _fetch_, zero_equal
-        ifto  THROW2  
+        ifto  THROW2
         dd      _ERROR_
         dd      DSP_zero, DSP_store
         dd      QUIT
@@ -917,9 +1089,9 @@ THROW1:
     header  ID_dot,   docol, ID_dot+5*cw, 0, lastlink, "ID."
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, dummymask, _AND_
-        ifto  IDDOT1  
+        ifto  IDDOT1
         dd      DROP
-        goto  IDDOT2  
+        goto  IDDOT2
 IDDOT1:
         dd      to_NFA
         dd      _fetch_
@@ -937,7 +1109,7 @@ IDDOT2:
         dd      two_DUP
         dd      PRESENT
         dd      _DUP_
-        ifto  CREA1   
+        ifto  CREA1
         dd      to_NFA, _fetch_, string_fetch
         dd      _TYPE_
         dd      BRANCH
@@ -946,25 +1118,25 @@ sb1:
         dd      LIT, sb1
         dd      string_fetch
         dd      _TYPE_, CR
-        dd      _       
+        dd      _
 CREA1:  dd      DROP
  dd      _ALIGN_
         dd      string_comma
  dd      _ALIGN_
         dd      HERE,to_R
-        dd      R_fetch, to_PHA, _comma_         
-        dd      R_fetch, to_PHA, _comma_         
-        dd      _zero_, _comma_ 
-        dd      _zero_, _comma_ 
-        dd      _comma_   
+        dd      R_fetch, to_PHA, _comma_
+        dd      R_fetch, to_PHA, _comma_
+        dd      _zero_, _comma_
+        dd      _zero_, _comma_
+        dd      _comma_
         dd      R_from
         dd      EXIT
     header  _LINK_,   docol, _LINK_+5*cw, 0, lastlink, "LINK"
-        dd      to_LFA                     
-        dd      two_DUP                     
-        dd      _fetch_                    
-        dd      SWAP, to_LFA, _store_         
-        dd      _store_                     
+        dd      to_LFA
+        dd      two_DUP
+        dd      _fetch_
+        dd      SWAP, to_LFA, _store_
+        dd      _store_
         dd      EXIT
     header  paren_CREATE,   docol, paren_CREATE+5*cw, 0, lastlink, "(CREATE)"
         dd      HEADER
@@ -979,7 +1151,7 @@ CREA1:  dd      DROP
         dd      LIT, 15, query_ERROR
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, immediatemask, _AND_, zero_equal
-        ifto  POSTP1  
+        ifto  POSTP1
          dd      LIT, LIT, _comma_
          dd      _comma_
          dd      LIT, _comma_
@@ -989,7 +1161,7 @@ POSTP1:
     header  LITERAL,   docol, LITERAL+5*cw, immediatemask, lastlink, "LITERAL"
         dd      STATE
         dd      _fetch_
-        ifto  LITE1   
+        ifto  LITE1
         dd      LIT, LIT, _comma_, _comma_
 LITE1:  dd      EXIT
     header  query_STACK,   docol, query_STACK+5*cw, 0, lastlink, "?STACK"
@@ -1007,10 +1179,10 @@ LITE1:  dd      EXIT
         dd      EXIT
         ;
     header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
-INTE1:
+begin3:
         dd      NAME
-        dd      _DUP_      
-        whileto   INTE8 
+        dd      _DUP_
+        whileto   inte8
         dd      OVER, to_R       ; Remember start of word.
         dd      FOUND
 ;Skip over the part that is matched, this is the whole word, unless it is a prefix
@@ -1018,14 +1190,16 @@ INTE1:
         dd      R_from, _plus_, PP, _store_
         dd      _DUP_, to_FFA, _fetch_, LIT, immediatemask, _AND_
         dd      STATE, _fetch_, zero_equal, _OR_
-        ifto  INTE3   
+        ifto  else1
         dd      EXECUTE
-        goto  INTE4   
-INTE3:   dd      _comma_
-INTE4: dd      query_STACK
-        goto  INTE1    
-INTE8:  dd      DROP, DROP
+        goto  endif1
+else1:   dd      _comma_
+endif1: dd      query_STACK
+        goto  begin3
+
+inte8:  dd      DROP, DROP
         dd      EXIT
+
     header  IMMEDIATE,   docol, IMMEDIATE+5*cw, 0, lastlink, "IMMEDIATE"
         dd      LATEST
         dd      to_FFA
@@ -1048,26 +1222,26 @@ INTE8:  dd      DROP, DROP
         dd      left_bracket
         dd      RSP_zero, RSP_store
         dd      _zero_, HANDLER, _store_
-QUIT1:                  
+QUIT1:
         dd      LIT
         dd      paren_ACCEPT
         dd      CATCH
         dd      _DUP_, LIT, -epipe, _equal_
-        ifto  ENDIF7  
-        dd      BYE     
+        ifto  ENDIF7
+        dd      BYE
 ENDIF7:
         dd      _zero_, MIN, _DUP_, query_ERROR
         dd      one_plus
         dd      SET_SRC
         dd      INTERPRET
         dd      OK
-        goto  QUIT1    
-        dd      EXIT   
+        goto  QUIT1
+        dd      EXIT
     header  OK,   docol, OK+5*cw, 0, lastlink, "OK"
         dd      STATE
         dd      _fetch_
         dd      zero_equal
-        ifto  OK2   
+        ifto  OK2
         dd      BRANCH
 sb2:
         string    " OK"
@@ -1079,12 +1253,12 @@ OK2:
         dd      EXIT
     header  CLS,   docol, CLS+5*cw, 0, lastlink, "CLS"
         dd      DSP_zero, DSP_store
-        dd      EXIT   
+        dd      EXIT
     header  COLD,   docol, COLD+5*cw, 0, lastlink, "COLD"
         dd      INIT
         dd      CLS, ABORT
-        dd      BYE     
-        dd      EXIT   
+        dd      BYE
+        dd      EXIT
     header  ABORT,   docol, ABORT+5*cw, 0, lastlink, "ABORT"
         dd      QUIT
         dd      EXIT
@@ -1097,22 +1271,22 @@ OK2:
     header  _ABS_,   docol, _ABS_+5*cw, 0, lastlink, "ABS"
         dd      _DUP_
         dd      zero_less
-        ifto  PM1     
-        dd      NEGATE   
+        ifto  PM1
+        dd      NEGATE
 PM1:
         dd      EXIT
     header  MIN,   docol, MIN+5*cw, 0, lastlink, "MIN"
         dd      two_DUP
         dd      _greater_
-        ifto  MIN1    
-        dd      SWAP    
+        ifto  MIN1
+        dd      SWAP
 MIN1:   dd      DROP
         dd      EXIT
     header  MAX,   docol, MAX+5*cw, 0, lastlink, "MAX"
         dd      two_DUP
         dd      _less_
-        ifto  MAX1    
-        dd      SWAP    
+        ifto  MAX1
+        dd      SWAP
 MAX1:   dd      DROP
         dd      EXIT
     header  LSHIFT,   LSHIFT+5*cw, 0, 0, lastlink, "LSHIFT"
@@ -1120,29 +1294,29 @@ MAX1:   dd      DROP
         pop     eax
         shl     eax,cl
         push    eax
-        next 
+        next
     header  RSHIFT,   RSHIFT+5*cw, 0, 0, lastlink, "RSHIFT"
         pop     ecx
         pop     eax
         shr     eax,cl
         push    eax
-        next 
+        next
     header  M_star,   M_star+5*cw, 0, 0, lastlink, "M*"
         pop     eax
         pop     ebx
-        imul     ebx      
-        xchg    eax,edx   
+        imul     ebx
+        xchg    eax,edx
         push    edx
         push    eax
-        next           
+        next
     header  SM_slash_REM,   SM_slash_REM+5*cw, 0, 0, lastlink, "SM/REM"
-        pop     ebx      
-        pop     edx      
-        pop     eax      
-        idiv     ebx     
+        pop     ebx
+        pop     edx
+        pop     eax
+        idiv     ebx
         push    edx
         push    eax
-        next           
+        next
     header  _star_,   docol, _star_+5*cw, 0, lastlink, "*"
         dd      M_star
         dd      DROP
@@ -1186,13 +1360,13 @@ MAX1:   dd      DROP
         dd      to_R
         dd EXIT
     header  XOS,   XOS+5*cw, 0, 0, lastlink, "XOS"
-        pop     eax        
-        pop     edx        
-        pop     ecx        
-        pop     ebx        
-        int     0x80        
+        pop     eax
+        pop     edx
+        pop     ecx
+        pop     ebx
+        int     0x80
         push    eax
-        next      
+        next
         ;
     header  ZEN,   docol, ZEN+5*cw, 0, lastlink, "ZEN"
         dd      LIT, pad0, string_store
@@ -1230,14 +1404,14 @@ MAX1:   dd      DROP
         dd      EXIT
     header  GET_FILE,   docol, GET_FILE+5*cw, 0, lastlink, "GET-FILE"
         dd      two_DUP, string_comma, DROP
-        dd      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), _comma_ 
+        dd      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), _comma_
         dd      _zero_, OPEN_FILE, THROW, to_R
         dd      HERE, _DUP_
         dd      _EM_, LIT, 6, _slash_, _DUP_, ALLOT
         dd      LIT, 1000, _minus_
         dd      R_fetch, READ_FILE, THROW
         dd      R_from, CLOSE_FILE, THROW
-        dd      two_DUP, _plus_, _DP_, _store_        
+        dd      two_DUP, _plus_, _DP_, _store_
         dd      EXIT
     header  PUT_FILE,   docol, PUT_FILE+5*cw, 0, lastlink, "PUT-FILE"
         dd      LIT, 755O
@@ -1251,10 +1425,10 @@ MAX1:   dd      DROP
         dd      HERE, to_R
         dd      LIT, GET_FILE, CATCH
         dd      _DUP_
-        ifto  INCLUD1  
+        ifto  INCLUD1
         dd      R_from, _DP_, _store_
         dd      THROW
-        goto  INCLUD2  
+        goto  INCLUD2
 INCLUD1:
         dd      R_from, DROP, DROP
 INCLUD2:
@@ -1267,7 +1441,7 @@ INCLUD2:
         dd      _zero_
         dd      READ_FILE
         dd      _zero_, MIN, _DUP_, query_ERROR
-        dd      _DUP_, zero_equal, LIT, -epipe, _AND_ 
+        dd      _DUP_, zero_equal, LIT, -epipe, _AND_
         dd      _zero_, MIN, _DUP_, query_ERROR
         dd      CIB, SWAP, R_from, _plus_
         dd      REMAINDER, two_store
@@ -1290,7 +1464,7 @@ PACCEP2:
         dd      CIB
         dd      REMAINDER, CELL_plus, _store_
         dd      REFILL_CIB
-        goto  PACCEP2  
+        goto  PACCEP2
 PACCEP1:
         dd      REMAINDER, two_fetch
         dd      LIT, 0x0A, string_slash
@@ -1318,9 +1492,9 @@ FORGV3:
         dd      R_fetch
         dd      _less_
         untilto   FORGV3
-        dd      SWAP            
+        dd      SWAP
         dd      to_LFA
-        dd      _store_           
+        dd      _store_
         dd      R_from
         dd      to_NFA, _fetch_, _DP_, _store_
         dd      EXIT
@@ -1357,11 +1531,11 @@ FORGV3:
         dd      EXIT
     header  _LOOP,   docol, _LOOP+5*cw, immediatemask, lastlink, "LOOP"
         dd      LIT, paren_LOOP, _comma_, BACK_paren
-        dd      FORWARD_paren 
+        dd      FORWARD_paren
         dd      EXIT
     header  plus_LOOP,   docol, plus_LOOP+5*cw, immediatemask, lastlink, "+LOOP"
         dd      LIT, paren_plus_LOOP, _comma_, BACK_paren
-        dd      FORWARD_paren 
+        dd      FORWARD_paren
         dd      EXIT
     header  UNTIL,   docol, UNTIL+5*cw, immediatemask, lastlink, "UNTIL"
         dd      LIT, zero_BRANCH, _comma_, BACK_paren
@@ -1371,7 +1545,7 @@ FORGV3:
         dd      EXIT
     header  _REPEAT_,   docol, _REPEAT_+5*cw, immediatemask, lastlink, "REPEAT"
         dd      LIT, BRANCH, _comma_, BACK_paren
-        dd      FORWARD_paren 
+        dd      FORWARD_paren
         dd      EXIT
     header  _IF_,   docol, _IF_+5*cw, immediatemask, lastlink, "IF"
         dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
@@ -1382,7 +1556,7 @@ FORGV3:
         dd      FORWARD_paren
         dd      EXIT
     header  _WHILE_,   docol, _WHILE_+5*cw, immediatemask, lastlink, "WHILE"
-        dd      to_R    
+        dd      to_R
         dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
         dd      R_from
         dd      EXIT
@@ -1408,24 +1582,24 @@ FORGV3:
         dd      LIT,9
         dd      OVER
         dd      _less_
-        ifto  perc1    
+        ifto  perc1
         dd      LIT,7
-        dd      _plus_    
+        dd      _plus_
 perc1:   dd      LIT,0x30
         dd      _plus_
         dd      HOLD
         dd      EXIT
     header  percent_S,   docol, percent_S+5*cw, 0, lastlink, "%S"
-perc_S1:  dd      percent     
+perc_S1:  dd      percent
         dd      _DUP_
         dd      zero_equal
-        untilto   perc_S1 
+        untilto   perc_S1
         dd      EXIT
     header  SIGN,   docol, SIGN+5*cw, 0, lastlink, "SIGN"
         dd      zero_less
-        ifto  SIGN1   
+        ifto  SIGN1
         dd      LIT, '-'
-        dd      HOLD    
+        dd      HOLD
 SIGN1:  dd      EXIT
     header  _dot_,   docol, _dot_+5*cw, 0, lastlink, "."
         dd      _DUP_, _ABS_
@@ -1441,7 +1615,7 @@ SIGN1:  dd      EXIT
         dd      _TYPE_
         dd      EXIT
     header  WORDS,   docol, WORDS+5*cw, 0, lastlink, "WORDS"
-        dd      _zero_            
+        dd      _zero_
         dd      CONTEXT
         dd      _fetch_
 WORDS0:
@@ -1456,9 +1630,6 @@ WORDS1:
         untilto   WORDS1
         dd DROP
         dd      EXIT
-    header  BYE,   docol, BYE+5*cw, 0, lastlink, "BYE"
-        dd      _zero_, _, _, LIT, __NR_exit, XOS
-        dd      EXIT   
     header  dot_S,   docol, dot_S+5*cw, 0, lastlink, ".S"
         dd      CR
         dd      LIT, 'S', EMIT
@@ -1468,19 +1639,60 @@ WORDS1:
 DOC2:   dd      two_DUP, _less_
         whileto   DOC1
         dd      _zero_, CELL_plus, _minus_, _DUP_, _fetch_, _dot_
-        goto  DOC2  
+        goto  DOC2
 DOC1:    dd DROP, DROP
         dd      LIT, ']', EMIT
         dd      EXIT
-    header  TASK,   docol, TASK+5*cw, 0, lastlink, "TASK"
+
+    header  catchall,   docol, catchall+5*cw, prefixmask, 0, ""
+        dd      paren_NUMBER, LITERAL, EXIT
+    header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
+        dd      NAME, PRESENT
+        dd      _DUP_, zero_equal
+        dd      LIT, 11, query_ERROR
+        dd      LITERAL
         dd      EXIT
-initdp:                 
+    header  charprefix,   docol, charprefix+5*cw, prefixmask, lastlink, "&"
+        dd      PP_fetch_fetch
+        dd      NIP
+        dd      _DUP_, query_BLANK
+        dd      LIT, 10, query_ERROR
+        dd      LITERAL
+        dd      EXIT
+    header  minusprefix,   docol, minusprefix+5*cw, prefixmask, lastlink, "-"
+        dd      paren_NUMBER, NEGATE, LITERAL
+        dd      EXIT
+    header  plusprefix,   docol, plusprefix+5*cw, prefixmask, lastlink, "+"
+        dd      paren_NUMBER, LITERAL, EXIT
+    header  stringprefix,   docol, stringprefix+5*cw, prefixmask, lastlink, '"'
+        dd      LIT, BRANCH, _comma_
+        dd      HERE, to_R, _zero_, _comma_
+        dd      LIT, '"', PARSE
+        dd      _DUP_, ALLOT, R_fetch, string_plus_store
+    dd _ALIGN_
+        dd      R_fetch, CELL_plus, LITERAL
+        dd      R_from, _fetch_, LITERAL
+        dd      PP_fetch_fetch, query_BLANK, _NOT_, LIT, 10, query_ERROR
+        dd      DROP
+        dd      EXIT
+dovoc:
+        dd      CONTEXT
+        dd      _store_
+        dd      EXIT
+
+    header  FORTH,   dodo, FORTH+5*cw, 0, lastlink, "FORTH"
+        dd      dovoc
+        dd      0, 0, dummymask, TASK, (_zero_+1*cw)
+
+    header  TASK,   docol, TASK+5*cw, 0, dot_S, "TASK"
+        dd      EXIT
+initdp:
 dictsize       =     initdp - bm
-         rb  (forthsize - dictsize - tasksize ) 
-        rb  (stacksize )    
-initdsp0:                         
-initcib: rb  (cibsize )     
-        rb  (stacksize )       
-initrsp0:                         
+         rb  (forthsize - dictsize - tasksize )
+        rb  (stacksize )
+initdsp0:
+initcib: rb  (cibsize )
+        rb  (stacksize )
+initrsp0:
 em:
         ;
