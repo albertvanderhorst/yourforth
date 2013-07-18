@@ -1,13 +1,30 @@
+; yourforth the simplest Forth possible
+; Originated as a FASM version of ciforth created by ``m4'' from generic listing.
+;
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.4 $
+ ;   ciforth $Revision: 6.5 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
 ; That is right. Not only did you brew coffee, you've been to Columbia, picked the beans,
 ; and roasted them as well! Next time you only need the last part.
+
+; Normally a Forth in assembly style would use the official assembler
+; on the operating system at hand, in our case gas or ``GNU as'' as it is called
+; nowadays.
+; The one-liner illustrates why we deviate here. A gas equivalent would download 1 Gbyte!
+; I use fasm because it has overwhelming advantages.
+; By implication the follow advantages point to disadvantages of gas.
+; 1. fasm accommodates one simple segment
+; 2. fasm accommodates Intel syntax fairly
+; 3. fasm has a traditional macro facilitiy
+; 4. fasm needs no linking step
+; 5. fasm is small, basically an executable.
+; Also it accomodates symbol reassignment and labels that are local to macro's,
+; which is kind of essential to the way we want to use macro's.
 
 ; The first c-compiler in existance was written in assembler (what else?)
 ; but then immediately they rewrote the compiler in c.
@@ -18,32 +35,35 @@
 ; just can include a Forth source file with the facilities
 ; you want. Only the kernel here has to be written in assembler,
 ; like the first c-compiler ever.
-; Even in this assembler source you will see a lot of Forth
-; code, that is compiled by the assembler (with some renaming).
+; Even in this assembler source you will see that most of the code is actually
+; Forthcode, that is compiled by the assembler (with a renaming convention).
 ; Forth is the only language simple enough to make this feasible.
 
-; Normally an Forth-in-assembler observes the official assembler of the platform it is for.
-; The one-liner illustrates why we deviate here. A gas equivalent would download 1 Gbyte!
-
-; Forth uses memory between BM and EM. (exercise) Memory consists of bytes
+; yourforth uses memory between BM and EM. (exercise)
+; Memory consists of bytes
 ; and, yes, nothing funny, that are the bytes you buy in the store.
+; Bytes can represent characters, small pictures that are associated
+; with sounds (in most languages) or ideas in e.g. chinese.
 ; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
-; but not EM. Chunks of bytes are needed to represent numbers that large.
+; but not EM. Chunks of bytes are needed to represent numbers as large as BM.
 ; We take 4 bytes together to form a cell, resulting in a 32-bit Forth,
-; and restricting memory size to 4 Gbyte.
+; and restricting memory size to 4 Gbyte. Now we can manipulate
+; fairly large numbers, of plus or minus 2000 millions, and addresses
+; up to ca. 2 Gbyte (we will shun negative addresses in yourforth.)
+
+; The word "word" has a special meaning in Forth, so using "cell"
+; for those chunks diminishes confusion.
 
 cw      =     4                 ; Cell width
 
 ; 32 bits also happens to be the word size of the processor we are using, or more
-; precisely -- because it is probably a 64-bit processor -- of the words size we
+; precisely -- because it is probably a 64-bit processor -- of the wordsize we
 ; are instructing the processor to use.
-; The word "word" has a special meaning in Forth, so using "cell"
-; for numbers or addresses diminishes confusion.
-
         use32
 
-; This is not enough, Linux must know that this is a 32 bit (not ELF64)
-; executable, to start the program in the right mode.
+
+; This is not enough, Linux must know that this is a 32 bit (ELF)
+; executable (not ELF64), to start the program in the right mode.
 
         FORMAT  ELF EXECUTABLE ; fasm makes an executable directly, no linker.
 
@@ -54,12 +74,19 @@ cw      =     4                 ; Cell width
 ;
 forthsize      =     (0x100000)   ; One megabyte, for starters.
 ;
-tasksize     =     0x10000        ; Total uninitialised memory near EM
-stacksize   = tasksize/4          ;  with subdivision.
+tasksize    = 0x10000           ; Total size of the uninitialised memory near EM
+stacksize   = tasksize/4        ;  Its subdivisions.
 cibsize     = tasksize/2
 
 ; Forth is an interpreter, an environment that you can type commands into
-; to get them executed. The typing and the showing of results goes through
+; to get them executed.
+; Characters are glyph's, the bitmaps on the screen, that are associated
+; with the content of one byte.
+; Forth doesn't care much what the console
+; shows you, nor what content results from pressing a particular key.
+; Internally only rows of bytes are compared, and build up,
+; and they are passed to the console for display.
+; The typing and the showing of results goes through
 ; a "console" which is typically a terminal window on a Linux X-screen, but
 ; could equally well be an old fashoned VT100 terminal connected with a
 ; 100 m RS232 line. Linux has the convenient notions of a "standard input" and
@@ -68,7 +95,7 @@ cibsize     = tasksize/2
 
 ; This brings us to the subject of the interface with the Operating
 ; System. The interfacing with Linux is brutally direct. We use the system calls,
-; that have been given numbers.
+; that have been given numbers
 __NR_exit    =     0x1
 __NR_open    =     0x5
 __NR_close   =     0x6
@@ -88,14 +115,8 @@ __NR_fork    =     0x2
 __NR_waitpid =     0x7
 __NR_pipe    =     0x2a
 
-; See XOS of how the dispatching takes place.
-; They are copied from a secret place in Linux's include hierarchy (exercise).
-;
-; Characters are glyph's, the bitmaps on the screen, that are associated
-; with the content of one byte. Forth doesn't care much what the console
-; shows you, nor what content results from pressing a particular key.
-; Internally only rows of bytes are compared, and build up,
-; and they are passed to the console for display.
+; See XOS of how the dispatching takes place. They are documented as e.g. "man 2 exit".
+; The numbers have been copied from a secret place in Linux's include hierarchy (exercise).
 ;
 ; To an interpreter strings play of course an important role.
 ; Forth strings are represented as an address and a length.
@@ -110,19 +131,29 @@ macro string  content {
     local startstring, endstring
     dd    endstring -startstring
 startstring:
-    DB    content
+    db    content
 endstring:
-        ALIGN    cw
+        align    cw
 }
 
 ; "content" is of course the string itself, and fasm treats the start
 ; and the end of the string as locals, i.e. they are generated new for each
 ; string and are not visible outside the macro's.
+; DD lays down a 32 bit value. It is short for DD, "define double (16-bits) word ".
+; In yourforth a low of DD's are used, to represent headers as well as interpreted
+; code. You see that we keep those cells aligned to 32 bit boundaries. This is
+; not strictly necessary, but it makes inspecting memory so much easier.
+; <I'm tempted to use a 'fix macro' to redefine DD as DC >
+
+; <explanation of dictiory headers and memory belonging to a d.e.>
+; <explanation of why 5 fields and their relation to objects>
+; <explanation of linking>
 
 ; The header macro lays down the 5 fields in memory. You don't need to understand
-; the following in detail, and the examples are much easier than this.
+; the following fully yet. The details are introduced gradually as each type of
+; definition will be explained where it first occurs.
 
-; All fields are passed
+; All fields are passed to the macro
 ; as is, except for the name that is passed as a string. The string is
 ; to be laid out in memory just like in the string macro and a pointer
 ; to that is put in the name field.
@@ -130,9 +161,9 @@ endstring:
 macro header dea, cfield,dfield,ffield,lfield,forthname {
     local nfield, startstring, endstring
 nfield:         dd    endstring -startstring
-startstring:    DB    forthname
+startstring:    db    forthname
 endstring:
-        ALIGN    cw
+        align    cw
 dea:  dd      cfield, dfield, ffield, lfield, nfield
 lastlink EQU dea
 }
@@ -184,25 +215,21 @@ lastlink EQU dea
 ; different types:
 ; - cfield contains docon. The definition is a constant, i.e. when executed it
 ;   puts a constant on the stack. That constant is present at the DFA.
-; - cfield contains dobuf. The definition is a variable od buffer, i.e. when executed it
+; - cfield contains dobuf. The definition is a variable or buffer, i.e. when executed it
 ;    puts an address on the stack of an area where data can be stored.
-;    That address is present at the DFA.
+;    That address is present at the DFA, typically dea+5*cw
 ; - cfield contains docol. docol is the interpreter of Forth. It takes care that
 ;   the high level code is executed, that is found via the DFA. This typically
 ;   contains dea+5*cw. In other words the high level code contained at the post
 ;   header address is executed.
 ; - cfield contains dea+5*cw. In other words, the machine code contained at the post header
-;    address is ececuted. These are the regular low level words that make up the
+;    address is to be executed. These are the regular low level words that make up the
 ;    Forth language like "+" and "DROP". Of course this code is different for all
 ;    of those words.
 ; - cfield contains dodo. The Forth definition is generated using a CREATE DOES>
 ;   construct, Forth's poor man's objects of the 1970's. We will elaborate on this later.
 ;
 
-macro   next {
-        lodsd
-        jmp     dword[eax]
-}
 macro goto  label
 { dd  BRANCH, label-$-cw   }
 macro ifto  label
@@ -219,10 +246,6 @@ macro untilto  label
 ; Don't worry, Forthers hate nested loops. In the code of <your>forth you
 ; will not find a single nested loop.
 ;
-; FASM version of ciforth created by ``m4'' from generic listing.
-; This source can be assembled using the Flat Assembler,
-;  available from the Net.
-;      fasm yourforth.asm
 ;
 ;
         ;
@@ -257,20 +280,74 @@ bm:
 ;   COLD is the Forth definition that starts
 ;  up Forth. So we load the registers SP and BP with the data field of
 ;  DSP0 and RSP0 and SI with the post header address of COLD, where its
-;  Forth code resides.
+;  Forth code resides. It ends with machine code that results in executing
+;  the next Forth instruction. This is done all the time, so we have
+;  a shorthand for it, called next.
 
-        cld
+macro   next {
+        lodsd
+        jmp     dword[eax]
+}
+
+; Now the choice for SI becomes clear. The lodsd instruction loads the dea
+; from the instruction stream into EAX, and increments SI on the way,
+; making it point to the next Forth instruction.
+; Then we jump to what is contained in the code field of the dea, so actually
+; [eax+0*cw] . We rely on that code to end again with a ``next'', and if
+; it needs to use SI (e.g. for nesting), it must restore it beforehand.
+; exercise with (CREATE)  <maybe explain next before COLD>
+; Executing the code is started with an eax that contains the dea of the
+; word. So even if the code field is filled with the same pointer,
+; the objects data is different and results in different data or even different
+; action.
+
+        cld             ; Clear the direction bit. <EXPLANATION?!>
 
         mov     esp, [DSP_zero+1*cw]
         mov     ebp, [RSP_zero+1*cw]
         mov     esi, COLD+5*cw
         next
 ;
-; The following word is an example of a colon definition.
+; The following word is our first high level Forth word or "colon definition"
+; in Forth speak.
 header  BYE,   docol, BYE+5*cw, 0, FORTH, "BYE"
     dd      _zero_, _, _,   _one_, XOS
     dd      EXIT
-; <explanation of how SI is used to accomplish this.>
+
+; Executing this words means that the program jumps to address docol that takes
+; care that SI is going to point to _zero_ , then does next.
+; This is possible because eax contains the address BYE of this header
+; as discussed with the description of the next macro.
+
+docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
+        mov     [ebp],esi
+        mov     esi,[eax+1*cw]          ; Fill it with the data field
+        next
+
+; In the case of BYE the data field contains BYE+5*cw, which is the address
+; that contains _zero_.
+; So now we have it. Consecutively _zero_ _ _ _one XOS and EXIT are executed.
+; The word XOS finds 0 X X 1 on the stack, which instructs it to do linux
+; system call 1 (an exit) with one parameter 0 and two dummy parameters.
+; This ends the Forth session with a status code of 0, meaning okay. (exercise).
+
+; [One last remark. Because BYE is our first definition, you may expect it to
+; have a link of 0 and to be it last in the linked list. But we want the
+; word FORTH and the denotations to come last yet not discuss them until later.]
+;
+; EXIT is the reverse of docol. ( In the above case EXIT is not reached.)
+; This is our first example of a low level word, or "code definition".
+; You see that we use our lastlink trick as described with the header macro.
+
+    header  EXIT,   EXIT+5*cw, 0, 0, lastlink, "EXIT"
+        mov     esi,[ebp]
+        lea     ebp,[ebp+1*cw]
+        next
+
+; The next executed at the end of the FORTH instruction before EXIT,
+; jumps to EXIT+5*cw which is the mov instruction.
+; So EXIT just abandons the current SI and loads it with what docol has left.
+; Note that the data field is not used and the content of AX is not used.
 
 ; Because you understand Intel assembly language a bit, I present you
 ; ;; with a table of the 5 instructions of the virtual machine:
@@ -281,8 +358,8 @@ header  BYE,   docol, BYE+5*cw, 0, FORTH, "BYE"
 ;     0BRANCH rel         2               jz rel
 ;     LIT value           2               pushi value
 ;
-; That is all there is to it. It it seems
-; few, let me remind you that all operations like + fall under the
+; That is all there is to it. If it seems few,
+; let me remind you that all operations like + fall under the
 ; invocation of a definition. The conditional jump can be used to
 ; construct if-endif's (called IF THEN 's in Forth) and begin-until's.
 ; Together with the unconditional jump you can have all control
@@ -296,9 +373,6 @@ header  BYE,   docol, BYE+5*cw, 0, FORTH, "BYE"
         lodsd
         push    eax
         next
-    header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
-        pop     eax
-        jmp     dword[eax]
     header  BRANCH,   BRANCH+5*cw, 0, 0, lastlink, "BRANCH"
 BRAN1:  lodsd
         dec     eax
@@ -312,6 +386,11 @@ BRAN1:  lodsd
         jz      BRAN1
         lea     esi,[esi+1*cw]
         next
+    header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
+        pop     eax
+        jmp     dword[eax]
+
+
     header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
         mov     ebx,1
 XLOO1:  add     [ebp],ebx
@@ -465,10 +544,6 @@ MOVE2:
     header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
         pop     ebp
         next
-    header  EXIT,   EXIT+5*cw, 0, 0, lastlink, "EXIT"
-        mov     esi,[ebp]
-        lea     ebp,[ebp+1*cw]
-        next
     header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
         pop     ebx
         lea     ebp,[ebp - 1*cw]
@@ -620,10 +695,6 @@ ZLESS1: push    eax
         dd      LIT, docol, LATEST, to_CFA, _store_
         dd      right_bracket
         dd      EXIT
-docol:  lea     ebp,[ebp - 1*cw]
-        mov     [ebp],esi
-         mov     esi,[eax+1*cw]
-        next
     header  _semis_,   docol, _semis_+5*cw, immediatemask, lastlink, ";"
         dd      LIT, EXIT, _comma_
         dd      LATEST, HIDDEN
