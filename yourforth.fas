@@ -5,7 +5,7 @@
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.5 $
+ ;   ciforth $Revision: 6.6 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -136,6 +136,10 @@ endstring:
         align    cw
 }
 
+; <explanation of dictiory headers and memory belonging to a d.e.>
+; <explanation of why 5 fields and their relation to objects>
+; <explanation of linking>
+
 ; "content" is of course the string itself, and fasm treats the start
 ; and the end of the string as locals, i.e. they are generated new for each
 ; string and are not visible outside the macro's.
@@ -145,9 +149,7 @@ endstring:
 ; not strictly necessary, but it makes inspecting memory so much easier.
 ; <I'm tempted to use a 'fix macro' to redefine DD as DC >
 
-; <explanation of dictiory headers and memory belonging to a d.e.>
-; <explanation of why 5 fields and their relation to objects>
-; <explanation of linking>
+               segment executable readable writable
 
 ; The header macro lays down the 5 fields in memory. You don't need to understand
 ; the following fully yet. The details are introduced gradually as each type of
@@ -256,7 +258,6 @@ immediatemask   =     0x04
 denotationmask   =     0x08
 prefixmask = immediatemask+denotationmask
 epipe   =     0x20
-               segment executable readable writable
 bm:
 ;
 ;  The virtual machine reserves some of the Intel registers for its own.
@@ -1035,7 +1036,7 @@ SSLAS2:
     header  PAD,   dobuf, pad1 , 0, lastlink, "PAD"
 pad0:   rb      0x400
 pad1:   rb      0x400
-    header  paren_NUMBER,   docol, paren_NUMBER+5*cw, 0, lastlink, "(NUMBER)"
+    header  NUMBER,   docol, NUMBER+5*cw, 0, lastlink, "NUMBER"
         dd      _zero_                       ;  0
 NPNUM1:  dd      PP_fetch_fetch
         dd      _DUP_, query_BLANK, _NOT_            ;  DUP, query_BLANK NOT
@@ -1052,10 +1053,6 @@ NPNUM1:  dd      PP_fetch_fetch
         goto  NPNUM1
 NPNUM5:                                    ;
         dd      two_DROP
-        dd      EXIT
-    header  NUMBER,   docol, NUMBER+5*cw, 0, lastlink, "NUMBER"
-        dd      LIT, -1, PP, plus_store
-        dd      paren_NUMBER, LITERAL
         dd      EXIT
     header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
         dd      CONTEXT, _fetch_
@@ -1716,7 +1713,7 @@ DOC1:    dd DROP, DROP
         dd      EXIT
 
     header  catchall,   docol, catchall+5*cw, prefixmask, 0, ""
-        dd      paren_NUMBER, LITERAL, EXIT
+        dd      NUMBER, LITERAL, EXIT
     header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
         dd      NAME, PRESENT
         dd      _DUP_, zero_equal
@@ -1731,10 +1728,10 @@ DOC1:    dd DROP, DROP
         dd      LITERAL
         dd      EXIT
     header  minusprefix,   docol, minusprefix+5*cw, prefixmask, lastlink, "-"
-        dd      paren_NUMBER, NEGATE, LITERAL
+        dd      NUMBER, NEGATE, LITERAL
         dd      EXIT
     header  plusprefix,   docol, plusprefix+5*cw, prefixmask, lastlink, "+"
-        dd      paren_NUMBER, LITERAL, EXIT
+        dd      NUMBER, LITERAL, EXIT
     header  stringprefix,   docol, stringprefix+5*cw, prefixmask, lastlink, '"'
         dd      LIT, BRANCH, _comma_
         dd      HERE, to_R, _zero_, _comma_
