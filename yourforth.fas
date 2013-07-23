@@ -5,7 +5,7 @@
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.6 $
+ ;   ciforth $Revision: 6.7 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -138,6 +138,16 @@ endstring:
 
 ; <explanation of dictiory headers and memory belonging to a d.e.>
 ; <explanation of why 5 fields and their relation to objects>
+; Experienced assembler programmers expect two segments, one that we will fill
+; with our forth code, and one unitialized that may be very large.
+; (We could get by with one segment if we don't mind to have 1 Gbyte executables.)
+; The first segment would be NOBITS, the second BIT, and while linking we
+; would have made sure that they fit snugly together. Now this is a bit silly,
+; because the assembler perfectly knows that the NOBITS part is not initialised.
+; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store
+; the content of segments without content, it doesn't store the unitialised part
+; of segments. We can put everything in
+; one segment, and the unitialised part occupies no room on our hard disk.
 ; <explanation of linking>
 
 ; "content" is of course the string itself, and fasm treats the start
@@ -201,8 +211,8 @@ lastlink EQU dea
 ; bracket  not
 ;
 ; Sometimes < and > are used to indicate data transfer and are then
-; named to or from. I'm lazy and translate (NUMBER) to paren_NUMBER,
-; not leftparen_NUMBER_rightparen.
+; named to or from. I'm lazy and translate (CREATE) to paren_CREATE,
+; not leftparen_CREATE_rightparen.
 ;
 ; fetch and store are used in forth names that fetch something from memory
 ; or store something in memory.
@@ -1037,21 +1047,21 @@ SSLAS2:
 pad0:   rb      0x400
 pad1:   rb      0x400
     header  NUMBER,   docol, NUMBER+5*cw, 0, lastlink, "NUMBER"
-        dd      _zero_                       ;  0
+        dd      _zero_
 NPNUM1:  dd      PP_fetch_fetch
-        dd      _DUP_, query_BLANK, _NOT_            ;  DUP, query_BLANK NOT
+        dd      _DUP_, query_BLANK, _NOT_
         whileto   NPNUM5
-        dd      NIP                        ;  NIP
-        dd      DIGIT         ;  BASE, fetch, digit
+        dd      NIP
+        dd      DIGIT
         dd      LIT, 10, query_ERROR
-        dd      SWAP                       ;
-        dd      BASE                       ;
-        dd      _fetch_                      ;
-        dd      M_star                      ;
+        dd      SWAP
+        dd      BASE
+        dd      _fetch_
+        dd      M_star
         dd      DROP
-        dd      _plus_                       ;
+        dd      _plus_
         goto  NPNUM1
-NPNUM5:                                    ;
+NPNUM5:
         dd      two_DROP
         dd      EXIT
     header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
@@ -1171,9 +1181,7 @@ IDDOT1:
 IDDOT2:
         dd      EXIT
     header  HEADER,   docol, HEADER+5*cw, 0, lastlink, "HEADER"
-        dd      _DUP_
-        dd      zero_equal
-        dd      LIT, 5, query_ERROR
+        dd      _DUP_, zero_equal, LIT, 5, query_ERROR
         dd      two_DUP
         dd      PRESENT
         dd      _DUP_
@@ -1214,9 +1222,7 @@ CREA1:  dd      DROP
     header  POSTPONE,   docol, POSTPONE+5*cw, immediatemask, lastlink, "POSTPONE"
         dd      NAME
         dd      PRESENT
-        dd      _DUP_
-        dd      zero_equal
-        dd      LIT, 15, query_ERROR
+        dd      _DUP_, zero_equal, LIT, 15, query_ERROR
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, immediatemask, _AND_, zero_equal
         ifto  POSTP1
@@ -1235,15 +1241,10 @@ LITE1:  dd      EXIT
     header  query_STACK,   docol, query_STACK+5*cw, 0, lastlink, "?STACK"
         dd      DSP_fetch
         dd      DSP_zero
-        dd      SWAP
-        dd      _less_
-        dd      _one_, query_ERROR
+        dd      _greater_, LIT, 1, query_ERROR
         dd      DSP_fetch
-        dd      HERE
-        dd      LIT,0x80
-        dd      _plus_
-        dd      _less_
-        dd      LIT, 7, query_ERROR
+        dd      HERE, LIT,0x80, _plus_
+        dd      _less_, LIT, 7, query_ERROR
         dd      EXIT
         ;
     header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
@@ -1716,15 +1717,12 @@ DOC1:    dd DROP, DROP
         dd      NUMBER, LITERAL, EXIT
     header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
         dd      NAME, PRESENT
-        dd      _DUP_, zero_equal
-        dd      LIT, 11, query_ERROR
+        dd      _DUP_, zero_equal, LIT, 11, query_ERROR
         dd      LITERAL
         dd      EXIT
     header  charprefix,   docol, charprefix+5*cw, prefixmask, lastlink, "&"
-        dd      PP_fetch_fetch
-        dd      NIP
-        dd      _DUP_, query_BLANK
-        dd      LIT, 10, query_ERROR
+        dd      PP_fetch_fetch, NIP
+        dd      _DUP_, query_BLANK, LIT, 10, query_ERROR
         dd      LITERAL
         dd      EXIT
     header  minusprefix,   docol, minusprefix+5*cw, prefixmask, lastlink, "-"
@@ -1733,15 +1731,11 @@ DOC1:    dd DROP, DROP
     header  plusprefix,   docol, plusprefix+5*cw, prefixmask, lastlink, "+"
         dd      NUMBER, LITERAL, EXIT
     header  stringprefix,   docol, stringprefix+5*cw, prefixmask, lastlink, '"'
-        dd      LIT, BRANCH, _comma_
-        dd      HERE, to_R, _zero_, _comma_
+        dd      LIT, BRANCH, _comma_    ; Jump over string, if need be.
         dd      LIT, '"', PARSE
-        dd      _DUP_, ALLOT, R_fetch, string_plus_store
-    dd _ALIGN_
-        dd      R_fetch, CELL_plus, LITERAL
-        dd      R_from, _fetch_, LITERAL
-        dd      PP_fetch_fetch, query_BLANK, _NOT_, LIT, 10, query_ERROR
-        dd      DROP
+        dd      string_comma, _ALIGN_, to_R
+        dd      R_fetch, CELL_plus, LITERAL, R_from, _fetch_, LITERAL
+        dd      PP_fetch_fetch, NIP, query_BLANK, _NOT_, LIT, 10, query_ERROR
         dd      EXIT
 dovoc:
         dd      CONTEXT
