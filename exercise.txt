@@ -1,6 +1,248 @@
-Exercise for yourforth.
+Exercises for yourforth.
 
 We follow the convention of Knuth in TAO:
     Exercises are numbered per section.
     Each exercise has a rating 0..50, where 40 is research project and
     10 is an easy question just doable without pen and paper.
+
+
+Use as a calculator
+Go to a system with a decent keyboard and numeric keypad and
+switch it to numeric. Now type the following into <your>forth,
+ending each line with the <ENTER> key from the keypad.
+"
+  123
+  .
+  123
+  123
+  123
+  +
+  +
+  123
+  3
+  *
+  -
+  .
+"
+What are the first and second results?
+Answer: 123 0
+
+Now repeat the experiment, with the normal keyboard typing
+.S after each word.
+
+Define a word as per
+"APE" (CREATE)
+and verify that is is in the dictionary list.
+What happens if you type APE?
+Answer: a crash
+
+To make APE behave, we try
+  20 ALLOT
+  'NOOP 5 CELLS +    'APE 5 CELLS +  20 MOVE
+Is this sufficient? Why or why not?
+Answer: yes. All code of NOOP is transferred to the right address.
+Where is the ALLOT for?
+Answer: to claim the code area, such that it is not overwritten.
+Define a test to show that the ALLOT is needed. i.e. that fails
+if you leave out `` 20 ALLOT ''. State it!
+Answer: 0 , APE
+
+define 3 words A B C as per
+"A" (CREATE)
+"B" (CREATE)
+"C" (CREATE)
+WORDS
+You can manipulate the link fields such that the word
+B disappears from the dictionary list.
+Which link field must be changed, A's or C's ?
+Answer: C
+Now do it and check with WORDS. State how!
+Answer: 'A 'C >LFA !
+
+Which rb statement is responsible for allocating the bulk of the
+working space for <your>forth?
+Answer:   RB forthsize - dictsize - stacksize
+There are only four labels in the high uninitialized part of the memory.
+Name them.
+Answer: initdsp0: initcib: initrsp0: em:
+Where are they used? What is the type/class of those words?
+Answer: DSP0 RSP0 CIB EM , all CONSTANT 's.
+Now *on a virgin system* put 1000,000 on the stack and type
+    INCLUDE examples/grow.frt
+You have a new file in your directory, now run it.
+How large is the size of this new forth in megabytes?
+Hint: use `` EM BM - 1000000 / ''
+Answer: 2
+What is the difference in size of this new forth's binary file with yourforth?
+Answer: 190 bytes
+Now read the file grow.frt and try to understand what is going on.
+Try to get the working space at around 3 Gbyte.
+Why does
+    EM BM - 1000000 / .
+indicate that you have minus thousand Megabytes?
+Answer: we are in the dreaded negative memory zone.
+Find a Forth word to print `` EM BM - '' correctly.
+Answer: U.
+
+Try this
+'FORTH CONTEXT !
+Which words remain in the dictionary?
+Choose your own way to find it out. State which one you used.
+1 experimentally
+2. Find a way to get a wordlist of the state of the dictionary as per WORDS.
+3. code inspection
+Answer: only denotations remain. 3.
+What with numbers?
+Study the code (in the assembler listing) that is executed if you type
+   FORTH
+and explain the difference with 'FORTH CONTEXT !
+Answer:
+Can you recover to a full Forth after 'FORTH CONTEXT !
+Answer: not easily.
+(advanced: How can you do it if we give you EXECUTE ?
+Answer: 'FORTH EXECUTE
+
+   Verify this by making a <your>forth that has
+   EXECUTE still available after
+      'FORTH CONTEXT ! )
+State what you did.
+Answer: Move the definition of EXECUTE to just before FORTH.
+
+Try this
+    INCLUDE assembler.frt
+    CODE NOOP2  NEXT, END-CODE
+Verify that NOOP2 is a no operation, i.e. it does nothing.
+Do WORDS and remark that a lot if new words have appeared.
+Get rid of the assembler words in the dictionary list while
+keeping NOOP2. State how!
+Answer: 'TASK 'NOOP2 >LFA !
+
+Find the place where forthsize is defined:
+forthsize equ 0x100000         ; 1 Mbyte
+Reassemble with 2 Mbyte and check that the resulting Forth
+works the same
+How are you going to verify the size change from within <your>forth?
+Answer: EM BM - .
+
+Do
+   objdump -x yourforth
+Now compare it with some other compilers, one or more of
+   objdump -x `which jonesforth`
+   objdump -x `which gcc`
+   objdump -x `which gforth`
+   objdump -x `which java`
+   objdump -x `which python`
+   objdump -x `which lina`
+What is your impression?
+Answer: Astonishment of the number of sections.
+
+(advance) Assuming that fasm does all the right things with elf headers,
+find out what fields in the elf header change if forthsize is changed.
+Now define a word GROW that reads a <your>forth binary and writes
+a new binary with an enlarged, then a hugely enlarged space.
+How far can you push it?
+
+Find a document describing ELF headers.
+How many pages is it? How many pages in your estimation would you
+have to study to do the above experiment without help of fasm?
+Make a crude estimate of the time it would take.
+
+Switch to HEX.
+Verify that the character at BM-0x74 is 0x7F.
+(If not skip the remainder of the exercise)
+What is the result of
+    BM 53 - 3 TYPE   ?
+Add a definition to <your>forth
+  : A ;
+and save the current forth in a file as per
+BM 54 - HERE OVER - "yourforth2" PUT-FILE
+Try to execute yourforth2. What do you find?
+Answer: a crash
+Now repeat the experiment with an absolute virgin
+<your>forth so no `` : A ; ''. Result?
+Answer: It works, but the file is slighly longer.
+
+EXERCISE 1
+
+HEX
+BM 54 - @
+DUP .
+Answer: 7F455147
+Expect the value 7F
+BM 54 -
+COUNT .
+3 TYPE
+What do you see?
+Answer: 7F ELF
+What does this mean?
+Answer: we have found the ELF header.
+BM 54 - HERE OVER - "jones2" PUT-FILE
+Now run jones2.
+What happens?
+Answer: it runs just like yourforth.
+
+EXERCISE 2
+
+
+Write a noop, a machine code definition that does nothing.
+
+Define a word H. that prints a cell as 8 hex digits with a comma for
+readability like so 0xDEAD,BEEF
+Hints: don't bother with restoring  BASE yet, and use a phrase like &x HOLD .
+Answer: H. HEX <# # # # # &, HOLD # # # # &x HOLD &0 HOLD #> TYPE ;
+
+Now try it on a small number like 17
+
+Redefine H. inorder to restore BASE to what it was before,
+in this manner
+: H.  ... H. ... ;
+Answer:  : H. BASE @ >R H. R> BASE ! ;
+
+With this try
+HEX DEADBEAF DECIMAL DUP . H.
+also try
+HEX DEADBEAF DECIMAL DUP H. .
+
+What do you see?
+Answer: H. is not followed by a space like . is.
+
+Advanced: Change the source of yourforth to print hex numbers in lower case
+like so 1eadbeef.
+Can you think of a disadvantage?
+Answer: You can't read them in later. You can't use base beyond 36.
+
+Advanced: Modify yourforth to add a prefix 0x such that it understand hex numbers like
+0xDEADBEEF (no comma's and no lower case). State the changes!
+Hint: look at + for an example and make sure that you restore base like
+in a previous example.
+Answer: : 0x BASE @ >R (NUMBER) R> BASE ! ; PREFIX IMMEDIATE
+Now make a file c_compatible_0x.frt that can be loaded to do the
+same thing. State the content!
+Answer: : 0x BASE @ >R NUMBER R> BASE ! ; PREFIX IMMEDIATE
+Try it out on some of your favorite numbers.
+Does -0x12 work, or 0x-12 ? Your opinion about this?
+Answer: No. No. It's fine with me.
+
+make a yourforth with
+Interchange the code field second
+and the data field first.
+How many headers do you have to change?
+Answer: Trick question, none. Of course you only change the header macro.
+At how many other places are there changes?
+Answer: 5 (any answer between 3 and 10 accepted.)
+Would this have been easier if 1*cw and 0*cw where appropriate had been changed
+to D_HOFFSET and C_HOFFSET?
+Answer: Yes.
+Would it have been worthwhile?
+Answer: No 1. This was an artificial assignment.
+    2. That change would've been about equal to this assignment.
+    (All reasoning accepted.)
+
+EXERCISE
+Some Linux commands take 5 parameters instead of 3.
+Add a word XOS5 to <your>forth similiar to XOS that takes 5 parameters
+and a command number, knowing that the 4-th parameter goes into
+SI and the 5-th goes into DI .  Remember what we said about SI.
+Find a way to solve the problem (hint return stack).
+Now define BYE using XOS5. State the definition!
+Answer: : BYE 0 _ _ _ _    1 XOS5 ;
