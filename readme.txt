@@ -14,6 +14,9 @@ I don't know whether you are familiar with programming from a text
 console. There are a few things related to that collected in
 pitfalls.txt
 
+You can roam around in yourforth.html and get a pretty good idea of what
+is possible. A considerable part of the ALSO's are void. These indicate
+functions that were ommitted compared to ISO or a fuller Forth.
 
 yourforth.fas   : annotated source
 exercise.txt    : set of exercises
