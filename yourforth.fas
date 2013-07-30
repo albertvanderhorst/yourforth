@@ -5,7 +5,7 @@
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.7 $
+ ;   ciforth $Revision: 6.8 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -43,7 +43,7 @@
 ; Memory consists of bytes
 ; and, yes, nothing funny, that are the bytes you buy in the store.
 ; Bytes can represent characters, small pictures that are associated
-; with sounds (in most languages) or ideas in e.g. chinese.
+; with sounds (in most languages) or concepts in e.g. chinese.
 ; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
 ; but not EM. Chunks of bytes are needed to represent numbers as large as BM.
 ; We take 4 bytes together to form a cell, resulting in a 32-bit Forth,
@@ -59,6 +59,7 @@ cw      =     4                 ; Cell width
 ; 32 bits also happens to be the word size of the processor we are using, or more
 ; precisely -- because it is probably a 64-bit processor -- of the wordsize we
 ; are instructing the processor to use.
+
         use32
 
 
@@ -92,10 +93,16 @@ cibsize     = tasksize/2
 ; 100 m RS232 line. Linux has the convenient notions of a "standard input" and
 ; a "standard output" with facilities to use them. We let Linux take care of
 ; how this i/o is setup, and within Forth we just use it.
+; The character encoding doesn't count for much in Forth, but you can see that
+; this file is in UTF-8. The inventor of Forth, Chuck Moore uses a Huffman
+; encoding of his whim for colorforth. Exercise.
 
 ; This brings us to the subject of the interface with the Operating
 ; System. The interfacing with Linux is brutally direct. We use the system calls,
-; that have been given numbers
+; that have been given numbers. Each performs a basic functionality, e.g.
+; the open system call opens a file. 
+; Their documentation shows on commands like "man 2 exit".    
+
 __NR_exit    =     0x1
 __NR_open    =     0x5
 __NR_close   =     0x6
@@ -115,17 +122,145 @@ __NR_fork    =     0x2
 __NR_waitpid =     0x7
 __NR_pipe    =     0x2a
 
-; See XOS of how the dispatching takes place. They are documented as e.g. "man 2 exit".
-; The numbers have been copied from a secret place in Linux's include hierarchy (exercise).
+; See XOS of how the dispatching takes place.
+; The numbers have been copied from a secret place in Linux's include hierarchy (exercise)
+; and the exact names are retained, which means an exception to the naming convention
+; that words containing capitals or underscores are Forth names.
+;
+
+; The model for Forth is the stored program computer, actually the best invention since
+; sliced bread. The first computers had a work area where numbers were stored, and
+; punched card that represented the instructions. Then someone came with the idea, to
+; have one memory space, and store numbers there, but also put the program in the
+; same space and then have the computer read the instructions from memory.
+; Now a small programm can write a larger program, and then execute it!
+; It is is similar to how the human brain continuously reconditions its synapses
+; in a perpetual learning process. At last a machine with the potential of artificial
+; intelligence was born.
+; The first program-building program was probably an assembler, but at the time the larger
+;  program could not be deposited into memory and had to punched onto tape.
+; Guess what? It is still done this way, only the tape has been replaced
+; by disk files or EPROM. Only the artificial-intelligence-languages,
+; LISP and Forth, allow to have a program that extends itself
+; indefinitely. Interestingly, you will find that most programs cripple
+; the computer, by separating into a text and a data segment, the
+; equivalent of the punched card and the work area of above. Not so in
+; Forth, were data and the code belonging together remain close. 
+; It is hard to instruct a traditional compiler like GNU's to have one
+; unified memory space. It is telling that the option for the linker is
+; called -magic and it is is probably only there, because Richard
+; Stalman is a fan of that other ai-capable language, LISP. This applies
+; to GNU as. Of course what we want is simple, and with fasm doing
+; simple things is easy. 
+
+; You probably know a little bit how an interpreter works. Contrary to a compiler
+; that may inspect a whole file, it takes the input one word at a time.
+; In Forth word's are separated by blank space. The word is looked up in a list,
+; and it is executed, which means that it gets in control. There is no "interpreter
+; loop" that sniffs the word out, and refuses it if it is no good. No. You type
+; "DROP" and if it's there, you get it. The Intel program counter is set
+; to the machine code of "DROP" and the ship sails. 
+; Not all that we want the interpreter to understands can be put in the list, e.g.
+; we can't put all 32 bit numbers there. There are more notations for
+; expressions that are known at compile time and constant : "aap" 1234 0x1234.
+; We'll call those denotations.
+; The solution for denotations, is that it sufficient to have a partial
+; or ambiguous match. yourforth requires that the first characters are
+; recognized, so it can handle a 0x1234 notation for hexadecimal but not
+; Intel's 1234H. 
+; Being a prefix is merely a property of the Forth definition and it doesn't
+; make looking up a word all that harder.
+; So, if the first part of a word matches a prefix definition in the
+; list, e.g. " for strings, then the definition with name `` " '' 
+; is executed. For you new to Forth, a string consisting of one double
+; quote is a perfectly good Forth name. Get used to it!
+; It itself takes care of parsing the remainder of the denotation. 
+; At the very end of the list we have a catch-all, which always matches,
+; because it is the empty string. This interprets the string as a
+; number. I admit, this is a bit of a trick.
+
+; Now the intelligent part. You can use the Forth system to extend itself by
+; instructing the interpreter to add a new command to the list.
+; We will discuss that later in great detail. For now let's sketch how
+; the dictionary looks. It is basically a list of Forth words, each with
+; a header. The list is expandable, and the most recent word is highest
+; in memory. In Forth you can redefine a word, then it hides a word of
+; that same name that might exist. You get a warning, but it is not an
+; error. In this way you can replace a word with a version with
+; debugging information, you can use the old version to build the word.
+; In interactive sessions this feature is often used to correct
+; mistakes. Oops, forgot a carriage return.
+;
+; Forth definitions despite their division in categories like colon
+; definitions, variables, constants, cd-objects are uniform. Zooming in
+; we see the header, a structure with 5 fields each of one cell,
+; followed by memory that is owned by this definition, then the
+; following header. What is in the memory is up to the definition. You
+; may consider this Forth's version of an object. If there is one thing
+; to remember about objects that is that objects have a character and an
+; identity. An objects character, its type or class, is determined by
+; its behaviour or code. The identity of an object is determined by the
+; data it carries. Likewise Forth's object have a code field and a data
+; field. If you are into objects, you may associate the code field with
+; methods and the data fields with fields in traditional objects. You
+; will however discover that Forth is uncannily concrete and precise.
+;
+; The list mechanism requires a link field. This starts at the most
+; recent word. Its link contains the address of the header of the
+; previous definition, and so on, and the last definition contains a
+; zero. Then of course there is one field for the name. The flag field
+; with for miscellaneous properties, brings the field count to 5.
+;
+; So let's summarize.
+; A definition consist of a header with 5 fields CDFLN and its data
+; area. The definitions together make up the memory up to a point that
+; moves up with the addition of new definitions. Then we have free
+; memory up till the end of a reserved with a few scratch area's notably
+; the stack.
+;
+; The name is not very essential. You can change the name of any
+; definition in a working program and it keeps working all 
+; the same. A definition can only be found if you know the name, of
+; course. (EXERCISE!) 
+;
+; The link field also is not. It is only used by the interpreter to look
+; up a definition. A typical application program will never inspect link
+; fields. Set them all to zero and the program keeps working fine. A
+; definition can only be found if it is linked in properly, so the
+; compilation of that program cannot succeed. In fact the : definition
+; that starts compilation cannot be found. Exercise.
+;
+; The flag field contains a bit up for properties a word might have. For
+; example it may be hidden, which means that it must be ignored during a
+; lookup. Exercise.
+;
+; More essential is the data field. All but the basic instruction of the
+; Forth engine have data, associated: a constant value, a buffer
+; address, a structure with fields. Als note that most Forth code is
+; interpreted. The interpreted code is data, not machine code. Exercise.
+;
+; Absolutely essential is the code field. This contains an address and
+; the genuine Intel Program counter is directly and unconditionally
+; loaded with that address if the definition is called upon. If that
+; address is wrong you end up in genuine limbo. Remember Forth is
+; concrete and precise, no handwaving. I repeat it for clarity. If you
+; type in a Forth word, it is looked up, and its machine code address is
+; fetched. Then your Intel machine starts, for better or worse,
+; executing the code at that address. There is no safety net. If that
+; code doesn't cooperate with Forth-as-a-whole your machine crashes.
+; (exercise)
 ;
 ; To an interpreter strings play of course an important role.
 ; Forth strings are represented as an address and a length.
 ; Putting two things on the stack is of course no problem.
 ; This may be unfamiliar for the c-programmer, but familiar for the Pascal programmer.
+; Note that modern character encodings may contain embedded zero's, and several bytes may
+; combine to represent glyph. yourforth doesn't care.
 ; If stored in memory the length occupies a whole cell, and the characters
-; follow one per byte. Counting those characters is a chore, as we will
-; need a string for each name of a built in command.
+; follow, one per byte, as far as this file is concerned.
+; Counting those characters is a chore, as we will need a string for each name of a built in command.
 ; That chore is easily handled by the assembler using a macro.
+
 ;
 macro string  content {
     local startstring, endstring
@@ -141,7 +276,8 @@ endstring:
 ; Experienced assembler programmers expect two segments, one that we will fill
 ; with our forth code, and one unitialized that may be very large.
 ; (We could get by with one segment if we don't mind to have 1 Gbyte executables.)
-; The first segment would be NOBITS, the second BIT, and while linking we
+; The first segment would be marked BITS (or some such), and the second one NOBIT,
+; and while linking we
 ; would have made sure that they fit snugly together. Now this is a bit silly,
 ; because the assembler perfectly knows that the NOBITS part is not initialised.
 ; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store

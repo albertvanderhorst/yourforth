@@ -30,6 +30,24 @@ Answer: 123 0
 Now repeat the experiment, with the normal keyboard typing
 .S after each word.
 
+EXERCISE
+Run the test through yourforth as follows:
+yourforth <tsuiteyour.frt | more
+We want to see how this test signals defects.
+Remove the word MIN from yourforth, i.e. its header line and
+lines following up till MAX.
+Try to run the test again. Why doesn't this work?
+Answer: It doesn't assemble, because MIN is used in yourforth itself.
+Now rename the word MIN to APE.
+What number has the error revealed by tsuiteyour.frt?
+Answer: 10.
+Look the error up in yourforth.pdf.
+What is the name of the chapter it is in?
+Answer: errors.
+What are the three words that detect this error?
+Answer: & " (NUMBER)
+Hint: all errors are signalled by ?ERROR. Use the source!
+
 Define a word as per
 "APE" (CREATE)
 and verify that is is in the dictionary list.
@@ -46,6 +64,76 @@ Answer: to claim the code area, such that it is not overwritten.
 Define a test to show that the ALLOT is needed. i.e. that fails
 if you leave out `` 20 ALLOT ''. State it!
 Answer: 0 , APE
+EXERCISE
+'APE >NFA @ $@ TYPE
+You've earned your badge, from now on you may do
+'APE ID.
+
+
+Try out the following
+: APE "Kiss my ape" TYPE CR ;
+: NOTE "Crack note" TYPE CR ;
+: AN APE NOTE ;
+AN
+WORDS
+"MISS" $, 'APE >NFA ! \ Note $, has been introduced earlier.
+AN
+WORDS
+What is this code doing to the word APE?
+What do you see in WORDS?
+Answer: changing its name. The name APE is replaced by MISS.
+
+EXERCISE
+INCLUDE  sieve.frt
+SIEVE    \ 2000 primes
+WORDS
+: erase-links   'SIEVE   BEGIN >LFA DUP @ WHILE DUP @ >R 0 SWAP ! R> >LFA REPEAT ;
+SIEVE
+WORDS
+erase-links
+SIEVE
+WORDS
+
+What does sieve do? What does erase-links do? Does SIEVE still work after
+erase-links? And WORDS?
+Answer: prints primes. Puts all links after SIEVE to zero. Yes. Sort of,
+it prints "SIEVE erase-links" then crashes.
+
+: APE "APE" TYPE CR ;
+: NOTE "NOTE" TYPE CR ;
+'APE DUP . >FFA @ .
+'APE HIDDEN
+WORDS
+'APE >FFA @
+Why doesn't this work?
+FInd another way to inspect APE 's flagfield. State it.
+Answer: We can't print APE's FFA, because APE can't be found.
+Simply put this address on the stack before hiding.
+
+17 CONSTANT APE
+What contained in APE 's datafield. State the code.
+Answer: 17 . 'APE >DFA @
+
+
+EXERCISE
+'APE >CFA @ .
+"NOTE" (CREATE)
+Find out about NOTE 's datafield.
+"APE" (CREATE)
+1789172  'APE >CFA !
+APE
+"NOTE" (CREATE)
+HEX
+51 C, 52 C, 52 C, AD C, FF C,
+NOTE
+Put some values on the stack and try to find out what NOTE does.
+What happens if you type APE? What does NOTE?
+Answer: A crash. DUP.
+
+
+
+
+
 
 define 3 words A B C as per
 "A" (CREATE)
@@ -83,6 +171,9 @@ indicate that you have minus thousand Megabytes?
 Answer: we are in the dreaded negative memory zone.
 Find a Forth word to print `` EM BM - '' correctly.
 Answer: U.
+
+Exercise: Create two words red and green that appear in color if you
+type WORDS.
 
 Try this
 'FORTH CONTEXT !
