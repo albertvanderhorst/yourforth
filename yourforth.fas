@@ -5,7 +5,7 @@
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.8 $
+ ;   ciforth $Revision: 6.9 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -100,8 +100,8 @@ cibsize     = tasksize/2
 ; This brings us to the subject of the interface with the Operating
 ; System. The interfacing with Linux is brutally direct. We use the system calls,
 ; that have been given numbers. Each performs a basic functionality, e.g.
-; the open system call opens a file. 
-; Their documentation shows on commands like "man 2 exit".    
+; the open system call opens a file.
+; Their documentation shows on commands like "man 2 exit".
 
 __NR_exit    =     0x1
 __NR_open    =     0x5
@@ -145,13 +145,13 @@ __NR_pipe    =     0x2a
 ; indefinitely. Interestingly, you will find that most programs cripple
 ; the computer, by separating into a text and a data segment, the
 ; equivalent of the punched card and the work area of above. Not so in
-; Forth, were data and the code belonging together remain close. 
+; Forth, were data and the code belonging together remain close.
 ; It is hard to instruct a traditional compiler like GNU's to have one
 ; unified memory space. It is telling that the option for the linker is
 ; called -magic and it is is probably only there, because Richard
 ; Stalman is a fan of that other ai-capable language, LISP. This applies
 ; to GNU as. Of course what we want is simple, and with fasm doing
-; simple things is easy. 
+; simple things is easy.
 
 ; You probably know a little bit how an interpreter works. Contrary to a compiler
 ; that may inspect a whole file, it takes the input one word at a time.
@@ -159,7 +159,7 @@ __NR_pipe    =     0x2a
 ; and it is executed, which means that it gets in control. There is no "interpreter
 ; loop" that sniffs the word out, and refuses it if it is no good. No. You type
 ; "DROP" and if it's there, you get it. The Intel program counter is set
-; to the machine code of "DROP" and the ship sails. 
+; to the machine code of "DROP" and the ship sails.
 ; Not all that we want the interpreter to understands can be put in the list, e.g.
 ; we can't put all 32 bit numbers there. There are more notations for
 ; expressions that are known at compile time and constant : "aap" 1234 0x1234.
@@ -167,14 +167,14 @@ __NR_pipe    =     0x2a
 ; The solution for denotations, is that it sufficient to have a partial
 ; or ambiguous match. yourforth requires that the first characters are
 ; recognized, so it can handle a 0x1234 notation for hexadecimal but not
-; Intel's 1234H. 
+; Intel's 1234H.
 ; Being a prefix is merely a property of the Forth definition and it doesn't
 ; make looking up a word all that harder.
 ; So, if the first part of a word matches a prefix definition in the
-; list, e.g. " for strings, then the definition with name `` " '' 
+; list, e.g. " for strings, then the definition with name `` " ''
 ; is executed. For you new to Forth, a string consisting of one double
 ; quote is a perfectly good Forth name. Get used to it!
-; It itself takes care of parsing the remainder of the denotation. 
+; It itself takes care of parsing the remainder of the denotation.
 ; At the very end of the list we have a catch-all, which always matches,
 ; because it is the empty string. This interprets the string as a
 ; number. I admit, this is a bit of a trick.
@@ -219,9 +219,9 @@ __NR_pipe    =     0x2a
 ; the stack.
 ;
 ; The name is not very essential. You can change the name of any
-; definition in a working program and it keeps working all 
+; definition in a working program and it keeps working all
 ; the same. A definition can only be found if you know the name, of
-; course. (EXERCISE!) 
+; course. (EXERCISE!)
 ;
 ; The link field also is not. It is only used by the interpreter to look
 ; up a definition. A typical application program will never inspect link
@@ -650,24 +650,24 @@ MOVE2:
     header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
         pop     eax
         pop     ebx
-        AND     eax,ebx
+        and     eax,ebx
         push    eax
         next
     header  _OR_,   _OR_+5*cw, 0, 0, lastlink, "OR"
         pop     eax
         pop     ebx
-        OR      eax,ebx
+        or      eax,ebx
         push    eax
         next
     header  _XOR_,   _XOR_+5*cw, 0, 0, lastlink, "XOR"
         pop     eax
         pop     ebx
-        XOR     eax,ebx
+        xor     eax,ebx
         push    eax
         next
     header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
         pop     eax
-        NOT     eax
+        not     eax
         push    eax
         next
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
@@ -712,14 +712,18 @@ MOVE2:
         sbb     eax,eax
         push    eax
         next
+;    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
+;        pop    eax
+;        neg    eax
+;        sbb    eax,eax
+;        push   eax
+;        next
     header  _NOT_,   (zero_equal+5*cw), _NOT_+5*cw, 0, lastlink, "NOT"
     header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
         pop     eax
-        OR      eax,eax
-        mov     eax,0
-        jns     ZLESS1
-        dec     eax
-ZLESS1: push    eax
+        add     eax,eax
+        sbb     eax,eax
+        push    eax
         next
     header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
         pop     eax
@@ -872,6 +876,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  _one_,   docon, 1, 0, lastlink, "1"
     header  _BL_,   docon, ' ', 0, lastlink, "BL"
     header  string_fetch,   string_fetch+5*cw, 0, 0, lastlink, "$@"
+;;;;;;;;dd    _DUP_, CELL_plus, _SWAP_, _fetch_, EXIT
         pop   ebx
         mov   eax,[ebx]
         lea   edx, [ebx+1*cw]
@@ -895,7 +900,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd HERE, to_R
         dd _DUP_, CELL_plus, ALLOT
         dd R_fetch, string_store, R_from
- dd _ALIGN_
+        dd _ALIGN_
         dd EXIT
     header  _EM_,   docon, em, 0, lastlink, "EM"
     header  _BM_,   docon, bm, 0, lastlink, "BM"
@@ -905,7 +910,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  _DP_,   dobuf, _DP_+5*cw, 0, lastlink, "DP"
         dd      initdp
     header  WHERE,   dobuf, WHERE+5*cw, 0, lastlink, "WHERE"
-        dd _,_
+        dd      _, _
     header  STATE,   dobuf, STATE+5*cw, 0, lastlink, "STATE"
         dd      _
     header  BASE,   dobuf, BASE+5*cw, 0, lastlink, "BASE"
@@ -920,7 +925,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  REMAINDER,   dobuf, REMAINDER+5*cw, 0, lastlink, "REMAINDER"
         rb      2*cw
     header  CONTEXT,   dobuf, CONTEXT+5*cw, 0, lastlink, "CONTEXT"
-        rb      (16+1)*cw
+        dd      _
     header  one_plus,   docol, one_plus+5*cw, 0, lastlink, "1+"
         dd      _one_
         dd      _plus_
@@ -941,7 +946,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  ALIGNED ,   ALIGNED +5*cw, 0, 0, lastlink, "ALIGNED"
         pop     eax
         dec     eax
-        OR      eax,  1*cw-1
+        or      eax,  1*cw-1
         inc     eax
         push    eax
         next
@@ -976,19 +981,33 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      _minus_
         dd      zero_equal
         dd      EXIT
+;    header  _equal,   _equal+5*cw, 0, 0, lastlink, "="
+;        pop     eax
+;        pop     ebx
+;        sub     eax,ebx
+;        neg     eax
+;        cmc
+;        sbb     eax,eax
+;        push    eax
+;        next
     header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
         pop     edx
         pop     ebx
-        XOR     eax,eax
+        xor     eax,eax
         cmp     ebx,edx
-        jnl     LES1
-        dec     eax
-LES1:   push    eax
+        setl    al
+        neg     eax
+        push    eax
         next
-    header  _greater_,   docol, _greater_+5*cw, 0, lastlink, ">"
-        dd      SWAP
-        dd      _less_
-        dd      EXIT
+    header  _greater_,   _greater_+5*cw, 0, 0, lastlink, ">"
+        pop     edx
+        pop     ebx
+        xor     eax,eax
+        cmp     ebx,edx
+        setg    al
+        neg     eax
+        push    eax
+        next
     header  _unequal_,   docol, _unequal_+5*cw, 0, lastlink, "<>"
         dd      _minus_
         dd      zero_equal
@@ -1106,7 +1125,7 @@ crnoop: dd      EXIT
         dd      SAVE
         dd      SET_SRC
         dd      LIT, INTERPRET, CATCH
-        dd      RESTO
+        dd      _RESTORE_
         dd      THROW
         dd      EXIT
     header  FILL,   FILL+5*cw, 0, 0, lastlink, "FILL"
@@ -1557,7 +1576,7 @@ MAX1:   dd      DROP
         dd      to_R, to_R, to_R
         dd      to_R
         dd EXIT
-    header  RESTO,   docol, RESTO+5*cw, 0, lastlink, "RESTORE"
+    header  _RESTORE_,   docol, _RESTORE_+5*cw, 0, lastlink, "RESTORE"
         dd      R_from
         dd      R_from, R_from, R_from
         dd      PP, _store_
