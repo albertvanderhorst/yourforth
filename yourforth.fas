@@ -1,11 +1,11 @@
-; yourforth the simplest Forth possible
+; yourforth: the simplest Forth possible
 ; Originated as a FASM version of ciforth created by ``m4'' from generic listing.
 ;
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
         ;  66,106
- ;   ciforth $Revision: 6.9 $
+ ;   ciforth $Revision: 6.10 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -17,7 +17,7 @@
 ; nowadays.
 ; The one-liner illustrates why we deviate here. A gas equivalent would download 1 Gbyte!
 ; I use fasm because it has overwhelming advantages.
-; By implication the follow advantages point to disadvantages of gas.
+; By implication the following advantages point to disadvantages of gas.
 ; 1. fasm accommodates one simple segment
 ; 2. fasm accommodates Intel syntax fairly
 ; 3. fasm has a traditional macro facilitiy
@@ -62,14 +62,13 @@ cw      =     4                 ; Cell width
 
         use32
 
-
 ; This is not enough, Linux must know that this is a 32 bit (ELF)
 ; executable (not ELF64), to start the program in the right mode.
 
         FORMAT  ELF EXECUTABLE ; fasm makes an executable directly, no linker.
 
-; We are not particularly interested in what address BM represents and leave that
-; to the assembler. We do want to make sure we have enough bytes to work with,
+; We are not particularly interested at what address Forth starts.
+; We do want to make sure we have enough bytes to work with,
 ; that's what we define here. It is made to fit later, by declaring enough space.
 ; (exercise)
 ;
@@ -145,13 +144,31 @@ __NR_pipe    =     0x2a
 ; indefinitely. Interestingly, you will find that most programs cripple
 ; the computer, by separating into a text and a data segment, the
 ; equivalent of the punched card and the work area of above. Not so in
-; Forth, were data and the code belonging together remain close.
+; Forth, were data and code belonging together remain close.
 ; It is hard to instruct a traditional compiler like GNU's to have one
 ; unified memory space. It is telling that the option for the linker is
 ; called -magic and it is is probably only there, because Richard
 ; Stalman is a fan of that other ai-capable language, LISP. This applies
 ; to GNU as. Of course what we want is simple, and with fasm doing
 ; simple things is easy.
+
+; Experienced assembler programmers expect two segments, one that we will fill
+; with our forth code, and one unitialized that may be very large.
+; (We could get by with one segment if we don't mind to have 1 Gbyte executables.)
+; The first segment would be marked BITS (or some such), and the second one NOBIT,
+; and while linking we
+; would have made sure that they fit snugly together. Now this is a bit silly,
+; because the assembler perfectly knows that the NOBITS part is not initialised.
+; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store
+; the content of segments without content, it doesn't store the unitialised part
+; of segments. We can put everything in
+; one segment, and the unitialised part occupies no room on our hard disk.
+; <explanation of linking>
+
+               segment executable readable writable
+bm:                     ; This is the first address of Forth.
+; We are not particularly interested in what address bm represents and leave that
+; to the assembler.
 
 ; You probably know a little bit how an interpreter works. Contrary to a compiler
 ; that may inspect a whole file, it takes the input one word at a time.
@@ -161,7 +178,7 @@ __NR_pipe    =     0x2a
 ; "DROP" and if it's there, you get it. The Intel program counter is set
 ; to the machine code of "DROP" and the ship sails.
 ; Not all that we want the interpreter to understands can be put in the list, e.g.
-; we can't put all 32 bit numbers there. There are more notations for
+; we can't put all 32 bit numbers there. There are other notations for
 ; expressions that are known at compile time and constant : "aap" 1234 0x1234.
 ; We'll call those denotations.
 ; The solution for denotations, is that it sufficient to have a partial
@@ -250,19 +267,20 @@ __NR_pipe    =     0x2a
 ; code doesn't cooperate with Forth-as-a-whole your machine crashes.
 ; (exercise)
 ;
-; To an interpreter strings play of course an important role.
-; Forth strings are represented as an address and a length.
-; Putting two things on the stack is of course no problem.
-; This may be unfamiliar for the c-programmer, but familiar for the Pascal programmer.
-; Note that modern character encodings may contain embedded zero's, and several bytes may
-; combine to represent glyph. yourforth doesn't care.
-; If stored in memory the length occupies a whole cell, and the characters
-; follow, one per byte, as far as this file is concerned.
-; Counting those characters is a chore, as we will need a string for each name of a built in command.
+; To an interpreter strings play of course an important role. Forth
+; strings are represented as an address and a length. Putting two things
+; on the stack is of course no problem. This may be unfamiliar for the
+; c-programmer, but familiar for the Pascal programmer. Note that modern
+; character encodings may contain embedded zero's, and several bytes may
+; combine to represent glyph. yourforth doesn't care. If stored in
+; memory the length occupies a whole cell, and the characters follow,
+; one per byte, as far as this file is concerned. Counting those
+; characters is a chore, as we will need a string for each name of a
+; built in command.
 ; That chore is easily handled by the assembler using a macro.
 
-;
-macro string  content {
+macro string  content
+{
     local startstring, endstring
     dd    endstring -startstring
 startstring:
@@ -270,21 +288,6 @@ startstring:
 endstring:
         align    cw
 }
-
-; <explanation of dictiory headers and memory belonging to a d.e.>
-; <explanation of why 5 fields and their relation to objects>
-; Experienced assembler programmers expect two segments, one that we will fill
-; with our forth code, and one unitialized that may be very large.
-; (We could get by with one segment if we don't mind to have 1 Gbyte executables.)
-; The first segment would be marked BITS (or some such), and the second one NOBIT,
-; and while linking we
-; would have made sure that they fit snugly together. Now this is a bit silly,
-; because the assembler perfectly knows that the NOBITS part is not initialised.
-; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store
-; the content of segments without content, it doesn't store the unitialised part
-; of segments. We can put everything in
-; one segment, and the unitialised part occupies no room on our hard disk.
-; <explanation of linking>
 
 ; "content" is of course the string itself, and fasm treats the start
 ; and the end of the string as locals, i.e. they are generated new for each
@@ -295,8 +298,6 @@ endstring:
 ; not strictly necessary, but it makes inspecting memory so much easier.
 ; <I'm tempted to use a 'fix macro' to redefine DD as DC >
 
-               segment executable readable writable
-
 ; The header macro lays down the 5 fields in memory. You don't need to understand
 ; the following fully yet. The details are introduced gradually as each type of
 ; definition will be explained where it first occurs.
@@ -306,7 +307,8 @@ endstring:
 ; to be laid out in memory just like in the string macro and a pointer
 ; to that is put in the name field.
 
-macro header dea, cfield,dfield,ffield,lfield,forthname {
+macro header dea, cfield,dfield,ffield,lfield,forthname
+{
     local nfield, startstring, endstring
 nfield:         dd    endstring -startstring
 startstring:    db    forthname
@@ -370,10 +372,11 @@ lastlink EQU dea
 ;   the high level code is executed, that is found via the DFA. This typically
 ;   contains dea+5*cw. In other words the high level code contained at the post
 ;   header address is executed.
-; - cfield contains dea+5*cw. In other words, the machine code contained at the post header
-;    address is to be executed. These are the regular low level words that make up the
-;    Forth language like "+" and "DROP". Of course this code is different for all
-;    of those words.
+; - cfield contains dea+5*cw. In other words, its machine code is
+;   unique and contained at the post header address is to be executed.
+;   These are the regular low level words that make up the Forth
+;   language like "+" and "DROP". Of course this code is different for
+;   all of those words.
 ; - cfield contains dodo. The Forth definition is generated using a CREATE DOES>
 ;   construct, Forth's poor man's objects of the 1970's. We will elaborate on this later.
 ;
@@ -391,9 +394,8 @@ macro untilto  label
 ; the code following is executed. For ifto it is once, for whileto the code following
 ; is part of the loop, so we stay in the loop.
 ; in the loop, and for untilto the code following is outside of a loop.
-; Don't worry, Forthers hate nested loops. In the code of <your>forth you
-; will not find a single nested loop.
-;
+;  Don't worry, Forthers hate complicated control structures. In the
+;  code of <your>forth you will not find a single nested loop.
 ;
 ;
         ;
@@ -404,7 +406,6 @@ immediatemask   =     0x04
 denotationmask   =     0x08
 prefixmask = immediatemask+denotationmask
 epipe   =     0x20
-bm:
 ;
 ;  The virtual machine reserves some of the Intel registers for its own.
 ;  In the first place we need an interpretation pointer, to keep track
@@ -442,13 +443,11 @@ macro   next {
 ; Then we jump to what is contained in the code field of the dea, so actually
 ; [eax+0*cw] . We rely on that code to end again with a ``next'', and if
 ; it needs to use SI (e.g. for nesting), it must restore it beforehand.
-; exercise with (CREATE)  <maybe explain next before COLD>
+; exercise with (CREATE)
 ; Executing the code is started with an eax that contains the dea of the
 ; word. So even if the code field is filled with the same pointer,
 ; the objects data is different and results in different data or even different
-; action.
-
-        cld             ; Clear the direction bit. <EXPLANATION?!>
+; action. Object buff's will recognize this, it is just a self pointer.
 
         mov     esp, [DSP_zero+1*cw]
         mov     ebp, [RSP_zero+1*cw]
@@ -523,13 +522,13 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
     header  BRANCH,   BRANCH+5*cw, 0, 0, lastlink, "BRANCH"
 BRAN1:  lodsd
         dec     eax
-        OR      al,  4 - 1
+        or      al,  4 - 1
         inc     eax
         add     esi,eax
         next
     header  zero_BRANCH,   zero_BRANCH+5*cw, 0, 0, lastlink, "0BRANCH"
         pop     eax
-        OR      eax,eax
+        or      eax,eax
         jz      BRAN1
         lea     esi,[esi+1*cw]
         next
@@ -543,7 +542,7 @@ BRAN1:  lodsd
 XLOO1:  add     [ebp],ebx
         mov     eax,[ebp]
         sub     eax,[ebp+1*cw]
-        XOR     eax,ebx
+        xor     eax,ebx
         js      BRAN1
         lea     ebp,[ebp+3*cw]
         lea     esi,[esi+1*cw]
@@ -705,6 +704,21 @@ MOVE2:
         mov     eax,[ebp]
         push    eax
         next
+; 0<> is the most fundamental of logical operators.
+; It takes a dirty flag, anything not zero, and turns it into a proper
+; flag, i.e. all bits set. A false flag, zero, remains zero.
+; Its code is interesting. neg subtracts the number from zero, which generates
+; a borrow if it was not zero. So it transfers the flag to the carry bit.
+; sbb transfers the carry bit to a flag in a register. Subtracting a
+; register from itself with borrow generates a zero, unless the borrow
+; was set to begin with.
+    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
+        pop    eax
+        neg    eax
+        sbb    eax,eax
+        push   eax
+        next
+; Now 0= is easy. Add an instruction to complement the carry flag to 0<>
     header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
         pop     eax
         neg     eax
@@ -712,12 +726,7 @@ MOVE2:
         sbb     eax,eax
         push    eax
         next
-;    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
-;        pop    eax
-;        neg    eax
-;        sbb    eax,eax
-;        push   eax
-;        next
+; NOT is just an other name for 0=.
     header  _NOT_,   (zero_equal+5*cw), _NOT_+5*cw, 0, lastlink, "NOT"
     header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
         pop     eax
@@ -811,7 +820,7 @@ MOVE2:
         next
     header  C_fetch,   C_fetch+5*cw, 0, 0, lastlink, "C@"
         pop     ebx
-        XOR     eax,eax
+        xor     eax,eax
         mov     al,[ebx]
         push    eax
         next
@@ -1137,7 +1146,7 @@ crnoop: dd      EXIT
         next
     header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
         mov     edx,esi
-        XOR     eax,eax
+        xor     eax,eax
         pop     ecx
         pop     edi
         pop     esi
@@ -1155,11 +1164,11 @@ CORA3:
         pop     eax
         pop     ecx
         pop     edi
-        OR      esi,esi
+        or      esi,esi
         cld
         repnz     scasb
         jz      SINDEX1
-        XOR     edi,edi
+        xor     edi,edi
         inc     edi
 SINDEX1:
         dec     edi
@@ -1170,7 +1179,7 @@ SINDEX1:
         pop     ecx
         mov     ebx,ecx
         pop     edi
-        OR      edi,edi
+        or      edi,edi
         mov     edx,edi
         cld
         repnz     scasb
@@ -1238,7 +1247,7 @@ failed:
 found1:
         ; Require that we have a normal word (not invisible, not dummy.)
         dd      _DUP_, to_FFA, _fetch_
-        dd      LIT, invisiblemask OR dummymask, _AND_
+        dd      LIT, invisiblemask or dummymask, _AND_
         dd      zero_equal
         ifto  failed
         dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
