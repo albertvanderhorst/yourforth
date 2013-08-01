@@ -1,0 +1,9 @@
+HEX
+'TASK >DFA @ '?STACK >DFA !
+DUP BM 0C - +!
+DUP 'DSP0 >DFA +!
+DUP 'RSP0 >DFA +!
+DUP 'CIB  >DFA +!
+DUP 'EM  >DFA +!
+BM 54 - HERE OVER - "newforth" PUT-FILE
+BYE
