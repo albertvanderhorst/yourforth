@@ -24,16 +24,6 @@ HEX
 : UNLOOP        'RDROP , 'RDROP , 'RDROP , ;  IMMEDIATE
 
 : ROT SDSWAP ;
-"U<" (CREATE)
-    58 C,               \    POP     EAX
-    5A C,               \    POP     EDX
-    29 C, C2 C,         \    SUB     EDX,EAX
-    19 C, C0 C,         \    SBB     EAX,EAX
-    50 C,               \    PUSH    EAX
-    AD C,               \    LODSD                 ; NEXT
-    FF C, 20 C,         \    JMP      LONG[EAX]
-
-\     : WITHIN OVER - >R - R> U< ;
 
 \ FIXME! This definition is terribly wrong, but it helps out.
 : D+ ROT + >R + R> ;
@@ -76,23 +66,9 @@ DECIMAL
 
 \ Words actually used in the Hayes test.
 
-: S" PP@@ 2DROP POSTPONE " ; IMMEDIATE
-\ : ." POSTPONE " POSTPONE TYPE ; IMMEDIATE
-
-'' HIDDEN
-: '  NAME PRESENT DUP 0= 11 ?ERROR ;
-: [']  ' POSTPONE LITERAL ; IMMEDIATE
-
-: CHAR NAME DROP C@ ;
-: [CHAR] CHAR POSTPONE LITERAL ; IMMEDIATE
-: CHARS ;
-: CHAR+ 1 + ;
-
-: WORD  PP@@ 2DROP
-    DUP BL = IF DROP NAME ELSE >R BEGIN PP@@ R@ = WHILE DROP REPEAT
-    DROP -1 PP +! R> PARSE THEN HERE 34 BL FILL HERE $!-BD HERE ;
-: FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
-    >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
+\ '' HIDDEN
+\ : '  NAME PRESENT DUP 0= 11 ?ERROR ;
+\ : [']  ' POSTPONE LITERAL ; IMMEDIATE
 
 : >NUMBER
     2DUP + >R 0 2DUP - IF
@@ -174,11 +150,11 @@ CREATE ACTUAL-RESULTS 20 CELLS ALLOT
       DEPTH ?DUP IF                     \ IF THERE IS SOMETHING ON THE STACK
          0 DO                           \ FOR EACH STACK ITEM
             ACTUAL-RESULTS I CELLS + @  \ COMPARE ACTUAL WITH EXPECTED
-            <> IF S" INCORRECT RESULT: " ERROR LEAVE THEN
+            <> IF "INCORRECT RESULT: " ERROR LEAVE THEN
          LOOP
       THEN
    ELSE                                 \ DEPTH MISMATCH
-      S" WRONG NUMBER OF RESULTS: " ERROR
+      "WRONG NUMBER OF RESULTS: " ERROR
    THEN ;
 
 : TESTING       \ ( -- ) TALKING COMMENT.
@@ -688,7 +664,7 @@ IFSYM     : T*/    T*/MOD SWAP DROP ;
 { MIN-INT 2 MIN-INT */MOD -> MIN-INT 2 MIN-INT T*/MOD }
 
 \ ------------------------------------------------------------------------
-TESTING HERE , @ ! CELL+ CELLS C, C@ C! CHARS 2@ 2! ALIGN ALIGNED +! ALLOT
+TESTING HERE , @ ! CELL+ CELLS C, C@ C! 2@ 2! ALIGN ALIGNED +! ALLOT
 
 HERE 1 ALLOT
 HERE
@@ -719,8 +695,8 @@ HERE 2 C,
 CONSTANT 2NDC
 CONSTANT 1STC
 { 1STC 2NDC < -> <TRUE> }              \ HERE MUST GROW WITH ALLOT
-{ 1STC CHAR+ -> 2NDC }                  \ ... BY ONE CHAR
-{ 1STC 1 CHARS + -> 2NDC }
+{ 1STC 1+ -> 2NDC }                  \ ... BY ONE CHAR
+{ 1STC 1 + -> 2NDC }
 { 1STC C@ 2NDC C@ -> 1 2 }
 { 3 1STC C! -> }
 { 1STC C@ 2NDC C@ -> 3 2 }
@@ -731,7 +707,7 @@ HERE 1 ALLOT ALIGN 123 , CONSTANT X
 { X 1+ ALIGNED @ -> 123 }
 ( MISSING TEST: CHARS AT ALIGNED ADDRESS )
 
-{ 1 CELLS 1 CHARS MOD -> 0 }            \ SIZE OF CELL MULTIPLE OF SIZE OF CHAR
+{ 1 CELLS 1 MOD -> 0 }            \ SIZE OF CELL MULTIPLE OF SIZE OF CHAR
 
 { 0 1ST ! -> }
 { 1 1ST +! -> }
@@ -739,38 +715,38 @@ HERE 1 ALLOT ALIGN 123 , CONSTANT X
 { -1 1ST +! 1ST @ -> 0 }
 
 \ ------------------------------------------------------------------------
-TESTING CHAR [CHAR] [ ] BL S"
+TESTING [ ] BL & "
 
 { BL -> 20 }
-{ CHAR X -> 58 }
-{ CHAR HELLO -> 48 }
-{ : GC1 [CHAR] X ; -> }
-{ : GC2 [CHAR] HELLO ; -> }
+{ &X -> 58 }
+{ &H     -> 48 }
+{ : GC1 &X ; -> }
+{ : GC2 &H ; -> }
 { GC1 -> 58 }
 { GC2 -> 48 }
 { : GC3 [ GC1 ] LITERAL ; -> }
 { GC3 -> 58 }
-{ : GC4 S" XY" ; -> }
+{ : GC4 "XY" ; -> }
 { GC4 SWAP DROP -> 2 }
-{ GC4 DROP DUP C@ SWAP CHAR+ C@ -> 58 59 }
+{ GC4 DROP DUP C@ SWAP 1+ C@ -> 58 59 }
 
 \ ------------------------------------------------------------------------
-TESTING ' ['] FIND EXECUTE IMMEDIATE COUNT LITERAL POSTPONE STATE
+TESTING FIND EXECUTE IMMEDIATE COUNT LITERAL POSTPONE STATE  '
 
 { : GT1 123 ; -> }
-{ ' GT1 EXECUTE -> 123 }
-{ : GT2 ['] GT1 ; IMMEDIATE -> }
+{ 'GT1 EXECUTE -> 123 }
+{ : GT2 'GT1 ; IMMEDIATE -> }
 { GT2 EXECUTE -> 123 }
 : GT1STRING  "GT1" ;
 : GT2STRING  "GT2" ;
-{ GT1STRING FOUND -> ' GT1 }
-{ GT2STRING FOUND -> ' GT2 }
+{ GT1STRING FOUND -> 'GT1 }
+{ GT2STRING FOUND -> 'GT2 }
 ( HOW TO SEARCH FOR NON-EXISTENT WORD? ) \ Solved AH see next lines
 CREATE GT2A -1 C,
 : GT2ASTRING  GT2A 1 ;
 { GT2ASTRING FOUND >NFA @ @ -> 0 }
 { : GT3 GT2 LITERAL ; -> }
-{ GT3 -> ' GT1 }
+{ GT3 -> 'GT1 }
 { GT1STRING SWAP DROP -> 3 }
 
 { : GT4 POSTPONE GT1 ; IMMEDIATE -> }
@@ -873,7 +849,7 @@ TESTING DEFINING WORDS: : ; CONSTANT VARIABLE CREATE DOES> >BODY
 { : DOES2 DOES> @ 2 + ; -> }
 { CREATE CR1 -> }
 { CR1 -> HERE }
-{ ' CR1 >BODY -> HERE }
+{ 'CR1 >BODY -> HERE }
 { 1 , -> }
 { CR1 @ -> 1 }
 { DOES1 -> }
@@ -883,16 +859,16 @@ TESTING DEFINING WORDS: : ; CONSTANT VARIABLE CREATE DOES> >BODY
 
 { : WEIRD: CREATE DOES> 1 + DOES> 2 + ; -> }
 { WEIRD: W1 -> }
-{ ' W1 >BODY -> HERE }
+{ 'W1 >BODY -> HERE }
 { W1 -> HERE 1 + }
 { W1 -> HERE 2 + }
 
 \ ------------------------------------------------------------------------
 TESTING EVALUATE
 
-: GE1 S" 123" ; IMMEDIATE
-: GE2 S" 123 1+" ; IMMEDIATE
-: GE3 S" : GE4 345 ;" ;
+: GE1 "123" ; IMMEDIATE
+: GE2 "123 1+" ; IMMEDIATE
+: GE3 ": GE4 345 ;" ;
 : GE5 EVALUATE ; IMMEDIATE
 
 { GE1 EVALUATE -> 123 }                 ( TEST EVALUATE IN INTERP. STATE )
@@ -909,7 +885,7 @@ TESTING EVALUATE
 TESTING SRC PP NAME
 
 \ The phrase results is equivalent to ISO ``  SOURCE ''
-: GS1 S" SRC 2@ SWAP OVER - " 2DUP EVALUATE
+: GS1 "SRC 2@ SWAP OVER - " 2DUP EVALUATE
        >R SWAP >R = R> R> = ;
 { GS1 -> <TRUE> <TRUE> }
 
@@ -920,11 +896,11 @@ VARIABLE SCANS
 345 RESCAN?
 -> 345 345 }
 
-: GS2  5 SCANS ! S" 123 RESCAN?" EVALUATE ;
+: GS2  5 SCANS ! "123 RESCAN?" EVALUATE ;
 { GS2 -> 123 123 123 123 123 }
 
 : GS3 NAME SWAP C@ ;
-{ GS3 HELLO -> 5 CHAR H }
+{ GS3 HELLO -> 5 &H }
 
 : GS4 SRC CELL+ @ PP ! ;
 { GS4 123 456
@@ -938,7 +914,7 @@ TESTING <% % %S %> HOLD SIGN BASE >NUMBER HEX DECIMAL
       R> ?DUP IF                        \ IF NON-EMPTY STRINGS
          0 DO
             OVER C@ OVER C@ - IF 2DROP <FALSE> UNLOOP EXIT THEN
-            SWAP CHAR+ SWAP CHAR+
+            SWAP 1+ SWAP 1+
          LOOP
       THEN
       2DROP <TRUE>                      \ IF WE GET HERE, STRINGS MATCH
@@ -946,16 +922,16 @@ TESTING <% % %S %> HOLD SIGN BASE >NUMBER HEX DECIMAL
       R> DROP 2DROP <FALSE>             \ LENGTHS MISMATCH
    THEN ;
 
-: GP1 <% 41 HOLD 42 HOLD 0 %> S" BA" S= ;
+: GP1 <% 41 HOLD 42 HOLD 0 %> "BA" S= ;
 { GP1 -> <TRUE> }
 
-: GP2  <% -1 SIGN 0 SIGN -1 SIGN 0 %> S" --" S= ;
+: GP2  <% -1 SIGN 0 SIGN -1 SIGN 0 %> "--" S= ;
 { GP2 -> <TRUE> }
 
-: GP3  <% 1 % % %> S" 01" S= ;
+: GP3  <% 1 % % %> "01" S= ;
 { GP3 -> <TRUE> }
 
-: GP4  <% 1 %S %> S" 1" S= ;
+: GP4  <% 1 %S %> "1" S= ;
 { GP4 -> <TRUE> }
 
 24 CONSTANT MAX-BASE                    \ BASE 2 .. 36
@@ -967,7 +943,7 @@ COUNT-BITS CONSTANT #BITS-U         \ NUMBER OF BITS IN UD
    BASE @ <TRUE>
    MAX-BASE 1+ 2 DO                     \ FOR EACH POSSIBLE BASE
       I BASE !                          \ TBD: ASSUMES BASE WORKS
-      I <% %S %> S" 10" S= AND
+      I <% %S %> "10" S= AND
    LOOP
    SWAP BASE ! ;
 { GP5 -> <TRUE> }
@@ -978,8 +954,8 @@ COUNT-BITS CONSTANT #BITS-U         \ NUMBER OF BITS IN UD
    R> BASE !                            \ S: C-ADDR U
    DUP #BITS-U = SWAP
    0 DO                                 \ S: C-ADDR FLAG
-      OVER C@ [CHAR] 1 = AND            \ ALL ONES
-      >R CHAR+ R>
+      OVER C@ &1 = AND            \ ALL ONES
+      >R 1+ R>
    LOOP SWAP DROP ;
 { GP6 -> <TRUE> }
 
@@ -999,12 +975,12 @@ COUNT-BITS CONSTANT #BITS-U         \ NUMBER OF BITS IN UD
 { GP7 -> <TRUE> }
 
 \ >NUMBER TESTS
-CREATE GN-BUF 0 C,
-: GN-STRING     GN-BUF 1 ;
-: GN-CONSUMED   GN-BUF CHAR+ 0 ;
-: GN'           [CHAR] ' WORD CHAR+ C@ GN-BUF C!  GN-STRING ;
+CREATE GN-BUF _ , _ C,
+: GN-STRING     GN-BUF $@ ;
+: GN-CONSUMED   GN-BUF $@ DROP 1+ 0 ;
+: GN'           PP@@ 2DROP &' PARSE GN-BUF $!  GN-STRING ;
 
-\       : >NUMBER SAVE SET-SRC ['] (NUMBER) CATCH RESTORE THROW 0 D+ ;
+\       : >NUMBER SAVE SET-SRC 'NUMBER CATCH RESTORE THROW 0 D+ ;
 
 { 0 0 GN' 0' >NUMBER -> 0 0 GN-CONSUMED }
 { 0 0 GN' 1' >NUMBER -> 1 0 GN-CONSUMED }
@@ -1044,7 +1020,7 @@ TESTING FILL MOVE
 
 CREATE FBUF 00 C, 00 C, 00 C,
 CREATE SBUF 12 C, 34 C, 56 C,
-: SEEBUF FBUF C@  FBUF CHAR+ C@  FBUF CHAR+ CHAR+ C@ ;
+: SEEBUF FBUF C@  FBUF 1+ C@  FBUF 1+ 1+ C@ ;
 
 { FBUF 0 20 FILL -> }
 { SEEBUF -> 00 00 00 }
@@ -1055,22 +1031,22 @@ CREATE SBUF 12 C, 34 C, 56 C,
 { FBUF 3 20 FILL -> }
 { SEEBUF -> 20 20 20 }
 
-{ FBUF FBUF 3 CHARS MOVE -> }           \ BIZARRE SPECIAL CASE
+{ FBUF FBUF 3 MOVE -> }           \ BIZARRE SPECIAL CASE
 { SEEBUF -> 20 20 20 }
 
-{ SBUF FBUF 0 CHARS MOVE -> }
+{ SBUF FBUF 0 MOVE -> }
 { SEEBUF -> 20 20 20 }
 
-{ SBUF FBUF 1 CHARS MOVE -> }
+{ SBUF FBUF 1 MOVE -> }
 { SEEBUF -> 12 20 20 }
 
-{ SBUF FBUF 3 CHARS MOVE -> }
+{ SBUF FBUF 3 MOVE -> }
 { SEEBUF -> 12 34 56 }
 
-{ FBUF FBUF CHAR+ 2 CHARS MOVE -> }
+{ FBUF FBUF 1+ 2 MOVE -> }
 { SEEBUF -> 12 12 34 }
 
-{ FBUF CHAR+ FBUF 2 CHARS MOVE -> }
+{ FBUF 1+ FBUF 2 MOVE -> }
 { SEEBUF -> 12 34 34 }
 
 \ ------------------------------------------------------------------------
@@ -1080,13 +1056,13 @@ TESTING OUTPUT: . ." CR EMIT SPACE SPACES TYPE U.
    ." YOU SHOULD SEE 0-9 SEPARATED BY A SPACE:" CR
    9 1+ 0 DO I . LOOP CR
    ." YOU SHOULD SEE 0-9 (WITH NO SPACES):" CR
-   [CHAR] 9 1+ [CHAR] 0 DO I 0 SPACES EMIT LOOP CR
+   &9 1+ &0 DO I 0 SPACES EMIT LOOP CR
    ." YOU SHOULD SEE A-G SEPARATED BY A SPACE:" CR
-   [CHAR] G 1+ [CHAR] A DO I EMIT SPACE LOOP CR
+   &G 1+ &A DO I EMIT SPACE LOOP CR
    ." YOU SHOULD SEE 0-5 SEPARATED BY TWO SPACES:" CR
-   5 1+ 0 DO I [CHAR] 0 + EMIT 2 SPACES LOOP CR
+   5 1+ 0 DO I &0 + EMIT 2 SPACES LOOP CR
    ." YOU SHOULD SEE TWO SEPARATE LINES:" CR
-   S" LINE 1" TYPE CR S" LINE 2" TYPE CR
+   "LINE 1" TYPE CR "LINE 2" TYPE CR
    ." YOU SHOULD SEE THE NUMBER RANGES OF SIGNED AND UNSIGNED NUMBERS:" CR
    ."   SIGNED: " MIN-INT . MAX-INT . CR
    ." UNSIGNED: " 0 U. MAX-UINT U. CR
@@ -1097,13 +1073,13 @@ TESTING OUTPUT: . ." CR EMIT SPACE SPACES TYPE U.
 \ ------------------------------------------------------------------------
 TESTING INPUT: ACCEPT
 
-CREATE ABUF 80 CHARS ALLOT
+CREATE ABUF 80 ALLOT
 
 : ACCEPT-TEST
    CR ." PLEASE TYPE UP TO 80 CHARACTERS:" CR
    ABUF 80 ACCEPT
-   CR ." RECEIVED: " [CHAR] " EMIT
-   ABUF SWAP TYPE [CHAR] " EMIT CR
+   CR ." RECEIVED: " &" EMIT
+   ABUF SWAP TYPE &" EMIT CR
 ;
 
 ." YOU SHOULD SEE THE FOLLOWING LINE ANOTHER TIME AFTER RECEIVED:" CR
