@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.11 $
+;   yourforth $Revision: 6.12 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -102,7 +102,7 @@ cw      =     4                 ; Cell width
 ; This is not enough, Linux must know that this is a 32 bit (ELF)
 ; executable (not ELF64), to start the program in the right mode.
 ; This is the way to instruct fasm to put such a header at the front
-; od our program.
+; of our program.
 
         FORMAT  ELF EXECUTABLE ; fasm makes an executable directly, no linker.
 
@@ -182,8 +182,8 @@ __NR_pipe    =     0x2a
 
                segment executable readable writable
 bm:                     ; This is the first address of Forth.
-; We are not particularly interested in what address bm represents and leave that
-; to the assembler.
+; As said, we are not particularly interested in what address bm represents and don't
+; force the assemblers hand.
 
 ; You probably know a little bit how an interpreter works. Contrary to a compiler
 ; that may inspect a whole file, it takes the input one word at a time.
@@ -221,7 +221,8 @@ bm:                     ; This is the first address of Forth.
 ; error. In this way you can replace a word with a version with
 ; debugging information, you can use the old version to build the word.
 ; In interactive sessions this feature is often used to correct
-; mistakes. Oops, forgot a carriage return.
+; mistakes. Oops, forgot a carriage return. Let me just redefine it
+; as itself plus a carriage return.
 ;
 ; Forth definitions despite their division in categories like colon
 ; definitions, variables, constants, cd-objects are uniform. Zooming in
@@ -246,7 +247,7 @@ bm:                     ; This is the first address of Forth.
 ; So let's summarize.
 ; A definition consist of a header with 5 fields CDFLN and its data
 ; area. The definitions together make up the memory up to a point that
-; moves up with the addition of new definitions. Then we have free
+; moves up when adding new definitions. Then we have free
 ; memory up till the end of a reserved with a few scratch area's notably
 ; the stack.
 ;
@@ -377,7 +378,7 @@ lastlink EQU dea
 ; The most important type of definitions are lowlevel code, high level code,
 ; low level objects(constants, variables/buffers) and high level objects.
 ; They are gradually introduced by example, but here is an overview of the
-; different types:
+; different types. The names starting in "do" are assembler labels.
 ; - cfield contains docon. The definition is a constant, i.e. when executed it
 ;   puts a constant on the stack. That constant is present at the DFA.
 ; - cfield contains dobuf. The definition is a variable or buffer, i.e. when executed it
@@ -386,7 +387,7 @@ lastlink EQU dea
 ; - cfield contains docol. docol is the interpreter of Forth. It takes care that
 ;   the high level code is executed, that is found via the DFA. This typically
 ;   contains dea+5*cw. In other words the high level code contained at the post
-;   header address is executed.
+;   header address is executed. These are the ordinary functions.
 ; - cfield contains dea+5*cw. In other words, its machine code is
 ;   unique and contained at the post header address is to be executed.
 ;   These are the regular low level words that make up the Forth
@@ -396,23 +397,6 @@ lastlink EQU dea
 ;   construct, Forth's poor man's objects of the 1970's. We will elaborate on this later.
 ;
 
-macro goto  label
-{ dd  BRANCH, label-$-cw   }
-macro ifto  label
-{ dd  zero_BRANCH, label-$-cw   }
-macro whileto  label
-{ dd  zero_BRANCH, label-$-cw   }
-macro untilto  label
-{ dd  zero_BRANCH, label-$-cw   }
-; They all have in common that on the preceeding condition
-; being true/non-zero/on,
-; the code following is executed. For ifto it is once, for whileto the code following
-; is part of the loop, so we stay in the loop.
-; in the loop, and for untilto the code following is outside of a loop.
-;  Don't worry, Forthers hate complicated control structures. In the
-;  code of <your>forth you will not find a single nested loop.
-;
-;
         ;
 figrel  =     6
 dummymask   =     0x01
@@ -501,7 +485,7 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
 ; You see that we use our lastlink trick as described with the header macro.
 
     header  EXIT,   EXIT+5*cw, 0, 0, lastlink, "EXIT"
-        mov     esi,[ebp]
+        mov     esi,[ebp]               ; Pop SI from the return stack
         lea     ebp,[ebp+1*cw]
         next
 
@@ -512,12 +496,13 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
 
 ; Because you understand Intel assembly language a bit, I present you
 ; ;; with a table of the 5 instructions of the virtual machine:
-;     Forth machine      cells    Intel equivalent
+;     Forth machine      cells            Intel equivalent
 ;     DEA, invocation     1               call XXX
 ;     EXIT                1               rts
 ;     BRANCH rel          2               jr rel
 ;     0BRANCH rel         2               jz rel
 ;     LIT value           2               pushi value
+;     expandable          your choice     whatever
 ;
 ; That is all there is to it. If it seems few,
 ; let me remind you that all operations like + fall under the
@@ -527,30 +512,83 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
 ; constructs.  EXIT BRANCH 0BRANCH LIT are the names of actual
 ; definitions in the dictionary. Their invocation is the same as
 ; for just any DEA.
+; I put in the last line to remind you that this is not the end if it.
+; You can add basic constructs e.g. special looping constructs later.
+; You can use assembler language in defining it, and you can do this
+; in a separate file, that you will choose to include, or not.
+; FIXME: actual those looping are still built in.
 
-    header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
-       next
+; LIT does something very similar to next, it fetches
+; the cell from SI with auto increment, using the now familiar
+; lodsd instruction. Now we have to put that on the data stack.
     header  LIT,   LIT+5*cw, 0, 0, lastlink, "LIT"
         lodsd
         push    eax
         next
+
+; BRANCH also fetches a cell in line that serves as an offset to SI.
+; The three instruction
+; following round it up to a multiple of cw, an action that is called
+; alignment. Why that is done, we'll come back to later.
+; Normally the offset is a multiple of cw and nothing happens.
+; Si is incremented with the offset and
+; code is hencetoforth fetched from there.
+
     header  BRANCH,   BRANCH+5*cw, 0, 0, lastlink, "BRANCH"
 BRAN1:  lodsd
         dec     eax
-        or      al,  4 - 1
+        or      al,  cw - 1
         inc     eax
         add     esi,eax
         next
+; 0BRANCH is similar to BRANCH. The difference is just that before
+; the offset is added, it can be zeroed. This depends on a flag
+; popped from the data stack.
     header  zero_BRANCH,   zero_BRANCH+5*cw, 0, 0, lastlink, "0BRANCH"
-        pop     eax
-        or      eax,eax
-        jz      BRAN1
-        lea     esi,[esi+1*cw]
+        lodsd
+        pop     ebx
+        or      ebx,ebx
+        jz      ZBRAN1
+        xor     eax,eax
+ZBRAN1: add     esi,eax
         next
+; This completes the virtual Forth machine that is used in yourforth.
+; You can however at all times add anything that you come up with.
+
+; Probably you will find 0BRANCH confusing and hard to find out what
+; code is executed with what flag.
+; Also here again we want the offsets calculated for us.
+; This leads us to define some macro's.
+macro goto  label
+{ dd  BRANCH, label-$-cw   }
+
+; 0BRANCH always emulate a control structure, and different macros
+; are used to show which one.
+macro ifto  label
+{ dd  zero_BRANCH, label-$-cw   }
+macro whileto  label
+{ dd  zero_BRANCH, label-$-cw   }
+macro untilto  label
+{ dd  zero_BRANCH, label-$-cw   }
+; They all have in common that on the preceeding condition
+; being true/non-zero/on,
+; the code following is executed. Otherwise we skip to "label".
+; For ifto that code is executed once up till "label".
+; For whileto the code following
+; is part of the loop, so we stay in the loop. The label is where we want
+; to jump out of the loop.
+; For untilto the code following is outside of a loop, so we jump out.
+; Now the label is the start of the loop.
+;  Don't worry, Forthers hate complicated control structures. In the
+;  code of <your>forth you will not find a single nested loop.
+;
+;
+
+    header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
+       next
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
         jmp     dword[eax]
-
 
     header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
         mov     ebx,1
@@ -636,6 +674,8 @@ begin2: dd      DROP
 PARSE8:
         dd      PP, _store_
         dd      EXIT
+; PP points to the last cell of SRC.
+    header  PP,   dobuf, SRC+5*cw + 2*cw, 0, lastlink, "PP"
     header  SRC,   dobuf, SRC+5*cw, 0, lastlink, "SRC"
         dd      _,_,_
     header  CR,   docol, CR+5*cw, 0, lastlink, "CR"
@@ -941,9 +981,6 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      _
     header  HLD,   dobuf, HLD+5*cw, 0, lastlink, "HLD"
         dd      _
-    header  PP,   docol, PP+5*cw, 0, lastlink, "PP"
-        dd      SRC, CELL_plus, CELL_plus
-        dd      EXIT
     header  HANDLER,   dobuf, HANDLER+5*cw, 0, lastlink, "HANDLER"
         dd      _
     header  REMAINDER,   dobuf, REMAINDER+5*cw, 0, lastlink, "REMAINDER"
