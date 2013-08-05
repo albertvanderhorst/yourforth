@@ -1,17 +1,17 @@
-; yourforth: the simplest Forth possible
+; yourforth: the simplest Forth possible, i86 Linux version.
 ; Originated as a FASM version of ciforth created by ``m4'' from generic listing.
 ;
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-        ;  66,106
- ;   ciforth $Revision: 6.10 $
+;   yourforth $Revision: 6.11 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
 ; That is right. Not only did you brew coffee, you've been to Columbia, picked the beans,
 ; and roasted them as well! Next time you only need the last part.
 
+; ---------------- preliminary remark -------------------------
 ; Normally a Forth in assembly style would use the official assembler
 ; on the operating system at hand, in our case gas or ``GNU as'' as it is called
 ; nowadays.
@@ -26,12 +26,45 @@
 ; Also it accomodates symbol reassignment and labels that are local to macro's,
 ; which is kind of essential to the way we want to use macro's.
 
+; -------------------- introduction ------------------------------------
+; A famous chess player once stated that, if we were to find aliens living on
+; another planet, we should expect that they will play Go. Likewise
+; discovering Forth is something every civilisation in the universe will
+; do eventually. Chuck Moore claims to have discovered, rather than invented, Forth.
+; You'll find the structure of yourforth simple, and compelling.
+
+; The model for Forth is the stored program computer, actually the best invention since
+; sliced bread. The first computers had a work area where numbers were stored, and
+; punched card that represented the instructions. Then someone came with the idea, to
+; have one memory space, and store numbers there, but also put the program in the
+; same space and then have the computer read the instructions from memory.
+; Now a small programm can write a larger program, and then execute it!
+; It is is similar to how the human brain continuously reconditions its synapses
+; in a perpetual learning process. At last a machine with the potential of artificial
+; intelligence was born. So a memory item is identified by a number,
+;  the "address" of the memory item.
+; The first program-building program was probably an assembler, but at the time the larger
+;  program could not be deposited into memory and had to punched onto tape.
+; Guess what? It is still done this way, only the tape has been replaced
+; by disk files or EPROM. Only the artificial-intelligence-languages,
+; LISP and Forth, allow to have a program that extends itself
+; indefinitely. Interestingly, you will find that most programs cripple
+; the computer, by separating into a text and a data segment, the
+; equivalent of the punched card and the work area of above. Not so in
+; Forth, were data and code belonging together remain close.
+; It is hard to instruct a traditional compiler like GNU's to have such a
+; unified memory space. It is illustrative that the option for the linker is
+; called -magic and it is is probably only there, because Richard
+; Stalman is a fan of that other ai-capable language, LISP. This applies
+; to GNU as. Of course what we want is simple, and with fasm doing
+; simple things is easy.
+
 ; The first c-compiler in existance was written in assembler (what else?)
 ; but then immediately they rewrote the compiler in c.
 ; Likewise a PL-1 compiler is written in PL-1, an algol68 compiler
 ; is written in algol68. Can't a Forth be written in Forth?
 ; Actually it is! It is even easier. If you want to add features to a c-compiler
-; you must edit the source and rebuild it. With yourforth you
+; you must edit the source and rebuild it. Being an interpreter yourforth
 ; just can include a Forth source file with the facilities
 ; you want. Only the kernel here has to be written in assembler,
 ; like the first c-compiler ever.
@@ -39,20 +72,24 @@
 ; Forthcode, that is compiled by the assembler (with a renaming convention).
 ; Forth is the only language simple enough to make this feasible.
 
-; yourforth uses memory between BM and EM. (exercise)
 ; Memory consists of bytes
 ; and, yes, nothing funny, that are the bytes you buy in the store.
+; Those bytes are numbered, and thus identified, and they
+; can be used for data or code, as I choose.
+; yourforth uses memory between BM and EM. (exercise)
+; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
+; but not EM.
 ; Bytes can represent characters, small pictures that are associated
 ; with sounds (in most languages) or concepts in e.g. chinese.
-; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
-; but not EM. Chunks of bytes are needed to represent numbers as large as BM.
+; Chunks of bytes are needed to represent numbers as large as BM.
 ; We take 4 bytes together to form a cell, resulting in a 32-bit Forth,
 ; and restricting memory size to 4 Gbyte. Now we can manipulate
 ; fairly large numbers, of plus or minus 2000 millions, and addresses
-; up to ca. 2 Gbyte (we will shun negative addresses in yourforth.)
+; (which are just numbers)
+; up to ca. 2 Gbyte. We will shun negative addresses in yourforth.
 
-; The word "word" has a special meaning in Forth, so using "cell"
-; for those chunks diminishes confusion.
+; The word "word" has a special meaning in Forth, so using official Forth jargon
+; "cell" for those chunks diminishes confusion.
 
 cw      =     4                 ; Cell width
 
@@ -64,12 +101,15 @@ cw      =     4                 ; Cell width
 
 ; This is not enough, Linux must know that this is a 32 bit (ELF)
 ; executable (not ELF64), to start the program in the right mode.
+; This is the way to instruct fasm to put such a header at the front
+; od our program.
 
         FORMAT  ELF EXECUTABLE ; fasm makes an executable directly, no linker.
 
-; We are not particularly interested at what address Forth starts.
-; We do want to make sure we have enough bytes to work with,
-; that's what we define here. It is made to fit later, by declaring enough space.
+; We are not particularly interested at what address Forth starts, as long as
+; we have enough bytes to work with, and
+; that's what we define here. It is made to work, by declaring the right amount
+; of space.
 ; (exercise)
 ;
 forthsize      =     (0x100000)   ; One megabyte, for starters.
@@ -126,31 +166,6 @@ __NR_pipe    =     0x2a
 ; and the exact names are retained, which means an exception to the naming convention
 ; that words containing capitals or underscores are Forth names.
 ;
-
-; The model for Forth is the stored program computer, actually the best invention since
-; sliced bread. The first computers had a work area where numbers were stored, and
-; punched card that represented the instructions. Then someone came with the idea, to
-; have one memory space, and store numbers there, but also put the program in the
-; same space and then have the computer read the instructions from memory.
-; Now a small programm can write a larger program, and then execute it!
-; It is is similar to how the human brain continuously reconditions its synapses
-; in a perpetual learning process. At last a machine with the potential of artificial
-; intelligence was born.
-; The first program-building program was probably an assembler, but at the time the larger
-;  program could not be deposited into memory and had to punched onto tape.
-; Guess what? It is still done this way, only the tape has been replaced
-; by disk files or EPROM. Only the artificial-intelligence-languages,
-; LISP and Forth, allow to have a program that extends itself
-; indefinitely. Interestingly, you will find that most programs cripple
-; the computer, by separating into a text and a data segment, the
-; equivalent of the punched card and the work area of above. Not so in
-; Forth, were data and code belonging together remain close.
-; It is hard to instruct a traditional compiler like GNU's to have one
-; unified memory space. It is telling that the option for the linker is
-; called -magic and it is is probably only there, because Richard
-; Stalman is a fan of that other ai-capable language, LISP. This applies
-; to GNU as. Of course what we want is simple, and with fasm doing
-; simple things is easy.
 
 ; Experienced assembler programmers expect two segments, one that we will fill
 ; with our forth code, and one unitialized that may be very large.
@@ -226,7 +241,7 @@ bm:                     ; This is the first address of Forth.
 ; recent word. Its link contains the address of the header of the
 ; previous definition, and so on, and the last definition contains a
 ; zero. Then of course there is one field for the name. The flag field
-; with for miscellaneous properties, brings the field count to 5.
+; with bits up for miscellaneous properties, brings the field count to 5.
 ;
 ; So let's summarize.
 ; A definition consist of a header with 5 fields CDFLN and its data
