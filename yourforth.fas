@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.12 $
+;   yourforth $Revision: 6.13 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -583,9 +583,184 @@ macro untilto  label
 ;  code of <your>forth you will not find a single nested loop.
 ;
 ;
+; -------------------- low level definitions: operators ----------------------------
+; Operators are assembler functions that transform some inputs into some
+; output with all data on the stack. Examples are operations like + or <.
 
     header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
        next
+; 0<> is the most fundamental of logical operators.
+; It takes a dirty flag, anything not zero, and turns it into a proper
+; flag, i.e. all bits set. A false flag, zero, remains zero.
+; Its code is interesting. neg subtracts the number from zero, which generates
+; a borrow if it was not zero. So it transfers the flag to the carry bit.
+; sbb transfers the carry bit to a flag in a register. Subtracting a
+; register from itself with borrow generates a zero, unless the borrow
+; was set to begin with.
+    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
+        pop    eax
+        neg    eax
+        sbb    eax,eax
+        push   eax
+        next
+; Now 0= is easy. Add an instruction to complement the carry flag to 0<>
+    header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
+        pop     eax
+        neg     eax
+        cmc
+        sbb     eax,eax
+        push    eax
+        next
+; NOT is just an other name for 0=. We copy the code field of "0="
+    header  _NOT_,   (zero_equal+5*cw),  0, 0, lastlink, "NOT"
+    header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
+        pop     eax
+        add     eax,eax
+        sbb     eax,eax
+        push    eax
+        next
+    header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
+        pop     eax
+        pop     ebx
+        add     eax,ebx
+        push    eax
+        next
+    header  NEGATE,   NEGATE+5*cw, 0, 0, lastlink, "NEGATE"
+        pop     eax
+        neg     eax
+        push    eax
+        next
+    header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
+        pop     eax
+        pop     ebx
+        and     eax,ebx
+        push    eax
+        next
+    header  _OR_,   _OR_+5*cw, 0, 0, lastlink, "OR"
+        pop     eax
+        pop     ebx
+        or      eax,ebx
+        push    eax
+        next
+    header  _XOR_,   _XOR_+5*cw, 0, 0, lastlink, "XOR"
+        pop     eax
+        pop     ebx
+        xor     eax,ebx
+        push    eax
+        next
+    header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
+        pop     eax
+        not     eax
+        push    eax
+        next
+    header  _minus_,   _minus_+5*cw, 0, 0, lastlink, "-"
+        pop     edx
+        pop     eax
+        sub     eax,edx
+        push    eax
+        next
+    header  _equal_,   docol, _equal_+5*cw, 0, lastlink, "="
+        dd      _minus_
+        dd      zero_equal
+        dd      EXIT
+;    header  _equal,   _equal+5*cw, 0, 0, lastlink, "="
+;        pop     eax
+;        pop     ebx
+;        sub     eax,ebx
+;        neg     eax
+;        cmc
+;        sbb     eax,eax
+;        push    eax
+;        next
+    header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
+        pop     edx
+        pop     ebx
+        xor     eax,eax
+        cmp     ebx,edx
+        setl    al
+        neg     eax
+        push    eax
+        next
+    header  _greater_,   _greater_+5*cw, 0, 0, lastlink, ">"
+        pop     edx
+        pop     ebx
+        xor     eax,eax
+        cmp     ebx,edx
+        setg    al
+        neg     eax
+        push    eax
+        next
+    header  _unequal_,   docol, _unequal_+5*cw, 0, lastlink, "<>"
+        dd      _minus_
+        dd      zero_equal
+        dd      _NOT_
+        dd      EXIT
+
+; -------------------- low level definitions: stack operations -----------------
+; Stack operations reorder, duplicate or remove items from the data stack
+; without doing a transformation on them.
+    header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
+        pop     edx
+        pop     eax
+        push    eax
+        push    edx
+        push    eax
+        next
+    header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
+        pop     eax
+        next
+    header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
+        pop     eax
+        pop     ebx
+        push    eax
+        next
+    header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
+        pop     eax
+        pop     eax
+        next
+    header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
+        pop     edx
+        pop     eax
+        push    edx
+        push    eax
+        next
+    header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
+        pop     eax
+        push    eax
+        push    eax
+        next
+    header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
+        pop     eax
+        pop     edx
+        push    edx
+        push    eax
+        push    edx
+        push    eax
+        next
+    header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next
+    header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     edx
+        push     eax
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next
+
+; ------------------------------------------------------------------------------
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
         jmp     dword[eax]
@@ -701,29 +876,6 @@ MOVE2:
         cld
         mov     esi,ebx
         next
-    header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
-        pop     eax
-        pop     ebx
-        and     eax,ebx
-        push    eax
-        next
-    header  _OR_,   _OR_+5*cw, 0, 0, lastlink, "OR"
-        pop     eax
-        pop     ebx
-        or      eax,ebx
-        push    eax
-        next
-    header  _XOR_,   _XOR_+5*cw, 0, 0, lastlink, "XOR"
-        pop     eax
-        pop     ebx
-        xor     eax,ebx
-        push    eax
-        next
-    header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
-        pop     eax
-        not     eax
-        push    eax
-        next
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
         mov     eax,esp
         push    eax
@@ -757,107 +909,6 @@ MOVE2:
         next
     header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
         mov     eax,[ebp]
-        push    eax
-        next
-; 0<> is the most fundamental of logical operators.
-; It takes a dirty flag, anything not zero, and turns it into a proper
-; flag, i.e. all bits set. A false flag, zero, remains zero.
-; Its code is interesting. neg subtracts the number from zero, which generates
-; a borrow if it was not zero. So it transfers the flag to the carry bit.
-; sbb transfers the carry bit to a flag in a register. Subtracting a
-; register from itself with borrow generates a zero, unless the borrow
-; was set to begin with.
-    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
-        pop    eax
-        neg    eax
-        sbb    eax,eax
-        push   eax
-        next
-; Now 0= is easy. Add an instruction to complement the carry flag to 0<>
-    header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
-        pop     eax
-        neg     eax
-        cmc
-        sbb     eax,eax
-        push    eax
-        next
-; NOT is just an other name for 0=.
-    header  _NOT_,   (zero_equal+5*cw), _NOT_+5*cw, 0, lastlink, "NOT"
-    header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
-        pop     eax
-        add     eax,eax
-        sbb     eax,eax
-        push    eax
-        next
-    header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
-        pop     eax
-        pop     ebx
-        add     eax,ebx
-        push    eax
-        next
-    header  NEGATE,   NEGATE+5*cw, 0, 0, lastlink, "NEGATE"
-        pop     eax
-        neg     eax
-        push    eax
-        next
-    header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
-        pop     edx
-        pop     eax
-        push    eax
-        push    edx
-        push    eax
-        next
-    header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
-        pop     eax
-        next
-    header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
-        pop     eax
-        pop     ebx
-        push    eax
-        next
-    header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
-        pop     eax
-        pop     eax
-        next
-    header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
-        pop     edx
-        pop     eax
-        push    edx
-        push    eax
-        next
-    header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
-        pop     eax
-        push    eax
-        push    eax
-        next
-    header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
-        pop     eax
-        pop     edx
-        push    edx
-        push    eax
-        push    edx
-        push    eax
-        next
-    header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
-        pop     ebx
-        pop     ecx
-        pop     eax
-        pop     edx
-        push     ecx
-        push     ebx
-        push    edx
-        push    eax
-        next
-    header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
-        pop     ebx
-        pop     ecx
-        pop     eax
-        pop     edx
-        push     edx
-        push     eax
-        push     ecx
-        push     ebx
-        push    edx
         push    eax
         next
     header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
@@ -1031,48 +1082,6 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      _one_
         dd      ALLOT
         dd      C_store
-        dd      EXIT
-    header  _minus_,   _minus_+5*cw, 0, 0, lastlink, "-"
-        pop     edx
-        pop     eax
-        sub     eax,edx
-        push    eax
-        next
-    header  _equal_,   docol, _equal_+5*cw, 0, lastlink, "="
-        dd      _minus_
-        dd      zero_equal
-        dd      EXIT
-;    header  _equal,   _equal+5*cw, 0, 0, lastlink, "="
-;        pop     eax
-;        pop     ebx
-;        sub     eax,ebx
-;        neg     eax
-;        cmc
-;        sbb     eax,eax
-;        push    eax
-;        next
-    header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
-        pop     edx
-        pop     ebx
-        xor     eax,eax
-        cmp     ebx,edx
-        setl    al
-        neg     eax
-        push    eax
-        next
-    header  _greater_,   _greater_+5*cw, 0, 0, lastlink, ">"
-        pop     edx
-        pop     ebx
-        xor     eax,eax
-        cmp     ebx,edx
-        setg    al
-        neg     eax
-        push    eax
-        next
-    header  _unequal_,   docol, _unequal_+5*cw, 0, lastlink, "<>"
-        dd      _minus_
-        dd      zero_equal
-        dd      _NOT_
         dd      EXIT
     header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
         dd      to_R, SWAP, R_from, SWAP
