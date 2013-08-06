@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.13 $
+;   yourforth $Revision: 6.14 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -439,6 +439,9 @@ macro   next {
 ; Now the choice for SI becomes clear. The lodsd instruction loads the dea
 ; from the instruction stream into EAX, and increments SI on the way,
 ; making it point to the next Forth instruction.
+; Actually this is a bit tricky. This requires that the socalled direction bit
+; is set to forward, using the instruction cld.
+; After executing the instruction std, lodsd is switched to decrementing.
 ; Then we jump to what is contained in the code field of the dea, so actually
 ; [eax+0*cw] . We rely on that code to end again with a ``next'', and if
 ; it needs to use SI (e.g. for nesting), it must restore it beforehand.
@@ -448,6 +451,7 @@ macro   next {
 ; the objects data is different and results in different data or even different
 ; action. Object buff's will recognize this, it is just a self pointer.
 
+        cld     ; This direction must never change, or next stops working
         mov     esp, [DSP_zero+1*cw]
         mov     ebp, [RSP_zero+1*cw]
         mov     esi, COLD+5*cw
@@ -584,8 +588,10 @@ macro untilto  label
 ;
 ;
 ; -------------------- low level definitions: operators ----------------------------
-; Operators are assembler functions that transform some inputs into some
-; output with all data on the stack. Examples are operations like + or <.
+; Operators are assembler functions that take all inputs from the stack,
+; do some transformation and put all results back on the stack. In other
+; words they have no side effects.
+; Examples are operations like + or <.
 
     header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
        next
@@ -597,7 +603,7 @@ macro untilto  label
 ; sbb transfers the carry bit to a flag in a register. Subtracting a
 ; register from itself with borrow generates a zero, unless the borrow
 ; was set to begin with.
-    header  zero_unequal,   zero_equal+5*cw, 0, 0, lastlink, "0<>"
+    header  zero_unequal,   zero_unequal+5*cw, 0, 0, lastlink, "0<>"
         pop    eax
         neg    eax
         sbb    eax,eax
@@ -615,19 +621,45 @@ macro untilto  label
     header  _NOT_,   (zero_equal+5*cw),  0, 0, lastlink, "NOT"
     header  zero_less,   zero_less+5*cw, 0, 0, lastlink, "0<"
         pop     eax
-        add     eax,eax
+        shl     eax,1      ; Move eax's sign bit into the carry bit.
         sbb     eax,eax
-        push    eax
-        next
-    header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
-        pop     eax
-        pop     ebx
-        add     eax,ebx
         push    eax
         next
     header  NEGATE,   NEGATE+5*cw, 0, 0, lastlink, "NEGATE"
         pop     eax
         neg     eax
+        push    eax
+        next
+    header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
+        pop     eax
+        not     eax
+        push    eax
+        next
+    header  ALIGNED ,   ALIGNED +5*cw, 0, 0, lastlink, "ALIGNED"
+        pop     eax
+        dec     eax
+        or      eax,  1*cw-1
+        inc     eax
+        push    eax
+        next
+    header  one_plus,   docol, one_plus+5*cw, 0, lastlink, "1+"
+        dd      _one_
+        dd      _plus_
+        dd      EXIT
+    header  CELL_plus,   docol, CELL_plus+5*cw, 0, lastlink, "CELL+"
+        dd      LIT, cw
+        dd      _plus_
+        dd      EXIT
+    header  CELLS,   docol, CELLS+5*cw, 0, lastlink, "CELLS"
+        dd      LIT, 2
+        dd      LSHIFT
+        dd      EXIT
+
+; The archetype of an operator, pop 2 registers, add them and push the result.
+    header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
+        pop     eax
+        pop     ebx
+        add     eax,ebx
         push    eax
         next
     header  _AND_,   _AND_+5*cw, 0, 0, lastlink, "AND"
@@ -648,53 +680,50 @@ macro untilto  label
         xor     eax,ebx
         push    eax
         next
-    header  INVERT,   INVERT+5*cw, 0, 0, lastlink, "INVERT"
-        pop     eax
-        not     eax
-        push    eax
-        next
     header  _minus_,   _minus_+5*cw, 0, 0, lastlink, "-"
         pop     edx
         pop     eax
         sub     eax,edx
         push    eax
         next
-    header  _equal_,   docol, _equal_+5*cw, 0, lastlink, "="
-        dd      _minus_
-        dd      zero_equal
-        dd      EXIT
-;    header  _equal,   _equal+5*cw, 0, 0, lastlink, "="
-;        pop     eax
-;        pop     ebx
-;        sub     eax,ebx
-;        neg     eax
-;        cmc
-;        sbb     eax,eax
-;        push    eax
-;        next
-    header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
-        pop     edx
-        pop     ebx
-        xor     eax,eax
-        cmp     ebx,edx
-        setl    al
-        neg     eax
-        push    eax
-        next
-    header  _greater_,   _greater_+5*cw, 0, 0, lastlink, ">"
-        pop     edx
-        pop     ebx
-        xor     eax,eax
-        cmp     ebx,edx
-        setg    al
-        neg     eax
-        push    eax
-        next
-    header  _unequal_,   docol, _unequal_+5*cw, 0, lastlink, "<>"
-        dd      _minus_
-        dd      zero_equal
-        dd      _NOT_
-        dd      EXIT
+; Intel has a set instruction that moves the condition we need (such as equality)
+; into the least significant bit of AX.
+    header  _equal_,   _equal_+5*cw, 0, 0, lastlink, "="
+         pop     edx
+         pop     ebx
+         xor     eax,eax  ; Zero all of AX
+         cmp     ebx,edx
+         sete    al       ; Set least significant bit according to "equal"
+         neg     eax      ; 1 -> -1 : a proper flag
+         push    eax
+         next
+    header  _unequal_,   _unequal_+5*cw, 0, 0, lastlink, "<>"
+         pop     edx
+         pop     ebx
+         xor     eax,eax
+         cmp     ebx,edx
+         setne    al      ; Set least significant bit according to "not equal"
+         neg     eax
+         push    eax
+         next
+     header  _less_,   _less_+5*cw, 0, 0, lastlink, "<"
+         pop     edx
+         pop     ebx
+         xor     eax,eax
+         cmp     ebx,edx
+         setl    al       ; Set least significant bit according to "less"
+         neg     eax
+         push    eax
+         next
+     header  _greater_,   _greater_+5*cw, 0, 0, lastlink, ">"
+         pop     edx
+         pop     ebx
+         xor     eax,eax
+         cmp     ebx,edx
+         setg    al       ; Set least significant bit according to "greater"
+         neg     eax
+         push    eax
+         next
 
 ; -------------------- low level definitions: stack operations -----------------
 ; Stack operations reorder, duplicate or remove items from the data stack
@@ -852,7 +881,8 @@ PARSE8:
 ; PP points to the last cell of SRC.
     header  PP,   dobuf, SRC+5*cw + 2*cw, 0, lastlink, "PP"
     header  SRC,   dobuf, SRC+5*cw, 0, lastlink, "SRC"
-        dd      _,_,_
+; Three cells: start and end of parse area, parse pointer.
+        dd      _, _, _
     header  CR,   docol, CR+5*cw, 0, lastlink, "CR"
         dd      LIT,0x0A
         dd      EMIT
@@ -864,7 +894,6 @@ PARSE8:
         pop     esi
         cmp     esi,edi
         jc    MOVE1
-        cld
         jmp short MOVE2
 MOVE1:  std
         add     edi,ecx
@@ -873,7 +902,7 @@ MOVE1:  std
         dec     esi
 MOVE2:
         rep     movsb
-        cld
+        cld           ; Make sure the direction is forward again.
         mov     esi,ebx
         next
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
@@ -1038,30 +1067,11 @@ dobuf:  mov     eax,[eax+(1)*cw]
         rb      2*cw
     header  CONTEXT,   dobuf, CONTEXT+5*cw, 0, lastlink, "CONTEXT"
         dd      _
-    header  one_plus,   docol, one_plus+5*cw, 0, lastlink, "1+"
-        dd      _one_
-        dd      _plus_
-        dd      EXIT
-    header  CELL_plus,   docol, CELL_plus+5*cw, 0, lastlink, "CELL+"
-        dd      LIT, cw
-        dd      _plus_
-        dd      EXIT
-    header  CELLS,   docol, CELLS+5*cw, 0, lastlink, "CELLS"
-        dd      LIT, 2
-        dd      LSHIFT
-        dd      EXIT
     header  _ALIGN_,   docol , _ALIGN_+5*cw, 0, lastlink, "ALIGN"
         dd      _DP_, _fetch_
         dd      ALIGNED
         dd      _DP_, _store_
         dd      EXIT
-    header  ALIGNED ,   ALIGNED +5*cw, 0, 0, lastlink, "ALIGNED"
-        pop     eax
-        dec     eax
-        or      eax,  1*cw-1
-        inc     eax
-        push    eax
-        next
     header  HERE,   docol, HERE+5*cw, 0, lastlink, "HERE"
         dd      _DP_
         dd      _fetch_
@@ -1207,6 +1217,8 @@ crnoop: dd      EXIT
         next
     header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
         mov     edx,esi
+; Default result of zero.
+; Also set the zero bit, which is essential if the count is zero.
         xor     eax,eax
         pop     ecx
         pop     edi
@@ -1311,19 +1323,19 @@ found1:
         dd      LIT, invisiblemask or dummymask, _AND_
         dd      zero_equal
         ifto  failed
-        dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
-        ifto  endif3
-            dd      NIP,NIP,EXIT         ; Leave dea
+            dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
+            ifto  endif3
+                dd      NIP,NIP,EXIT         ; Leave dea
 endif3:
         ; We may still have a denotation, the dea matches the string as a prefix.
         ; Require that the name is at least as large as the prefix.
-        dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
-        ifto  failed
+            dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
+            ifto  failed
         ; Require that it is a denotation.
-        dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
-        ifto  failed
-        dd      NIP,NIP,EXIT   ; leave dea, a denotation.
-
+                dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
+                ifto  failed
+                    dd      NIP,NIP,EXIT   ; leave dea, a denotation.
+        ; endif endif endif
     header  PRESENT,   docol, PRESENT+5*cw, 0, lastlink, "PRESENT"
         dd      _DUP_, to_R
         dd      FOUND
@@ -1421,9 +1433,9 @@ sb1:
         dd      _TYPE_, CR
         dd      _
 CREA1:  dd      DROP
- dd      _ALIGN_
+        dd      _ALIGN_
         dd      string_comma
- dd      _ALIGN_
+        dd      _ALIGN_
         dd      HERE,to_R
         dd      R_fetch, to_PHA, _comma_
         dd      R_fetch, to_PHA, _comma_
@@ -1969,17 +1981,18 @@ dovoc:
 
     header  FORTH,   dodo, FORTH+5*cw, 0, lastlink, "FORTH"
         dd      dovoc
+        ; Dummy header, use the datafield of 0 as an empty string.
         dd      0, 0, dummymask, TASK, (_zero_+1*cw)
 
     header  TASK,   docol, TASK+5*cw, 0, dot_S, "TASK"
         dd      EXIT
 initdp:
 dictsize       =     initdp - bm
-         rb  (forthsize - dictsize - tasksize )
-        rb  (stacksize )
+        rb  forthsize - dictsize - tasksize
+        rb  stacksize
 initdsp0:
-initcib: rb  (cibsize )
-        rb  (stacksize )
+initcib: rb  cibsize
+        rb  stacksize
 initrsp0:
 em:
         ;
