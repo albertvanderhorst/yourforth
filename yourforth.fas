@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.14 $
+;   yourforth $Revision: 6.15 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -439,9 +439,9 @@ macro   next {
 ; Now the choice for SI becomes clear. The lodsd instruction loads the dea
 ; from the instruction stream into EAX, and increments SI on the way,
 ; making it point to the next Forth instruction.
-; Actually this is a bit tricky. This requires that the socalled direction bit
-; is set to forward, using the instruction cld.
-; After executing the instruction std, lodsd is switched to decrementing.
+; [Actually this is a bit tricky. This requires that the socalled
+; direction bit is set to forward, using the instruction cld. After
+; executing the instruction std, lodsd is switched to decrementing.]
 ; Then we jump to what is contained in the code field of the dea, so actually
 ; [eax+0*cw] . We rely on that code to end again with a ``next'', and if
 ; it needs to use SI (e.g. for nesting), it must restore it beforehand.
@@ -788,7 +788,28 @@ macro untilto  label
         push    edx
         push    eax
         next
-
+; The return stack can be used for scratch.
+    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
+        pop     ebx
+        lea     ebp,[ebp - 1*cw]
+        mov     [ebp],ebx
+        next
+    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"
+        mov     eax,[ebp]
+        lea     ebp,[ebp + 1*cw]
+        push    eax
+        next
+    header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
+        mov     eax,[ebp]
+        push    eax
+        next
+; SDSWAP reorders a,b1,b2 on the stack into b1,b2,a.
+; We have no way to directly get b1 into place, but if we first
+; move b2 out of the way to the return stack, we can by swapping.
+; Now get b2 back, leaving b1,a,b2. That we can handle.
+    header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
+        dd      to_R, SWAP, R_from, SWAP
+        dd      EXIT
 ; ------------------------------------------------------------------------------
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
@@ -925,20 +946,6 @@ MOVE2:
         next
     header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
         pop     ebp
-        next
-    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
-        pop     ebx
-        lea     ebp,[ebp - 1*cw]
-        mov     [ebp],ebx
-        next
-    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"
-        mov     eax,[ebp]
-        lea     ebp,[ebp + 1*cw]
-        push    eax
-        next
-    header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
-        mov     eax,[ebp]
-        push    eax
         next
     header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
         pop     ebx
@@ -1092,9 +1099,6 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      _one_
         dd      ALLOT
         dd      C_store
-        dd      EXIT
-    header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
-        dd      to_R, SWAP, R_from, SWAP
         dd      EXIT
     header  SPACE,   docol, SPACE+5*cw, 0, lastlink, "SPACE"
         dd      _BL_

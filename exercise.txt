@@ -24,11 +24,11 @@ ending each line with the <ENTER> key from the keypad.
   -
   .
 "
+Now repeat the experiment, with the normal keyboard typing
+.S after each word.
 What are the first and second results?
 Answer:
 
-Now repeat the experiment, with the normal keyboard typing
-.S after each word.
 
 Run the test through yourforth as follows:
 yourforth <tsuiteyour.frt | more
@@ -43,7 +43,7 @@ Answer:
 Look the error up in yourforth.pdf.
 What is the name of the chapter it is in?
 Answer:
-What are the three words that detect this error?
+What are the three words where this error is detected?
 Answer:
 Hint: all errors are signalled by ?ERROR. Use the source!
 
@@ -110,13 +110,11 @@ Find another way to inspect APE 's flagfield. State it.
 Answer:
 
 17 CONSTANT APE
-What contained in APE 's datafield. State the code.
-Answer:
+What is contained in APE 's datafield. State the code to inspect it.
 
-
-'APE >CFA @ .
 "NOTE" (CREATE)
-Find out about NOTE 's datafield.
+What is contained in APE 's datafield.
+Answer:
 "APE" (CREATE)
 1789172  'APE >CFA !
 APE
@@ -168,14 +166,16 @@ Now that we have 1 Gbyte, do
    INCLUDE examples/sieve.frt .
 The last number printed is the number of primes under 1000,000,000,
 what is it?
-Answer:
 Now read the file grow.frt and try to understand what is going on.
+Answer:
 
 Try to get the working space at around 3 Gbyte.
+What happens?
+Find the error detecting line in grow.frt and comment it out.
+Does it work?
 Why does
     EM BM - 1000000 / .
 indicate that you have minus thousand Megabytes?
-Answer:
 Find a Forth word to print `` EM BM - '' correctly.
 Answer:
 
@@ -219,7 +219,7 @@ Answer:
 Find the place where forthsize is defined:
 forthsize equ 0x100000         ; 1 Mbyte
 Reassemble with 2 Mbyte and check that the resulting Forth
-works the same
+works the same.
 How are you going to verify the size change from within <your>forth?
 Answer:
 
@@ -234,54 +234,39 @@ Now compare it with some other compilers, one or more of
    objdump -x `which lina`
 What is your impression?
 Answer:
-
-(advance) Assuming that fasm does all the right things with elf headers,
-find out what fields in the elf header change if forthsize is changed.
-Now define a word GROW that reads a <your>forth binary and writes
-a new binary with an enlarged, then a hugely enlarged space.
-How far can you push it?
-
+[
+    (advance) Assuming that fasm does all the right things with elf headers,
+    find out what fields in the elf header change if forthsize is changed.
+    Now define a word GROW that reads a <your>forth binary and writes
+    a new binary with an enlarged, then a hugely enlarged space.
+    How far can you push it?
+]
 Find a document describing ELF headers.
 How many pages is it? How many pages in your estimation would you
 have to study to do the above experiment without help of fasm?
 Make a crude estimate of the time it would take.
-
+Answer:
 Switch to HEX.
-Verify that the character at BM-0x74 is 0x7F.
+Verify that the character at BM-0x54 is 0x7F.
 (If not skip the remainder of the exercise)
 What is the result of
     BM 53 - 3 TYPE   ?
-Add a definition to <your>forth
-  : A ;
-and save the current forth in a file as per
+Answer:
+What doethis mean?
+Answer:
+
+Do the next experiment with an absolute virgin
+<your>forth.
+Save the current forth in a file as per
 BM 54 - HERE OVER - "yourforth2" PUT-FILE
 Try to execute yourforth2. What do you find?
 Answer:
-Now repeat the experiment with an absolute virgin
-<your>forth so no `` : A ; ''. Result?
+Add a definition to <your>forth
+  : A ;
+and repeat the experiment.
+Try to execute yourforth2. What do you find?
+Why would that be?
 Answer:
-
-
-
-HEX
-BM 54 - @
-DUP .
-Answer:
-Expect the value 7F
-BM 54 -
-COUNT .
-3 TYPE
-What do you see?
-Answer:
-What does this mean?
-Answer:
-BM 54 - HERE OVER - "jones2" PUT-FILE
-Now run jones2.
-What happens?
-Answer:
-
-
-
 
 Write a noop, a machine code definition that does nothing.
 
@@ -322,8 +307,8 @@ Try it out on some of your favorite numbers.
 Does -0x12 work, or 0x-12 ? Your opinion about this?
 Answer:
 
-make a yourforth with
-Interchange the code field second
+make a yourforth with the code and data field Interchanged
+the code field second
 and the data field first.
 How many headers do you have to change?
 Answer:

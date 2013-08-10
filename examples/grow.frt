@@ -1,5 +1,5 @@
 HEX
-'TASK >DFA @ '?STACK >DFA !
+\ 'TASK >DFA @ '?STACK >DFA !
 DUP BM 0C - +!
 DUP 'DSP0 >DFA +!
 DUP 'RSP0 >DFA +!
