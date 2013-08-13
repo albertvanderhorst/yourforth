@@ -339,20 +339,23 @@ lastlink EQU dea
 ; the previous definition is always available as "lastlink".
 ; So you will see that almost always all header specifies lastlink
 ; for lfield.
-;; It is very inconvenient to fill in those linkfields by hand,
-;; especially if you plan to move the code around. The header macro takes
-;; this from our hands. We just always fill in "lastlink"
-;;  and within
-;; the macro lastlink is set to address of the new word,
-;; ready to fill in into the next header.
-;;
-;; We can always override this by replacing
-;; "lastlink" by the actual value we want to have.
+; As a result a definition can be moved around without changes to its code.
+; We can always override this by replacing
+; "lastlink" by the actual value we want to have.
 
 ; "dea" is the name used within the assembler. Remember forthname is a
 ; string like "+" that probably is not an acceptable name for the word
 ; in the assembler. So we need "dea" to use the word in the assembler.
+; The "dea" passed to the header macro, results in that name being usable
+; in the assembler as a number and an address. It contains only lower
+; case characters and underscores.
 
+; Each name in yourforth itself contains any assortion of weird characters and capital
+; letters, no lower case. Let's take R@ as an example.
+; It is identified by it dea: 'R@ a denotation, a fixed number.
+; Withing the assembler this number is represented by the name r_fetch.
+; A simpler example is DROP. The assembler name is "drop", which is the same
+; number as 'DROP in yourforth.
 ; Here is the renaming convention:
 ; The capitals are kept, and if the resulting name clashes in the assembler,
 ; underscores are added before and after.
@@ -609,7 +612,7 @@ macro untilto  label
         sbb    eax,eax
         push   eax
         next
-; Now 0= is easy. Add an instruction to complement the carry flag to 0<>
+; Now 0= is easy. To 0<> add an instruction to complement the carry flag
     header  zero_equal,   zero_equal+5*cw, 0, 0, lastlink, "0="
         pop     eax
         neg     eax
@@ -724,7 +727,18 @@ macro untilto  label
          neg     eax
          push    eax
          next
-
+    header  LSHIFT,   LSHIFT+5*cw, 0, 0, lastlink, "LSHIFT"
+        pop     ecx
+        pop     eax
+        shl     eax,cl
+        push    eax
+        next
+    header  RSHIFT,   RSHIFT+5*cw, 0, 0, lastlink, "RSHIFT"
+        pop     ecx
+        pop     eax
+        shr     eax,cl
+        push    eax
+        next
 ; -------------------- low level definitions: stack operations -----------------
 ; Stack operations reorder, duplicate or remove items from the data stack
 ; without doing a transformation on them.
@@ -788,7 +802,7 @@ macro untilto  label
         push    edx
         push    eax
         next
-; The return stack can be used for scratch.
+; The return stack can be used for scratch. For an example see SDSWAP
     header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
         pop     ebx
         lea     ebp,[ebp - 1*cw]
@@ -805,10 +819,13 @@ macro untilto  label
         next
 ; SDSWAP reorders a,b1,b2 on the stack into b1,b2,a.
 ; We have no way to directly get b1 into place, but if we first
-; move b2 out of the way to the return stack, we can by swapping.
+; move b2 out of the way to the return stack, we can, by swapping.
 ; Now get b2 back, leaving b1,a,b2. That we can handle.
     header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
-        dd      to_R, SWAP, R_from, SWAP
+        dd      to_R    ; Get b2 out of the way.
+        dd      SWAP    ; a,b1 --> b1,a
+        dd      R_from  ; b1,a,b2 : almost correct
+        dd      SWAP
         dd      EXIT
 ; ------------------------------------------------------------------------------
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
@@ -1599,18 +1616,6 @@ MIN1:   dd      DROP
         dd      SWAP
 MAX1:   dd      DROP
         dd      EXIT
-    header  LSHIFT,   LSHIFT+5*cw, 0, 0, lastlink, "LSHIFT"
-        pop     ecx
-        pop     eax
-        shl     eax,cl
-        push    eax
-        next
-    header  RSHIFT,   RSHIFT+5*cw, 0, 0, lastlink, "RSHIFT"
-        pop     ecx
-        pop     eax
-        shr     eax,cl
-        push    eax
-        next
     header  M_star,   M_star+5*cw, 0, 0, lastlink, "M*"
         pop     eax
         pop     ebx
@@ -1954,6 +1959,7 @@ DOC1:    dd DROP, DROP
         dd      LIT, ']', EMIT
         dd      EXIT
 
+; Here ends the dictionary.
     header  catchall,   docol, catchall+5*cw, prefixmask, 0, ""
         dd      NUMBER, LITERAL, EXIT
     header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
