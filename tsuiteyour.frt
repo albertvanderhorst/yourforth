@@ -34,17 +34,6 @@ HEX
 
 :  ."   PP@@ 2DROP POSTPONE " STATE @ IF 'TYPE , ELSE TYPE THEN ; IMMEDIATE
 
-"UM/MOD" (CREATE)
-5B C, \          :H_UM/MOD    POP|X, BX|
-5A C, \                         POP|X, DX|
-58 C, \                         POP|X, AX|
-F7 C, F3 C, \               DIV|AD, X| R| BX|
-52 C, \                         PUSH|X, DX|
-50 C, \                         PUSH|X, AX|
-AD C, \                    LODS, X'|
-FF C, 20 C, \                    JMPO, ZO| [AX]
-ALIGN
-
 "UM*" (CREATE)
 58 C, \               :H_UM*    POP|X, AX|
 5B C, \                         POP|X, BX|
@@ -83,24 +72,11 @@ DECIMAL
 
 : SPACES  BEGIN DUP 0 > WHILE BL EMIT 1 - REPEAT DROP ;
 
-: M/MOD >R 0 R@ UM/MOD R> SWAP >R UM/MOD R> ;
-
-: FM/MOD
-    DUP >R 2DUP XOR >R SM/REM R> 0< 0BRANCH [ 44 , ]
-        OVER IF 1 - SWAP R> + SWAP
-    ELSE RDROP THEN
-;
-
 : 1- 1 - ;
-\ : 2/ DUP 0< 2 FM/MOD NIP ;
 : 2/ DUP 0< 31 RSHIFT 31 LSHIFT  SWAP 1 RSHIFT OR ;
 : 2* 2 * ;
 
 : S>D   DUP 0< ;
-: <# PAD HLD ! ;
-: #> DROP DROP HLD @ PAD OVER - ;
-: # BASE @ M/MOD ROT 9 OVER < IF 7 + THEN 48 + HOLD ;
-: #S   BEGIN #   2DUP OR   0=  UNTIL ;
 
 \ ==================================================================
 
@@ -119,8 +95,7 @@ VARIABLE VERBOSE
    TRUE VERBOSE !
 \    FALSE VERBOSE !
 
-: EMPTY-STACK   \ ( ... -- ) EMPTY STACK.
-   DEPTH ?DUP IF 0 DO DROP LOOP THEN ;
+: EMPTY-STACK   CLS  ;    \ ( ... -- ) EMPTY STACK.
 
 ' ERROR HIDDEN
 
@@ -333,15 +308,12 @@ TESTING COMPARISONS: 0= = 0< < > MIN MAX
 { MAX-INT 0 MAX -> MAX-INT }
 
 \ ------------------------------------------------------------------------
-TESTING STACK OPS: 2DROP 2DUP 2OVER 2SWAP ?DUP DEPTH DROP DUP OVER ROT SWAP
+TESTING STACK OPS: 2DROP 2DUP 2OVER 2SWAP DEPTH DROP DUP OVER ROT SWAP
 
 { 1 2 2DROP -> }
 { 1 2 2DUP -> 1 2 1 2 }
 { 1 2 3 4 2OVER -> 1 2 3 4 1 2 }
 { 1 2 3 4 2SWAP -> 3 4 1 2 }
-{ 0 ?DUP -> 0 }
-{ 1 ?DUP -> 1 1 }
-{ -1 ?DUP -> -1 -1 }
 { DEPTH -> 0 }
 { 0 DEPTH -> 0 1 }
 { 0 1 DEPTH -> 0 1 2 }
@@ -459,42 +431,7 @@ TESTING MULTIPLY: S>D * M* UM*
 { MAX-UINT MAX-UINT UM* -> 1 1 INVERT }
 
 \ ------------------------------------------------------------------------
-TESTING DIVIDE: FM/MOD SM/REM UM/MOD */ */MOD / /MOD MOD
-
-{ 0 S>D 1 FM/MOD -> 0 0 }
-{ 1 S>D 1 FM/MOD -> 0 1 }
-{ 2 S>D 1 FM/MOD -> 0 2 }
-{ -1 S>D 1 FM/MOD -> 0 -1 }
-{ -2 S>D 1 FM/MOD -> 0 -2 }
-{ 0 S>D -1 FM/MOD -> 0 0 }
-{ 1 S>D -1 FM/MOD -> 0 -1 }
-{ 2 S>D -1 FM/MOD -> 0 -2 }
-{ -1 S>D -1 FM/MOD -> 0 1 }
-{ -2 S>D -1 FM/MOD -> 0 2 }
-{ 2 S>D 2 FM/MOD -> 0 1 }
-{ -1 S>D -1 FM/MOD -> 0 1 }
-{ -2 S>D -2 FM/MOD -> 0 1 }
-{  7 S>D  3 FM/MOD -> 1 2 }
-{  7 S>D -3 FM/MOD -> -2 -3 }
-{ -7 S>D  3 FM/MOD -> 2 -3 }
-{ -7 S>D -3 FM/MOD -> -1 2 }
-{ MAX-INT S>D 1 FM/MOD -> 0 MAX-INT }
-{ MIN-INT S>D 1 FM/MOD -> 0 MIN-INT }
-{ MAX-INT S>D MAX-INT FM/MOD -> 0 1 }
-{ MIN-INT S>D MIN-INT FM/MOD -> 0 1 }
-{ 1S 1 4 FM/MOD -> 3 MAX-INT }
-{ 1 MIN-INT M* 1 FM/MOD -> 0 MIN-INT }
-{ 1 MIN-INT M* MIN-INT FM/MOD -> 0 1 }
-{ 2 MIN-INT M* 2 FM/MOD -> 0 MIN-INT }
-{ 2 MIN-INT M* MIN-INT FM/MOD -> 0 2 }
-{ 1 MAX-INT M* 1 FM/MOD -> 0 MAX-INT }
-{ 1 MAX-INT M* MAX-INT FM/MOD -> 0 1 }
-{ 2 MAX-INT M* 2 FM/MOD -> 0 MAX-INT }
-{ 2 MAX-INT M* MAX-INT FM/MOD -> 0 2 }
-{ MIN-INT MIN-INT M* MIN-INT FM/MOD -> 0 MIN-INT }
-{ MIN-INT MAX-INT M* MIN-INT FM/MOD -> 0 MAX-INT }
-{ MIN-INT MAX-INT M* MAX-INT FM/MOD -> 0 MIN-INT }
-{ MAX-INT MAX-INT M* MAX-INT FM/MOD -> 0 MAX-INT }
+TESTING DIVIDE: SM/REM */ */MOD / /MOD MOD
 
 { 0 S>D 1 SM/REM -> 0 0 }
 { 1 S>D 1 SM/REM -> 0 1 }
@@ -527,26 +464,11 @@ TESTING DIVIDE: FM/MOD SM/REM UM/MOD */ */MOD / /MOD MOD
 { MIN-INT MAX-INT M* MAX-INT SM/REM -> 0 MIN-INT }
 { MAX-INT MAX-INT M* MAX-INT SM/REM -> 0 MAX-INT }
 
-{ 0 0 1 UM/MOD -> 0 0 }
-{ 1 0 1 UM/MOD -> 0 1 }
-{ 1 0 2 UM/MOD -> 1 0 }
-{ 3 0 2 UM/MOD -> 1 1 }
-{ MAX-UINT 2 UM* 2 UM/MOD -> 0 MAX-UINT }
-{ MAX-UINT 2 UM* MAX-UINT UM/MOD -> 0 2 }
-{ MAX-UINT MAX-UINT UM* MAX-UINT UM/MOD -> 0 MAX-UINT }
-
-: IFFLOORED
-   [ -3 2 / -2 = INVERT ] LITERAL IF POSTPONE \ THEN ;
 : IFSYM
    [ -3 2 / -1 = INVERT ] LITERAL IF POSTPONE \ THEN ;
 
 \ THE SYSTEM MIGHT DO EITHER FLOORED OR SYMMETRIC DIVISION.
-\ SINCE WE HAVE ALREADY TESTED M*, FM/MOD, AND SM/REM WE CAN USE THEM IN TEST.
-IFFLOORED : T/MOD  >R S>D R> FM/MOD ;
-IFFLOORED : T/     T/MOD SWAP DROP ;
-IFFLOORED : TMOD   T/MOD DROP ;
-IFFLOORED : T*/MOD >R M* R> FM/MOD ;
-IFFLOORED : T*/    T*/MOD SWAP DROP ;
+\ SINCE WE HAVE ALREADY TESTED M*, AND SM/REM WE CAN USE THEM IN TEST.
 IFSYM     : T/MOD  >R S>D R> SM/REM ;
 IFSYM     : T/     T/MOD SWAP DROP ;
 IFSYM     : TMOD   T/MOD DROP ;
@@ -910,16 +832,10 @@ VARIABLE SCANS
 TESTING <% % %S %> HOLD SIGN BASE >NUMBER HEX DECIMAL
 
 : S=  \ ( ADDR1 C1 ADDR2 C2 -- T/F ) COMPARE TWO STRINGS.
-   >R SWAP R@ = IF                      \ MAKE SURE STRINGS HAVE SAME LENGTH
-      R> ?DUP IF                        \ IF NON-EMPTY STRINGS
-         0 DO
-            OVER C@ OVER C@ - IF 2DROP <FALSE> UNLOOP EXIT THEN
-            SWAP 1+ SWAP 1+
-         LOOP
-      THEN
-      2DROP <TRUE>                      \ IF WE GET HERE, STRINGS MATCH
+   SDSWAP OVER <> IF                    \ COMPARE LENGTHS
+      DROP 2DROP <FALSE>             \ LENGTHS MISMATCH
    ELSE
-      R> DROP 2DROP <FALSE>             \ LENGTHS MISMATCH
+      CORA 0=                        \ IF NON-EMPTY STRINGS
    THEN ;
 
 : GP1 <% 41 HOLD 42 HOLD 0 %> "BA" S= ;
