@@ -1,12 +1,16 @@
 Exercises for yourforth.
-
 We follow the convention of Knuth in TAO:
     Exercises are numbered per section.
     Each exercise has a rating 0..50, where 40 is research project and
     10 is an easy question just doable without pen and paper.
 
+\ -------------------- 0 Introduction -------------------------- 
+0.0 If you're new at Forth you must read the Chapter "gentle introduction"   
+of yourforth.pdf. 
+Was it painful?
+Answer:
 
-Use as a calculator
+0.1 Use as a calculator.
 Go to a system with a decent keyboard and numeric keypad and
 switch it to numeric. Now type the following into <your>forth,
 ending each line with the <ENTER> key from the keypad.
@@ -29,24 +33,37 @@ Now repeat the experiment, with the normal keyboard typing
 What are the first and second results?
 Answer:
 
-
-Run the test through yourforth as follows:
+0.2 Regression test.
+Run the test supplied through yourforth as follows:
 yourforth <tsuiteyour.frt | more
-We want to see how this test signals defects.
+This is a regression test, familiarize yourself with the output. 
+We must know how this test signals defects.
 Remove the word MIN from yourforth, i.e. its header line and
 lines following up till MAX.
 Try to run the test again. Why doesn't this work?
 Answer:
-Now rename the word MIN to APE.
+Now keep the word, but change its Forth name MIN to APE.    
 What number has the error revealed by tsuiteyour.frt?
 Answer:
 Look the error up in yourforth.pdf.
 What is the name of the chapter it is in?
 Answer:
 What are the three words where this error is detected?
-Answer:
 Hint: all errors are signalled by ?ERROR. Use the source!
+Answer:
+Replace the content of MIN by a copy of the content of MAX and run 
+the test again. What error message do you get?
+Answer:
 
+\ ---------------------- 1 memory and adressing ---------------------------------
+1.1 Memory size.
+Type WORDS to verify that BM and EM are indeed Forth words.
+How many items are left by BM? Hint use .S .
+Answer:
+What do you expect as a result of `` BM EM - . ''? Now try it.
+Answer:
+
+\ ---------------------- next --------------------------  
 Define a word as per
 "APE" (CREATE)
 and verify that is is in the dictionary list.
@@ -125,11 +142,6 @@ NOTE
 Put some values on the stack and try to find out what NOTE does.
 What happens if you type APE? What does NOTE?
 Answer:
-
-
-
-
-
 
 define 3 words A B C as per
 "A" (CREATE)

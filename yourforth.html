@@ -5,7 +5,7 @@
 <HTML>
 <HEAD>
    <META http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-   <TITLE>ci86.yourforth.html snapshot 6.53 Manual</TITLE>
+   <TITLE>ci86.yourforth.html snapshot 6.55 Manual</TITLE>
 </HEAD>
 <BODY>
 
@@ -17,7 +17,7 @@ body { background: #CCFFCC; }
 </style>
 
 <H1>
-   ci86.yourforth.html Version [ snapshot 6.53 ] GLOSSARY </H1>
+   ci86.yourforth.html Version [ snapshot 6.55 ] GLOSSARY </H1>
 
 
 
@@ -135,7 +135,6 @@ word. All words in the basic set are documented.
 <A HREF="#ELSE">ELSE</A> &nbsp; &nbsp;
 <A HREF="#EMIT">EMIT</A> &nbsp; &nbsp;
 <A HREF="#EM">EM</A> &nbsp; &nbsp;
-<A HREF="#ERASE">ERASE</A> &nbsp; &nbsp;
 <A HREF="#ERROR">ERROR</A> &nbsp; &nbsp;
 <A HREF="#EVALUATE">EVALUATE</A> &nbsp; &nbsp;
 <A HREF="#EXECUTE">EXECUTE</A> &nbsp; &nbsp;
@@ -641,8 +640,6 @@ which it belongs.
 <A HREF="#CORA">CORA</A></LI>
 <LI>
 <A HREF="#EM">EM</A></LI>
-<LI>
-<A HREF="#ERASE">ERASE</A></LI>
 <LI>
 <A HREF="#FILL">FILL</A></LI>
 <LI>
@@ -4872,28 +4869,6 @@ SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#DP">DP</A> &nbsp;
 
 
 <P>
-<HR><A NAME="ERASE"></A>
-<H2>
-ERASE</H2>
-<P>
-
-STACKEFFECT: addr n ---
-<P>
-
-DESCRIPTION:
-<P>
-This is shorthand for <B>0 FILL</B>.
-<P>
-<A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
-<P>
-SEE ALSO: <A HREF="#MEMORY">MEMORY</A> &nbsp; <A HREF="#BLANK">BLANK</A> &nbsp;
- <A HREF="#FILL">FILL</A> &nbsp;
-
-
-
-
-
-<P>
 <HR><A NAME="FILL"></A>
 <H2>
 FILL</H2>
@@ -6113,6 +6088,8 @@ You only need to know them if you want to extend the
 <B>CONTROL</B> wordset.
 This version of ciforth contains no security, so the remainder
 of the chapter is empty.
+_VERBOSE_({{You may want to ask your implementor to supply a secure version.
+}forthxref({Rationale & legalese}){.}})
 
 
 

@@ -1,15 +1,17 @@
-; yourforth: the simplest Forth possible, i86 Linux version.
+; yourforth: the simplest Forth compiler possible, i86 Linux version.
 ; Originated as a FASM version of ciforth created by ``m4'' from generic listing.
 ;
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.15 $
+;   yourforth $Revision: 6.18 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
 ; That is right. Not only did you brew coffee, you've been to Columbia, picked the beans,
 ; and roasted them as well! Next time you only need the last part.
+; If you're new at Forth you may want to read the Chapter "gentle introduction"
+; of yourforth.pdf.
 
 ; ---------------- preliminary remark -------------------------
 ; Normally a Forth in assembly style would use the official assembler
@@ -20,13 +22,13 @@
 ; By implication the following advantages point to disadvantages of gas.
 ; 1. fasm accommodates one simple segment
 ; 2. fasm accommodates Intel syntax fairly
-; 3. fasm has a traditional macro facilitiy
+; 3. fasm has a traditional macro facility
 ; 4. fasm needs no linking step
 ; 5. fasm is small, basically an executable.
-; Also it accomodates symbol reassignment and labels that are local to macro's,
+; Also it accommodates symbol reassignment and labels that are local to macro's,
 ; which is kind of essential to the way we want to use macro's.
 
-; -------------------- introduction ------------------------------------
+; ------------------ 0. introduction ------------------------------------
 ; A famous chess player once stated that, if we were to find aliens living on
 ; another planet, we should expect that they will play Go. Likewise
 ; discovering Forth is something every civilisation in the universe will
@@ -38,8 +40,8 @@
 ; punched card that represented the instructions. Then someone came with the idea, to
 ; have one memory space, and store numbers there, but also put the program in the
 ; same space and then have the computer read the instructions from memory.
-; Now a small programm can write a larger program, and then execute it!
-; It is is similar to how the human brain continuously reconditions its synapses
+; Now a small program can write a larger program, and then execute it!
+; It is similar to how the human brain continuously reconditions its synapses
 ; in a perpetual learning process. At last a machine with the potential of artificial
 ; intelligence was born. So a memory item is identified by a number,
 ;  the "address" of the memory item.
@@ -71,16 +73,19 @@
 ; Even in this assembler source you will see that most of the code is actually
 ; Forthcode, that is compiled by the assembler (with a renaming convention).
 ; Forth is the only language simple enough to make this feasible.
+; For the following you must be familiar with the concept of a data stack
+; (ex. 0.1) and with behaviour of yourforth under a test (ex. 0.2).
 
+; ---------------------- 1 memory and adressing ---------------------------------
 ; Memory consists of bytes
 ; and, yes, nothing funny, that are the bytes you buy in the store.
 ; Those bytes are numbered, and thus identified, and they
 ; can be used for data or code, as I choose.
 ; yourforth uses memory between BM and EM. (exercise)
 ; So you can use the byte addressed as BM, as BM+1, up till and including EM-1,
-; but not EM.
+; but not EM.  (ex. 1.1)
 ; Bytes can represent characters, small pictures that are associated
-; with sounds (in most languages) or concepts in e.g. chinese.
+; with sounds (in most languages) or concepts in e.g. Chinese.
 ; Chunks of bytes are needed to represent numbers as large as BM.
 ; We take 4 bytes together to form a cell, resulting in a 32-bit Forth,
 ; and restricting memory size to 4 Gbyte. Now we can manipulate
@@ -112,7 +117,7 @@ cw      =     4                 ; Cell width
 ; of space.
 ; (exercise)
 ;
-forthsize      =     (0x100000)   ; One megabyte, for starters.
+forthsize      =     0x100000   ; One megabyte, for starters.
 ;
 tasksize    = 0x10000           ; Total size of the uninitialised memory near EM
 stacksize   = tasksize/4        ;  Its subdivisions.
@@ -128,7 +133,7 @@ cibsize     = tasksize/2
 ; and they are passed to the console for display.
 ; The typing and the showing of results goes through
 ; a "console" which is typically a terminal window on a Linux X-screen, but
-; could equally well be an old fashoned VT100 terminal connected with a
+; could equally well be an old fashioned VT100 terminal connected with a
 ; 100 m RS232 line. Linux has the convenient notions of a "standard input" and
 ; a "standard output" with facilities to use them. We let Linux take care of
 ; how this i/o is setup, and within Forth we just use it.
@@ -175,9 +180,9 @@ __NR_pipe    =     0x2a
 ; would have made sure that they fit snugly together. Now this is a bit silly,
 ; because the assembler perfectly knows that the NOBITS part is not initialised.
 ; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store
-; the content of segments without content, it doesn't store the unitialised part
+; the content of segments without content, it doesn't store the uninitialised part
 ; of segments. We can put everything in
-; one segment, and the unitialised part occupies no room on our hard disk.
+; one segment, and the uninitialised part occupies no room on our hard disk.
 ; <explanation of linking>
 
                segment executable readable writable
@@ -269,7 +274,7 @@ bm:                     ; This is the first address of Forth.
 ;
 ; More essential is the data field. All but the basic instruction of the
 ; Forth engine have data, associated: a constant value, a buffer
-; address, a structure with fields. Als note that most Forth code is
+; address, a structure with fields. Also note that most Forth code is
 ; interpreted. The interpreted code is data, not machine code. Exercise.
 ;
 ; Absolutely essential is the code field. This contains an address and
@@ -354,7 +359,7 @@ lastlink EQU dea
 ; letters, no lower case. Let's take R@ as an example.
 ; It is identified by it dea: 'R@ a denotation, a fixed number.
 ; Withing the assembler this number is represented by the name r_fetch.
-; A simpler example is DROP. The assembler name is "drop", which is the same
+; A simpler example is DROP. The assembler name is "DROP", which is the same
 ; number as 'DROP in yourforth.
 ; Here is the renaming convention:
 ; The capitals are kept, and if the resulting name clashes in the assembler,
@@ -375,7 +380,7 @@ lastlink EQU dea
 ; or store something in memory.
 ;
 ; A denotation, a constant value that is generated on the fly by
-; the compiler or intepreter.
+; the compiler or interpreter.
 ; Because this is difficult, we postpone it.
 
 ; The most important type of definitions are lowlevel code, high level code,
@@ -416,7 +421,7 @@ epipe   =     0x20
 ;  definitions finishes. This is similar to the program counter in an
 ;  assembly program and we will use SI for it.
 ;  Then of course we need a data stack, for which we use
-;  the intel stack, and the stack pointer is just SP.
+;  the Intel stack, and the stack pointer is just SP.
 ;  This leaves us with the return stack, that is keeps track of
 ;  where we are when SI is needed to interpret another high
 ;  level definition from the current one. Intel has run out of stacks
@@ -442,7 +447,7 @@ macro   next {
 ; Now the choice for SI becomes clear. The lodsd instruction loads the dea
 ; from the instruction stream into EAX, and increments SI on the way,
 ; making it point to the next Forth instruction.
-; [Actually this is a bit tricky. This requires that the socalled
+; [Actually this is a bit tricky. This requires that the so called
 ; direction bit is set to forward, using the instruction cld. After
 ; executing the instruction std, lodsd is switched to decrementing.]
 ; Then we jump to what is contained in the code field of the dea, so actually
@@ -705,7 +710,7 @@ macro untilto  label
          pop     ebx
          xor     eax,eax
          cmp     ebx,edx
-         setne    al      ; Set least significant bit according to "not equal"
+         setne    al      ; Set bit to "not equal"
          neg     eax
          push    eax
          next
@@ -714,7 +719,7 @@ macro untilto  label
          pop     ebx
          xor     eax,eax
          cmp     ebx,edx
-         setl    al       ; Set least significant bit according to "less"
+         setl    al       ; Set bit to "less"
          neg     eax
          push    eax
          next
@@ -723,7 +728,7 @@ macro untilto  label
          pop     ebx
          xor     eax,eax
          cmp     ebx,edx
-         setg    al       ; Set least significant bit according to "greater"
+         setg    al       ; Set bit to "greater"
          neg     eax
          push    eax
          next
@@ -739,6 +744,82 @@ macro untilto  label
         shr     eax,cl
         push    eax
         next
+; ------------------------------------------------------------------------------
+; To get the absolute valute, if it is less than zero, negate it.
+    header  _ABS_,   docol, _ABS_+5*cw, 0, lastlink, "ABS"
+        dd      _DUP_, zero_less    ; Leave condition
+        ifto  abs1                  ; Assembles : 0BRANCH offset
+            dd      NEGATE          ; Execute conditionally
+        abs1:                       ; Auxiliary label to mark the end.
+        dd      EXIT
+    header  MIN,   docol, MIN+5*cw, 0, lastlink, "MIN"
+        dd      two_DUP, _greater_
+        ifto  min1
+            dd      SWAP
+        min1:
+        dd      DROP
+        dd      EXIT
+    header  MAX,   docol, MAX+5*cw, 0, lastlink, "MAX"
+        dd      two_DUP, _less_
+        ifto  max1
+            dd      SWAP
+        max1:
+        dd      DROP
+        dd      EXIT
+; ------------------------------------------------------------------------------
+; 32 by 32 bit signed multiplication, with 64 bit product.
+; The basic low level word for all multiplications.
+    header  M_star,   M_star+5*cw, 0, 0, lastlink, "M*"
+        pop     eax
+        pop     ebx
+        imul     ebx
+        xchg    eax,edx
+        push    edx
+        push    eax
+        next
+; 64 by 32 bit signed division, with 32 bit quotient and remainder.
+; The basic low level word for all divisions and modulo.
+    header  SM_slash_REM,   SM_slash_REM+5*cw, 0, 0, lastlink, "SM/REM"
+        pop     ebx
+        pop     edx
+        pop     eax
+        idiv     ebx
+        push    edx
+        push    eax
+        next
+; ------------------------------------------------------------------------------
+; Regular cell*cell to cell multiplication.
+; It is assumed that the result fits in a cell!
+    header  _star_,   docol, _star_+5*cw, 0, lastlink, "*"
+        dd      M_star
+        dd      DROP    ; Drop m.s. part.
+        dd      EXIT
+; Regular cell by cell /MOD. Use the return stack to move the
+; divider out of the way.
+    header  slash_MOD,   docol, slash_MOD+5*cw, 0, lastlink, "/MOD"
+        dd      to_R
+        dd      _DUP_, zero_less  ; Sign extend 32->64
+        dd      R_from            ; Ready for 64 by 32.
+        dd      SM_slash_REM
+        dd      EXIT
+    header  _slash_,   docol, _slash_+5*cw, 0, lastlink, "/"
+        dd      slash_MOD
+        dd      NIP
+        dd      EXIT
+    header  _MOD_,   docol, _MOD_+5*cw, 0, lastlink, "MOD"
+        dd      slash_MOD
+        dd      DROP
+        dd      EXIT
+    header  star_slash_MOD,   docol, star_slash_MOD+5*cw, 0, lastlink, "*/MOD"
+        dd      to_R
+        dd      M_star
+        dd      R_from
+        dd      SM_slash_REM
+        dd      EXIT
+    header  star_slash,   docol, star_slash+5*cw, 0, lastlink, "*/"
+        dd      star_slash_MOD
+        dd      NIP
+        dd      EXIT
 ; -------------------- low level definitions: stack operations -----------------
 ; Stack operations reorder, duplicate or remove items from the data stack
 ; without doing a transformation on them.
@@ -827,11 +908,98 @@ macro untilto  label
         dd      R_from  ; b1,a,b2 : almost correct
         dd      SWAP
         dd      EXIT
+; --------------------- memory store and fetch ---------------------------------
+
+    header  _fetch_,   _fetch_+5*cw, 0, 0, lastlink, "@"
+        pop     ebx
+        mov     eax,[ebx]
+        push    eax
+        next
+    header  C_fetch,   C_fetch+5*cw, 0, 0, lastlink, "C@"
+        pop     ebx
+        xor     eax,eax
+        mov     al,[ebx]
+        push    eax
+        next
+    header  two_fetch,   two_fetch+5*cw, 0, 0, lastlink, "2@"
+        pop     ebx
+        mov     eax,[ebx]
+        mov     edx,[ebx+1*cw]
+        push    edx
+        push    eax
+        next
+    header  _store_,   _store_+5*cw, 0, 0, lastlink, "!"
+        pop     ebx
+        pop     eax
+        mov     [ebx],eax
+        next
+    header  C_store,   C_store+5*cw, 0, 0, lastlink, "C!"
+        pop     ebx
+        pop     eax
+        mov     [ebx],al
+        next
+    header  two_store,   two_store+5*cw, 0, 0, lastlink, "2!"
+        pop     ebx
+        pop     eax
+        mov     [ebx],eax
+        pop     eax
+        mov     [ebx+1*cw],eax
+        next
+    header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
+        pop     ebx
+        pop     eax
+        add     [ebx],eax
+        next
+; ------------------------------------------------------------------------------
+    header  _MOVE_,   _MOVE_+5*cw, 0, 0, lastlink, "MOVE"
+        mov     ebx,esi
+        pop     ecx
+        pop     edi
+        pop     esi
+        cmp     esi,edi
+        jc    MOVE1
+        jmp short MOVE2
+MOVE1:  std
+        add     edi,ecx
+        dec     edi
+        add     esi,ecx
+        dec     esi
+MOVE2:
+        rep     movsb
+        cld           ; Make sure the direction is forward again.
+        mov     esi,ebx
+        next
+    header  FILL,   FILL+5*cw, 0, 0, lastlink, "FILL"
+        pop     eax
+        pop     ecx
+        pop     edi
+        cld
+        rep     stosb
+        next
+    header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
+        mov     edx,esi
+; Default result of zero.
+; Also set the zero bit, which is essential if the count is zero.
+        xor     eax,eax
+        pop     ecx
+        pop     edi
+        pop     esi
+        cld
+        repz    cmpsb
+        jz      CORA3
+        mov     al,1
+        jnc     CORA3
+        neg     eax
+CORA3:
+        mov     esi,edx
+        push    eax
+        next
 ; ------------------------------------------------------------------------------
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
         jmp     dword[eax]
 
+; ------------------------------------------------------------------------------
     header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
         mov     ebx,1
 XLOO1:  add     [ebp],ebx
@@ -862,6 +1030,7 @@ XLOO1:  add     [ebp],ebx
         mov     eax,[ebp+3*cw]
         push    eax
         next
+; ------------------------------------------------------------------------------
     header  DIGIT,   docol , DIGIT+5*cw, 0, lastlink, "DIGIT"
         dd      LIT, '0'
         dd      OVER, LIT, '9', _greater_
@@ -925,24 +1094,7 @@ PARSE8:
         dd      LIT,0x0A
         dd      EMIT
         dd      EXIT
-    header  _MOVE_,   _MOVE_+5*cw, 0, 0, lastlink, "MOVE"
-        mov     ebx,esi
-        pop     ecx
-        pop     edi
-        pop     esi
-        cmp     esi,edi
-        jc    MOVE1
-        jmp short MOVE2
-MOVE1:  std
-        add     edi,ecx
-        dec     edi
-        add     esi,ecx
-        dec     esi
-MOVE2:
-        rep     movsb
-        cld           ; Make sure the direction is forward again.
-        mov     esi,ebx
-        next
+; ------------------------------------------------------------------------------
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
         mov     eax,esp
         push    eax
@@ -964,49 +1116,10 @@ MOVE2:
     header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
         pop     ebp
         next
-    header  plus_store,   plus_store+5*cw, 0, 0, lastlink, "+!"
-        pop     ebx
-        pop     eax
-        add     [ebx],eax
-        next
+; ------------------------------------------------------------------------------
     header  TOGGLE,   docol , TOGGLE+5*cw, 0, lastlink, "TOGGLE"
         dd      OVER, _fetch_, _XOR_, SWAP, _store_
         dd      EXIT
-    header  _fetch_,   _fetch_+5*cw, 0, 0, lastlink, "@"
-        pop     ebx
-        mov     eax,[ebx]
-        push    eax
-        next
-    header  C_fetch,   C_fetch+5*cw, 0, 0, lastlink, "C@"
-        pop     ebx
-        xor     eax,eax
-        mov     al,[ebx]
-        push    eax
-        next
-    header  two_fetch,   two_fetch+5*cw, 0, 0, lastlink, "2@"
-        pop     ebx
-        mov     eax,[ebx]
-        mov     edx,[ebx+1*cw]
-        push    edx
-        push    eax
-        next
-    header  _store_,   _store_+5*cw, 0, 0, lastlink, "!"
-        pop     ebx
-        pop     eax
-        mov     [ebx],eax
-        next
-    header  C_store,   C_store+5*cw, 0, 0, lastlink, "C!"
-        pop     ebx
-        pop     eax
-        mov     [ebx],al
-        next
-    header  two_store,   two_store+5*cw, 0, 0, lastlink, "2!"
-        pop     ebx
-        pop     eax
-        mov     [ebx],eax
-        pop     eax
-        mov     [ebx+1*cw],eax
-        next
     header  _colon_,   docol, _colon_+5*cw, 0, lastlink, ":"
         dd      NAME
         dd      paren_CREATE
@@ -1037,12 +1150,14 @@ docon:  mov     eax,[eax+(1)*cw]
 dobuf:  mov     eax,[eax+(1)*cw]
         push    eax
         next
+; ------------------------------------------------------------------------------
     header  _,   _+5*cw, 0, 0, lastlink, "_"
         push    eax
         next
     header  _zero_,   docon, 0, 0, lastlink, "0"
     header  _one_,   docon, 1, 0, lastlink, "1"
     header  _BL_,   docon, ' ', 0, lastlink, "BL"
+; ------------------------------------------------------------------------------
     header  string_fetch,   string_fetch+5*cw, 0, 0, lastlink, "$@"
 ;;;;;;;;dd    _DUP_, CELL_plus, _SWAP_, _fetch_, EXIT
         pop   ebx
@@ -1070,11 +1185,13 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd R_fetch, string_store, R_from
         dd _ALIGN_
         dd EXIT
+; ------------------------------------------------------------------------------
     header  _EM_,   docon, em, 0, lastlink, "EM"
     header  _BM_,   docon, bm, 0, lastlink, "BM"
     header  DSP_zero,   docon, initdsp0 , 0, lastlink, "DSP0"
     header  RSP_zero,   docon, initrsp0  , 0, lastlink, "RSP0"
     header  CIB,   docon, initcib , 0, lastlink, "CIB"
+; ------------------------------------------------------------------------------
     header  _DP_,   dobuf, _DP_+5*cw, 0, lastlink, "DP"
         dd      initdp
     header  WHERE,   dobuf, WHERE+5*cw, 0, lastlink, "WHERE"
@@ -1117,6 +1234,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      ALLOT
         dd      C_store
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  SPACE,   docol, SPACE+5*cw, 0, lastlink, "SPACE"
         dd      _BL_
         dd      EMIT
@@ -1155,6 +1273,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      to_DFA, _fetch_
         dd      CELL_plus
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  query_ERROR,   docol, query_ERROR+5*cw, 0, lastlink, "?ERROR"
         dd      SWAP
         ifto  QERR1
@@ -1165,6 +1284,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         goto  QERR2
 QERR1:  dd      DROP
 QERR2:  dd      EXIT
+; ------------------------------------------------------------------------------
     header  left_bracket,   docol, left_bracket+5*cw, immediatemask, lastlink, "["
         dd      _zero_
         dd      STATE
@@ -1190,6 +1310,7 @@ QERR2:  dd      EXIT
         dd      BASE
         dd      _store_
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  CREATE,   docol, CREATE+5*cw, 0, lastlink, "CREATE"
         dd      NAME
         dd      paren_CREATE
@@ -1211,12 +1332,14 @@ crnoop: dd      EXIT
         dd      _fetch_
         dd      _store_
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  COUNT,   docol, COUNT+5*cw, 0, lastlink, "COUNT"
         dd      _DUP_
         dd      one_plus
         dd      SWAP
         dd      C_fetch
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  SET_SRC,   docol, SET_SRC+5*cw, 0, lastlink, "SET-SRC"
         dd      OVER, _plus_
         dd      OVER, SRC, two_store
@@ -1229,31 +1352,7 @@ crnoop: dd      EXIT
         dd      _RESTORE_
         dd      THROW
         dd      EXIT
-    header  FILL,   FILL+5*cw, 0, 0, lastlink, "FILL"
-        pop     eax
-        pop     ecx
-        pop     edi
-        cld
-        rep     stosb
-        next
-    header  CORA,   CORA+5*cw, 0, 0, lastlink, "CORA"
-        mov     edx,esi
-; Default result of zero.
-; Also set the zero bit, which is essential if the count is zero.
-        xor     eax,eax
-        pop     ecx
-        pop     edi
-        pop     esi
-        cld
-        repz    cmpsb
-        jz      CORA3
-        mov     al,1
-        jnc     CORA3
-        neg     eax
-CORA3:
-        mov     esi,edx
-        push    eax
-        next
+; ------------------------------------------------------------------------------
     header  string_pointer,   string_pointer+5*cw, 0, 0, lastlink, "$^"
         pop     eax
         pop     ecx
@@ -1289,10 +1388,7 @@ SSLAS2:
         push    edx
         push    ebx
         next
-    header  ERASE,   docol, ERASE+5*cw, 0, lastlink, "ERASE"
-        dd      _zero_
-        dd      FILL
-        dd      EXIT
+; ------------------------------------------------------------------------------
     header  HOLD,   docol, HOLD+5*cw, 0, lastlink, "HOLD"
         dd      LIT,-1
         dd      HLD
@@ -1322,6 +1418,7 @@ NPNUM1:  dd      PP_fetch_fetch
 NPNUM5:
         dd      two_DROP
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
         dd      CONTEXT, _fetch_
 
@@ -1343,20 +1440,20 @@ found1:
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, invisiblemask or dummymask, _AND_
         dd      zero_equal
-        ifto  failed
+        ifto  endif4
             dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
             ifto  endif3
                 dd      NIP,NIP,EXIT         ; Leave dea
-endif3:
-        ; We may still have a denotation, the dea matches the string as a prefix.
-        ; Require that the name is at least as large as the prefix.
+            endif3:
+            ; We may still have a denotation, the dea matches the string as a prefix.
+            ; Require that the name is at least as large as the prefix.
             dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
-            ifto  failed
-        ; Require that it is a denotation.
+            ifto  endif4
+                ; Require that it is a denotation.
                 dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
-                ifto  failed
+                ifto  endif4
                     dd      NIP,NIP,EXIT   ; leave dea, a denotation.
-        ; endif endif endif
+        endif4:   goto failed
     header  PRESENT,   docol, PRESENT+5*cw, 0, lastlink, "PRESENT"
         dd      _DUP_, to_R
         dd      FOUND
@@ -1369,6 +1466,7 @@ endif3:
 PRES1:
         dd      R_from, DROP
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  _ERROR_,   docol, _ERROR_+5*cw, 0, lastlink, "ERROR"
         dd      WHERE, two_fetch
         dd      OVER
@@ -1422,6 +1520,7 @@ THROW2:
 THROW1:
         dd      DROP
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  ID_dot,   docol, ID_dot+5*cw, 0, lastlink, "ID."
         dd      _DUP_, to_FFA, _fetch_
         dd      LIT, dummymask, _AND_
@@ -1465,6 +1564,7 @@ CREA1:  dd      DROP
         dd      _comma_
         dd      R_from
         dd      EXIT
+; ------------------------------------------------------------------------------
     header  _LINK_,   docol, _LINK_+5*cw, 0, lastlink, "LINK"
         dd      to_LFA
         dd      two_DUP
@@ -1496,6 +1596,7 @@ POSTP1:
         ifto  LITE1
         dd      LIT, LIT, _comma_, _comma_
 LITE1:  dd      EXIT
+; ------------------------------------------------------------------------------
     header  query_STACK,   docol, query_STACK+5*cw, 0, lastlink, "?STACK"
         dd      DSP_fetch
         dd      DSP_zero
@@ -1505,6 +1606,7 @@ LITE1:  dd      EXIT
         dd      _less_, LIT, 7, query_ERROR
         dd      EXIT
         ;
+; ------------------------------------------------------------------------------
     header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
 begin3:
         dd      NAME
@@ -1595,71 +1697,7 @@ OK2:
         dd      DECIMAL
         dd      FORTH
       dd      EXIT
-    header  _ABS_,   docol, _ABS_+5*cw, 0, lastlink, "ABS"
-        dd      _DUP_
-        dd      zero_less
-        ifto  PM1
-        dd      NEGATE
-PM1:
-        dd      EXIT
-    header  MIN,   docol, MIN+5*cw, 0, lastlink, "MIN"
-        dd      two_DUP
-        dd      _greater_
-        ifto  MIN1
-        dd      SWAP
-MIN1:   dd      DROP
-        dd      EXIT
-    header  MAX,   docol, MAX+5*cw, 0, lastlink, "MAX"
-        dd      two_DUP
-        dd      _less_
-        ifto  MAX1
-        dd      SWAP
-MAX1:   dd      DROP
-        dd      EXIT
-    header  M_star,   M_star+5*cw, 0, 0, lastlink, "M*"
-        pop     eax
-        pop     ebx
-        imul     ebx
-        xchg    eax,edx
-        push    edx
-        push    eax
-        next
-    header  SM_slash_REM,   SM_slash_REM+5*cw, 0, 0, lastlink, "SM/REM"
-        pop     ebx
-        pop     edx
-        pop     eax
-        idiv     ebx
-        push    edx
-        push    eax
-        next
-    header  _star_,   docol, _star_+5*cw, 0, lastlink, "*"
-        dd      M_star
-        dd      DROP
-        dd      EXIT
-    header  slash_MOD,   docol, slash_MOD+5*cw, 0, lastlink, "/MOD"
-        dd      to_R
-        dd      _DUP_, zero_less
-        dd      R_from
-        dd      SM_slash_REM
-        dd      EXIT
-    header  _slash_,   docol, _slash_+5*cw, 0, lastlink, "/"
-        dd      slash_MOD
-        dd      NIP
-        dd      EXIT
-    header  _MOD_,   docol, _MOD_+5*cw, 0, lastlink, "MOD"
-        dd      slash_MOD
-        dd      DROP
-        dd      EXIT
-    header  star_slash_MOD,   docol, star_slash_MOD+5*cw, 0, lastlink, "*/MOD"
-        dd      to_R
-        dd      M_star
-        dd      R_from
-        dd      SM_slash_REM
-        dd      EXIT
-    header  star_slash,   docol, star_slash+5*cw, 0, lastlink, "*/"
-        dd      star_slash_MOD
-        dd      NIP
-        dd      EXIT
+; ------------------------------------------------------------------------------
     header  SAVE,   docol, SAVE+5*cw, 0, lastlink, "SAVE"
         dd      R_from
         dd      SRC, two_fetch
