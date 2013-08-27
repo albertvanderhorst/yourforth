@@ -4,9 +4,9 @@ We follow the convention of Knuth in TAO:
     Each exercise has a rating 0..50, where 40 is research project and
     10 is an easy question just doable without pen and paper.
 
-\ -------------------- 0 Introduction -------------------------- 
-0.0 If you're new at Forth you must read the Chapter "gentle introduction"   
-of yourforth.pdf. 
+\ -------------------- 0 Introduction --------------------------
+0.0 If you're new at Forth you must read the Chapter "gentle introduction"
+of yourforth.pdf.
 Was it painful?
 Answer:
 
@@ -36,13 +36,13 @@ Answer:
 0.2 Regression test.
 Run the test supplied through yourforth as follows:
 yourforth <tsuiteyour.frt | more
-This is a regression test, familiarize yourself with the output. 
+This is a regression test, familiarize yourself with the output.
 We must know how this test signals defects.
 Remove the word MIN from yourforth, i.e. its header line and
 lines following up till MAX.
 Try to run the test again. Why doesn't this work?
 Answer:
-Now keep the word, but change its Forth name MIN to APE.    
+Now keep the word, but change its Forth name MIN to APE.
 What number has the error revealed by tsuiteyour.frt?
 Answer:
 Look the error up in yourforth.pdf.
@@ -51,7 +51,7 @@ Answer:
 What are the three words where this error is detected?
 Hint: all errors are signalled by ?ERROR. Use the source!
 Answer:
-Replace the content of MIN by a copy of the content of MAX and run 
+Remove the content of COUNT , except for the closing EXIT and run
 the test again. What error message do you get?
 Answer:
 
@@ -63,7 +63,7 @@ Answer:
 What do you expect as a result of `` BM EM - . ''? Now try it.
 Answer:
 
-\ ---------------------- next --------------------------  
+\ ---------------------- next --------------------------
 Define a word as per
 "APE" (CREATE)
 and verify that is is in the dictionary list.

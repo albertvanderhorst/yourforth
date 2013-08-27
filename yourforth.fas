@@ -76,7 +76,7 @@
 ; For the following you must be familiar with the concept of a data stack
 ; (ex. 0.1) and with behaviour of yourforth under a test (ex. 0.2).
 
-; ---------------------- 1 memory and adressing ---------------------------------
+; ---------------------- 1. memory and adressing ---------------------------------
 ; Memory consists of bytes
 ; and, yes, nothing funny, that are the bytes you buy in the store.
 ; Those bytes are numbered, and thus identified, and they
@@ -123,6 +123,7 @@ tasksize    = 0x10000           ; Total size of the uninitialised memory near EM
 stacksize   = tasksize/4        ;  Its subdivisions.
 cibsize     = tasksize/2
 
+; ---------------------- 2. Communicating with the world --------------------
 ; Forth is an interpreter, an environment that you can type commands into
 ; to get them executed.
 ; Characters are glyph's, the bitmaps on the screen, that are associated
