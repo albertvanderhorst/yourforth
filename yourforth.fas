@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.18 $
+;   yourforth $Revision: 6.21 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -72,6 +72,8 @@
 ; like the first c-compiler ever.
 ; Even in this assembler source you will see that most of the code is actually
 ; Forthcode, that is compiled by the assembler (with a renaming convention).
+; In the last part there is even Forth source that is compiled by yourforth
+; at startup. That is equivalent to including a source file, but less messy.
 ; Forth is the only language simple enough to make this feasible.
 ; For the following you must be familiar with the concept of a data stack
 ; (ex. 0.1) and with behaviour of yourforth under a test (ex. 0.2).
@@ -138,9 +140,9 @@ cibsize     = tasksize/2
 ; 100 m RS232 line. Linux has the convenient notions of a "standard input" and
 ; a "standard output" with facilities to use them. We let Linux take care of
 ; how this i/o is setup, and within Forth we just use it.
-; The character encoding doesn't count for much in Forth, but you can see that
-; this file is in UTF-8. The inventor of Forth, Chuck Moore uses a Huffman
-; encoding of his whim for colorforth. Exercise.
+; This file is in UTF-8, but the character encoding doesn't count for much in Forth.
+; (ex. 2.1). The inventor of Forth, Chuck Moore uses a Huffman
+; encoding of his whim for colorforth.
 
 ; This brings us to the subject of the interface with the Operating
 ; System. The interfacing with Linux is brutally direct. We use the system calls,
@@ -167,7 +169,7 @@ __NR_fork    =     0x2
 __NR_waitpid =     0x7
 __NR_pipe    =     0x2a
 
-; See XOS of how the dispatching takes place.
+; See XOS of how the dispatching takes place. (ex. 2.2)
 ; The numbers have been copied from a secret place in Linux's include hierarchy (exercise)
 ; and the exact names are retained, which means an exception to the naming convention
 ; that words containing capitals or underscores are Forth names.
@@ -175,19 +177,30 @@ __NR_pipe    =     0x2a
 
 ; Experienced assembler programmers expect two segments, one that we will fill
 ; with our forth code, and one unitialized that may be very large.
-; (We could get by with one segment if we don't mind to have 1 Gbyte executables.)
+; (We could get by with one segment if we initialize all space. Then we'll
+; have 1 Gbyte executables.)
 ; The first segment would be marked BITS (or some such), and the second one NOBIT,
 ; and while linking we
 ; would have made sure that they fit snugly together. Now this is a bit silly,
 ; because the assembler perfectly knows that the NOBITS part is not initialised.
+; Also it is not easy. Fitting two segments snugly goes against the spirit of the
+; linker. There is no end of incantations needed, and worse yet, the high priests
+; change those at will.
 ; Surprise! fasm doesn't have this nonsensical keyword. Not only doesn't it store
 ; the content of segments without content, it doesn't store the uninitialised part
 ; of segments. We can put everything in
 ; one segment, and the uninitialised part occupies no room on our hard disk.
-; <explanation of linking>
 
                segment executable readable writable
+
+; So one segment, no separation between the punch cards containing executable
+; code and a workspace containing our data. We can have the computer invent
+; a program, put it into its memory then execute it. The last part of this source,
+; is Forth code. The first part is sufficient for compiling that during startup.
+; It is fast enough that you will not notice it.  (exercise).
+
 bm:                     ; This is the first address of Forth.
+
 ; As said, we are not particularly interested in what address bm represents and don't
 ; force the assemblers hand.
 
@@ -384,7 +397,7 @@ lastlink EQU dea
 ; the compiler or interpreter.
 ; Because this is difficult, we postpone it.
 
-; The most important type of definitions are lowlevel code, high level code,
+; The most important types of definitions are lowlevel code, high level code,
 ; low level objects(constants, variables/buffers) and high level objects.
 ; They are gradually introduced by example, but here is an overview of the
 ; different types. The names starting in "do" are assembler labels.
@@ -398,7 +411,7 @@ lastlink EQU dea
 ;   contains dea+5*cw. In other words the high level code contained at the post
 ;   header address is executed. These are the ordinary functions.
 ; - cfield contains dea+5*cw. In other words, its machine code is
-;   unique and contained at the post header address is to be executed.
+;   unique and contained at the post header address to be executed.
 ;   These are the regular low level words that make up the Forth
 ;   language like "+" and "DROP". Of course this code is different for
 ;   all of those words.
@@ -597,9 +610,10 @@ macro untilto  label
 ;
 ;
 ; -------------------- low level definitions: operators ----------------------------
-; Operators are assembler functions that take all inputs from the stack,
+; Operators are definitions that take all inputs from the stack,
 ; do some transformation and put all results back on the stack. In other
-; words they have no side effects.
+; words they have no side effects. Because they are so simple and fundamental
+; they are mostly written in assembler.
 ; Examples are operations like + or <.
 
     header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
@@ -952,6 +966,10 @@ macro untilto  label
         add     [ebx],eax
         next
 ; ------------------------------------------------------------------------------
+; Operations on blocks of memory. It is of some importance that they are fast.
+; We need to move a block of memory, initialise it and compare two blocks.
+; They are in fact wrappers arounf "rep movsb" "rep stosb" and "rep cmpsb".
+
     header  _MOVE_,   _MOVE_+5*cw, 0, 0, lastlink, "MOVE"
         mov     ebx,esi
         pop     ecx
@@ -995,12 +1013,18 @@ CORA3:
         mov     esi,edx
         push    eax
         next
+;------------------------------------------------------------------------------
+; This completes our set of primitive operations that make up our Forth engine.
+; We need no more low leve stuff from here.
+
+
 ; ------------------------------------------------------------------------------
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
         jmp     dword[eax]
 
 ; ------------------------------------------------------------------------------
+; FIXME: Move to the very end.
     header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
         mov     ebx,1
 XLOO1:  add     [ebp],ebx
@@ -1045,9 +1069,10 @@ then1:  dd      _minus_
         dd      two_DUP
         dd      R_fetch, to_NFA, _fetch_, string_fetch
         dd      SDSWAP, MIN
-        dd      CORA
+        dd      CORA           ; CORA gives 0 for match.
         dd      R_from, SWAP
         dd      EXIT
+;       : ~MATCH   >R   2DUP R@ >NFA @ $@   ROT MIN   CORA  R> SWAP ;
     header  query_BLANK,   docol, query_BLANK+5*cw, 0, lastlink, "?BLANK"
         dd      _BL_, one_plus, _less_
         dd      EXIT
@@ -1096,10 +1121,12 @@ PARSE8:
         dd      EMIT
         dd      EXIT
 ; ------------------------------------------------------------------------------
+; !ASM!
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
         mov     eax,esp
         push    eax
         next
+; !ASM!
     header  DSP_store,   DSP_store+5*cw, 0, 0, lastlink, "DSP!"
         pop     eax
         mov     esp,eax
@@ -1111,9 +1138,11 @@ PARSE8:
         dd      LIT, cw, _slash_
         dd      _one_, _minus_
         dd      EXIT
+; !ASM!
     header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"
         push    ebp
         next
+; !ASM!
     header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
         pop     ebp
         next
@@ -1152,6 +1181,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         push    eax
         next
 ; ------------------------------------------------------------------------------
+; !ASM!
     header  _,   _+5*cw, 0, 0, lastlink, "_"
         push    eax
         next
@@ -1159,6 +1189,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
     header  _one_,   docon, 1, 0, lastlink, "1"
     header  _BL_,   docon, ' ', 0, lastlink, "BL"
 ; ------------------------------------------------------------------------------
+; !ASM!
     header  string_fetch,   string_fetch+5*cw, 0, 0, lastlink, "$@"
 ;;;;;;;;dd    _DUP_, CELL_plus, _SWAP_, _fetch_, EXIT
         pop   ebx
@@ -1354,6 +1385,7 @@ crnoop: dd      EXIT
         dd      THROW
         dd      EXIT
 ; ------------------------------------------------------------------------------
+; !ASM!
     header  string_pointer,   string_pointer+5*cw, 0, 0, lastlink, "$^"
         pop     eax
         pop     ecx
@@ -1368,6 +1400,7 @@ SINDEX1:
         dec     edi
         push    edi
         next
+; !ASM!
     header  string_slash,   string_slash+5*cw, 0, 0, lastlink, "$/"
         pop     eax
         pop     ecx
@@ -1423,38 +1456,40 @@ NPNUM5:
     header  FOUND,   docol, FOUND+5*cw, 0, lastlink, "FOUND"
         dd      CONTEXT, _fetch_
 
+; ~MATCH is sure in determining a no-match,
+; a possible match must be investigated closely.
+; STACK: name dea
 found0:
-        dd      no_MATCH
-        whileto  found1
-failed:
+        dd      no_MATCH, _NOT_
+        ifto  endif4
+              ; Ignore invisible and dummy words.
+              dd      _DUP_, to_FFA, _fetch_
+              dd      LIT, invisiblemask or dummymask, _AND_
+              dd      zero_equal
+              ifto  endif4
+                  dd      two_DUP       ; STACK: string length, dea
+                  ; If strings length match ..
+                  dd      to_NFA, _fetch_, _fetch_, _equal_
+                  ifto  endif3
+                      dd      NIP,NIP,EXIT         ; Leave dea
+                  endif3:
+                  ; We may still have a denotation, such as a number.
+                  dd      two_DUP       ; STACK: string length, dea
+                  ; if the string has at least the dea's lenght,
+                  dd    to_NFA, _fetch_, _fetch_, _less_, _NOT_
+                  ifto  endif4
+                      ;   and if the word is a denotation prefix,
+                      dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
+                      ifto  endif4
+                          dd      NIP,NIP,EXIT   ; leave dea, a denotation.
+        endif4:
+
         dd      to_LFA, _fetch_
         dd      _DUP_, zero_equal
         untilto  found0
 
-        dd      NIP, NIP, EXIT          ; Leave a zero: "not found".
+        dd      NIP, NIP, EXIT          ; DEA is zero: "not found".
 
-; Exit for possible match
-; ~MATCH is sure in determining a no-match,
-; a possible match must be investigated closely.
-found1:
-        ; Require that we have a normal word (not invisible, not dummy.)
-        dd      _DUP_, to_FFA, _fetch_
-        dd      LIT, invisiblemask or dummymask, _AND_
-        dd      zero_equal
-        ifto  endif4
-            dd      two_DUP, to_NFA, _fetch_, _fetch_, _equal_
-            ifto  endif3
-                dd      NIP,NIP,EXIT         ; Leave dea
-            endif3:
-            ; We may still have a denotation, the dea matches the string as a prefix.
-            ; Require that the name is at least as large as the prefix.
-            dd      two_DUP, to_NFA, _fetch_, _fetch_, _less_, _NOT_
-            ifto  endif4
-                ; Require that it is a denotation.
-                dd      _DUP_, to_FFA, _fetch_,   LIT, denotationmask, _AND_
-                ifto  endif4
-                    dd      NIP,NIP,EXIT   ; leave dea, a denotation.
-        endif4:   goto failed
     header  PRESENT,   docol, PRESENT+5*cw, 0, lastlink, "PRESENT"
         dd      _DUP_, to_R
         dd      FOUND
@@ -1697,7 +1732,8 @@ OK2:
         dd      _zero_, HANDLER, _store_
         dd      DECIMAL
         dd      FORTH
-      dd      EXIT
+        dd      left_bracket, HERE,  string_fetch, EVALUATE
+        dd      EXIT
 ; ------------------------------------------------------------------------------
     header  SAVE,   docol, SAVE+5*cw, 0, lastlink, "SAVE"
         dd      R_from
@@ -1713,6 +1749,7 @@ OK2:
         dd      SRC, two_store
         dd      to_R
         dd EXIT
+; !ASM!
     header  XOS,   XOS+5*cw, 0, 0, lastlink, "XOS"
         pop     eax
         pop     edx
@@ -1835,23 +1872,6 @@ PACCEP1:
         dd      DROP
         dd      EXIT
         ;
-    header  FORGET,   docol, FORGET+5*cw, 0, lastlink, "FORGET"
-        dd      TICK
-        dd      to_R
-        dd      LIT, FORTH, to_BODY
-        dd      _DUP_
-FORGV3:
-        dd      to_LFA,_fetch_
-        dd      _DUP_
-        dd      R_fetch
-        dd      _less_
-        untilto   FORGV3
-        dd      SWAP
-        dd      to_LFA
-        dd      _store_
-        dd      R_from
-        dd      to_NFA, _fetch_, _DP_, _store_
-        dd      EXIT
     header  paren_BACK,   docol, paren_BACK+5*cw, 0, lastlink, "(BACK"
         dd      HERE
         dd      EXIT
@@ -2036,7 +2056,14 @@ dovoc:
     header  TASK,   docol, TASK+5*cw, 0, dot_S, "TASK"
         dd      EXIT
 initdp:
-dictsize       =     initdp - bm
+        dd endfcode - startfcode
+; Reserve some place to prevent overwriting the source during compilation.
+startfcode: db "                                                                                   " , 0x0a
+            db "                                                                                   " , 0x0a
+        db ": FORGET   POSTPONE ' >R 'FORTH >BODY DUP                                          "     , 0x0a
+        db "BEGIN >LFA @ DUP R@ < UNTIL   SWAP >LFA ! R> >NFA @ DP ! ;                         "
+endfcode:
+dictsize       =     endfcode - bm
         rb  forthsize - dictsize - tasksize
         rb  stacksize
 initdsp0:
