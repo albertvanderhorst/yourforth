@@ -2,12 +2,12 @@ Exercises for yourforth.
 We follow the convention of Knuth in TAO:
     Exercises are numbered per section.
     Each exercise has a rating 0..50, where 40 is research project and
-    10 is an easy question just doable without pen and paper.
+    under 10 an easy question that you can asnwer inyour head.
+    At first, just skip the hard exercises.
 
 \ -------------------- 0 Introduction --------------------------
 0.0 If you're new at Forth you must read the Chapter "gentle introduction"
 of yourforth.pdf.
-
 Was it painful?
 Answer:
 
@@ -35,7 +35,8 @@ What are the first and second results?
 Answer:
 
 0.2 Regression test.
-Run the test supplied through yourforth as follows:
+There is a test supplied called tsuiteyour.frt.
+Run it through yourforth as follows:
 yourforth <tsuiteyour.frt | more
 This is a regression test, familiarize yourself with the output.
 We must know how this test signals defects.
@@ -52,8 +53,8 @@ Answer:
 What are the three words where this error is detected?
 Hint: all errors are signalled by ?ERROR. Use the source!
 Answer:
-Remove the content of COUNT , except for the closing EXIT and run
-the test again. What error message do you get?
+In yourforth.fas remove the content of COUNT , except for the closing EXIT
+and run the test again. What error message do you get?
 Answer:
 
 \ ---------------------- 1 memory and adressing ---------------------------------
@@ -72,16 +73,42 @@ works the same. Hint: use the regression test.
 How are you going to verify the size change from within <your>forth?
 Answer:
 
-1.3 Which RB (reserve byte) statement is responsible for allocating the bulk of the
+1.3 Insight in memory layout.
+Which RB (reserve byte) statement is responsible for allocating the bulk of the
 working space for <your>forth?
 Answer:
 There are only four labels in the high uninitialized part of the memory.
 Name them.
 Answer:
+
+(30) 1.4. memory layout and Forth.
 Where are they used? What is the type/class of those words?
 Answer:
 
-\ ---------------------- next --------------------------
+\ ---------------------- 2 input and output ------------
+
+2.1 Just a bunch of characters.
+Define a word as with
+CREATE x[32myourforth
+Show that it is in the list using WORDS.
+Now do
+LATEST >NFA @ $@
+This leaves the name of that definition as you can see with
+2DUP TYPE
+Now do
+DROP HEX 1B SWAP C!
+This changes the first letter (x) into an escape.
+What do you see after the following?
+LATEST >NFA @ $@ TYPE
+Answer:
+
+2.2 Interfacing with Linux
+Just do
+1 XOS
+What happens?
+Answer:
+
+------------------------
 Define a word as per
 "APE" (CREATE)
 and verify that is is in the dictionary list.
@@ -102,7 +129,6 @@ Answer:
 'APE >NFA @ $@ TYPE
 You've earned your badge, from now on you may do
 'APE ID.
-
 
 Try out the following (don't worry if you don't quite understand it)
 : APE "Kiss my ape" TYPE CR ;
