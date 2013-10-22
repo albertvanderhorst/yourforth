@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.21 $
+;   yourforth $Revision: 6.24 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -1024,38 +1024,6 @@ CORA3:
         jmp     dword[eax]
 
 ; ------------------------------------------------------------------------------
-; FIXME: Move to the very end.
-    header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
-        mov     ebx,1
-XLOO1:  add     [ebp],ebx
-        mov     eax,[ebp]
-        sub     eax,[ebp+1*cw]
-        xor     eax,ebx
-        js      BRAN1
-        lea     ebp,[ebp+3*cw]
-        lea     esi,[esi+1*cw]
-        next
-    header  paren_plus_LOOP,   paren_plus_LOOP+5*cw, 0, 0, lastlink, "(+LOOP)"
-        pop     ebx
-        jmp short     XLOO1
-        next
-    header  paren_DO,   paren_DO+5*cw, 0, 0, lastlink, "(DO)"
-        lodsd
-        add     eax,esi
-        pop     edx
-        pop     ebx
-        xchg    ebp,esp
-        push    eax
-        push    ebx
-        push    edx
-        xchg    ebp,esp
-        next
-    header  I,   (R_fetch+5*cw), I+5*cw, 0, lastlink, "I"
-    header  J,   J+5*cw, 0, 0, lastlink, "J"
-        mov     eax,[ebp+3*cw]
-        push    eax
-        next
-; ------------------------------------------------------------------------------
     header  DIGIT,   docol , DIGIT+5*cw, 0, lastlink, "DIGIT"
         dd      LIT, '0'
         dd      OVER, LIT, '9', _greater_
@@ -1168,7 +1136,7 @@ PARSE8:
         dd      LATEST, to_DFA, _store_
         dd      LIT, docon, LATEST, to_CFA, _store_
         dd      EXIT
-docon:  mov     eax,[eax+(1)*cw]
+docon:  mov     eax,[eax+1*cw]
         push    eax
         next
     header  VARIABLE,   docol, VARIABLE+5*cw, 0, lastlink, "VARIABLE"
@@ -1177,7 +1145,7 @@ docon:  mov     eax,[eax+(1)*cw]
         dd      _zero_, _comma_
         dd      LIT, dobuf, LATEST, to_CFA, _store_
         dd      EXIT
-dobuf:  mov     eax,[eax+(1)*cw]
+dobuf:  mov     eax,[eax+1*cw]
         push    eax
         next
 ; ------------------------------------------------------------------------------
@@ -1301,10 +1269,7 @@ dobuf:  mov     eax,[eax+(1)*cw]
         dd      LIT,5*cw
         dd      _plus_
         dd      EXIT
-    header  to_BODY,   docol, to_BODY+5*cw, 0, lastlink, ">BODY"
-        dd      to_DFA, _fetch_
-        dd      CELL_plus
-        dd      EXIT
+; See also >BODY in the CREATE .. DOES> section.
 ; ------------------------------------------------------------------------------
     header  query_ERROR,   docol, query_ERROR+5*cw, 0, lastlink, "?ERROR"
         dd      SWAP
@@ -1340,28 +1305,6 @@ QERR2:  dd      EXIT
     header  DECIMAL,   docol, DECIMAL+5*cw, 0, lastlink, "DECIMAL"
         dd      LIT,10
         dd      BASE
-        dd      _store_
-        dd      EXIT
-; ------------------------------------------------------------------------------
-    header  CREATE,   docol, CREATE+5*cw, 0, lastlink, "CREATE"
-        dd      NAME
-        dd      paren_CREATE
-        dd      LIT, dodo, LATEST, to_CFA, _store_
-        dd      LIT, crnoop, _comma_
-        dd      EXIT
-dodo:  lea     ebp,[ebp - 1*cw]
-        mov     [ebp],esi
-        mov     esi,[eax+(1)*cw]
-        lea     eax,[esi+1*cw]
-        mov     esi,[esi]
-        push    eax
-        next
-crnoop: dd      EXIT
-    header  DOES_from,   docol, DOES_from+5*cw, 0, lastlink, "DOES>"
-        dd      R_from
-        dd      LATEST
-        dd      to_DFA
-        dd      _fetch_
         dd      _store_
         dd      EXIT
 ; ------------------------------------------------------------------------------
@@ -1557,22 +1500,6 @@ THROW1:
         dd      DROP
         dd      EXIT
 ; ------------------------------------------------------------------------------
-    header  ID_dot,   docol, ID_dot+5*cw, 0, lastlink, "ID."
-        dd      _DUP_, to_FFA, _fetch_
-        dd      LIT, dummymask, _AND_
-        ifto  IDDOT1
-        dd      DROP
-        goto  IDDOT2
-IDDOT1:
-        dd      to_NFA
-        dd      _fetch_
-        dd      string_fetch
-        dd      _TYPE_
-        dd      SPACE
-        dd      SPACE
-        dd      SPACE
-IDDOT2:
-        dd      EXIT
     header  HEADER,   docol, HEADER+5*cw, 0, lastlink, "HEADER"
         dd      _DUP_, zero_equal, LIT, 5, query_ERROR
         dd      two_DUP
@@ -1612,19 +1539,6 @@ CREA1:  dd      DROP
         dd      HEADER
         dd      CONTEXT, _fetch_
         dd      _LINK_
-        dd      EXIT
-    header  POSTPONE,   docol, POSTPONE+5*cw, immediatemask, lastlink, "POSTPONE"
-        dd      NAME
-        dd      PRESENT
-        dd      _DUP_, zero_equal, LIT, 15, query_ERROR
-        dd      _DUP_, to_FFA, _fetch_
-        dd      LIT, immediatemask, _AND_, zero_equal
-        ifto  POSTP1
-         dd      LIT, LIT, _comma_
-         dd      _comma_
-         dd      LIT, _comma_
-POSTP1:
-         dd      _comma_
         dd      EXIT
     header  LITERAL,   docol, LITERAL+5*cw, immediatemask, lastlink, "LITERAL"
         dd      STATE
@@ -1793,38 +1707,6 @@ OK2:
         dd      LIT, __NR_write, XOS
         dd      _zero_, MIN
         dd      EXIT
-    header  GET_FILE,   docol, GET_FILE+5*cw, 0, lastlink, "GET-FILE"
-        dd      two_DUP, string_comma, DROP
-        dd      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), _comma_
-        dd      _zero_, OPEN_FILE, THROW, to_R
-        dd      HERE, _DUP_
-        dd      _EM_, LIT, 6, _slash_, _DUP_, ALLOT
-        dd      LIT, 1000, _minus_
-        dd      R_fetch, READ_FILE, THROW
-        dd      R_from, CLOSE_FILE, THROW
-        dd      two_DUP, _plus_, _DP_, _store_
-        dd      EXIT
-    header  PUT_FILE,   docol, PUT_FILE+5*cw, 0, lastlink, "PUT-FILE"
-        dd      LIT, 755O
-        dd      CREATE_FILE, THROW
-        dd      _DUP_, to_R
-        dd      WRITE_FILE, THROW
-        dd      R_from, CLOSE_FILE, THROW
-        dd      EXIT
-    header  _INCLUDE_,   docol, _INCLUDE_+5*cw, 0, lastlink, "INCLUDE"
-        dd      NAME
-        dd      HERE, to_R
-        dd      LIT, GET_FILE, CATCH
-        dd      _DUP_
-        ifto  INCLUD1
-        dd      R_from, _DP_, _store_
-        dd      THROW
-        goto  INCLUD2
-INCLUD1:
-        dd      R_from, DROP, DROP
-INCLUD2:
-        dd      EVALUATE
-        dd      EXIT
     header  REFILL_CIB,   docol, REFILL_CIB+5*cw, 0, lastlink, "REFILL-CIB"
         dd      REMAINDER, _fetch_, to_R
         dd      CIB, R_fetch, _plus_
@@ -1872,68 +1754,6 @@ PACCEP1:
         dd      DROP
         dd      EXIT
         ;
-    header  paren_BACK,   docol, paren_BACK+5*cw, 0, lastlink, "(BACK"
-        dd      HERE
-        dd      EXIT
-    header  BACK_paren,   docol, BACK_paren+5*cw, 0, lastlink, "BACK)"
-        dd      HERE
-        dd      CELL_plus
-        dd      _minus_
-        dd      _comma_
-        dd      EXIT
-    header  paren_FORWARD,   docol, paren_FORWARD+5*cw, 0, lastlink, "(FORWARD"
-        dd      HERE
-        dd      _
-        dd      _comma_
-        dd      EXIT
-    header  FORWARD_paren,   docol, FORWARD_paren+5*cw, 0, lastlink, "FORWARD)"
-        dd      HERE
-        dd      OVER
-        dd      CELL_plus
-        dd      _minus_
-        dd      SWAP
-        dd      _store_
-        dd      EXIT
-    header  BEGIN,   docol, BEGIN+5*cw, immediatemask, lastlink, "BEGIN"
-        dd      paren_BACK
-        dd      EXIT
-    header  THEN,   docol, THEN+5*cw, immediatemask, lastlink, "THEN"
-        dd      FORWARD_paren
-        dd      EXIT
-    header  DO,   docol, DO+5*cw, immediatemask, lastlink, "DO"
-         dd      LIT, paren_DO, _comma_, paren_FORWARD, paren_BACK
-        dd      EXIT
-    header  _LOOP,   docol, _LOOP+5*cw, immediatemask, lastlink, "LOOP"
-        dd      LIT, paren_LOOP, _comma_, BACK_paren
-        dd      FORWARD_paren
-        dd      EXIT
-    header  plus_LOOP,   docol, plus_LOOP+5*cw, immediatemask, lastlink, "+LOOP"
-        dd      LIT, paren_plus_LOOP, _comma_, BACK_paren
-        dd      FORWARD_paren
-        dd      EXIT
-    header  UNTIL,   docol, UNTIL+5*cw, immediatemask, lastlink, "UNTIL"
-        dd      LIT, zero_BRANCH, _comma_, BACK_paren
-        dd      EXIT
-    header  AGAIN,   docol, AGAIN+5*cw, immediatemask, lastlink, "AGAIN"
-        dd      LIT, BRANCH, _comma_, BACK_paren
-        dd      EXIT
-    header  _REPEAT_,   docol, _REPEAT_+5*cw, immediatemask, lastlink, "REPEAT"
-        dd      LIT, BRANCH, _comma_, BACK_paren
-        dd      FORWARD_paren
-        dd      EXIT
-    header  _IF_,   docol, _IF_+5*cw, immediatemask, lastlink, "IF"
-        dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
-        dd      EXIT
-    header  _ELSE_,   docol, _ELSE_+5*cw, immediatemask, lastlink, "ELSE"
-        dd      LIT, BRANCH, _comma_, paren_FORWARD
-        dd      SWAP
-        dd      FORWARD_paren
-        dd      EXIT
-    header  _WHILE_,   docol, _WHILE_+5*cw, immediatemask, lastlink, "WHILE"
-        dd      to_R
-        dd      LIT, zero_BRANCH, _comma_, paren_FORWARD
-        dd      R_from
-        dd      EXIT
     header  to_percent,   docol, to_percent+5*cw, 0, lastlink, "<%"
         dd      PAD
         dd      HLD
@@ -1988,37 +1808,51 @@ SIGN1:  dd      EXIT
         dd      percent_from
         dd      _TYPE_
         dd      EXIT
-    header  WORDS,   docol, WORDS+5*cw, 0, lastlink, "WORDS"
-        dd      _zero_
-        dd      CONTEXT
-        dd      _fetch_
-WORDS0:
-        dd      to_LFA, _fetch_
-        dd      _DUP_
-        dd      _DUP_, zero_equal
-        untilto   WORDS0        ; until_to(WORDS0)
-        dd      two_DROP
-WORDS1:
-        dd      ID_dot
-        dd      _DUP_, zero_equal
-        untilto   WORDS1
-        dd DROP
-        dd      EXIT
-    header  dot_S,   docol, dot_S+5*cw, 0, lastlink, ".S"
-        dd      CR
-        dd      LIT, 'S', EMIT
-        dd      LIT, '[', EMIT
-        dd      SPACE
-        dd      DSP_fetch, DSP_zero
-DOC2:   dd      two_DUP, _less_
-        whileto   DOC1
-        dd      _zero_, CELL_plus, _minus_, _DUP_, _fetch_, _dot_
-        goto  DOC2
-DOC1:    dd DROP, DROP
-        dd      LIT, ']', EMIT
-        dd      EXIT
 
-; Here ends the dictionary.
+; Presenting Forth's ugly secret: the code routines to do "convenient" looping.
+; I lied about BRANCH and 0BRANCH being the only words in the Forth
+; engine to implement all control structures. I didn't lie about the
+; extensibility. We can "just" define a few assembler words to aid in
+; having loop limits and indices available. The control words that
+; you are to use, notably DO and LOOP , are to be found in the forth
+; code section.
+; This is tricky code borrowed from ciforth. If you want an explanation
+; look there. How to use it is in the pdf.
+
+    header  paren_LOOP,   paren_LOOP+5*cw, 0, 0, lastlink, "(LOOP)"
+        mov     ebx,1
+XLOO1:  add     [ebp],ebx
+        mov     eax,[ebp]
+        sub     eax,[ebp+1*cw]
+        xor     eax,ebx
+        js      BRAN1
+        lea     ebp,[ebp+3*cw]
+        lea     esi,[esi+1*cw]
+        next
+    header  paren_plus_LOOP,   paren_plus_LOOP+5*cw, 0, 0, lastlink, "(+LOOP)"
+        pop     ebx
+        jmp short     XLOO1
+        next
+    header  paren_DO,   paren_DO+5*cw, 0, 0, lastlink, "(DO)"
+        lodsd
+        add     eax,esi
+        pop     edx
+        pop     ebx
+        xchg    ebp,esp
+        push    eax
+        push    ebx
+        push    edx
+        xchg    ebp,esp
+        next
+    header  I,   (R_fetch+5*cw), I+5*cw, 0, lastlink, "I"
+    header  J,   J+5*cw, 0, 0, lastlink, "J"
+        mov     eax,[ebp+3*cw]
+        push    eax
+        next
+
+regularlast EQU lastlink         ; Remember where non-prefix word end.
+
+; Here ends the dictionary with a link of zero.
     header  catchall,   docol, catchall+5*cw, prefixmask, 0, ""
         dd      NUMBER, LITERAL, EXIT
     header  TICK,   docol, TICK+5*cw, prefixmask, lastlink, "'"
@@ -2043,6 +1877,67 @@ DOC1:    dd DROP, DROP
         dd      R_fetch, CELL_plus, LITERAL, R_from, _fetch_, LITERAL
         dd      PP_fetch_fetch, NIP, query_BLANK, _NOT_, LIT, 10, query_ERROR
         dd      EXIT
+
+; Presenting Forth's poor man's objects of the seventies, the CREATE DOES>
+; construct. Those objects have one method only and that method is coded
+; in interpreted Forth, not assembler. Moreover the method is common to
+; all. You see that in CREATE a default method is filled in at the
+; first addres post the header owned by the object, but this field is
+; supposed to be overwritten by DOES>. The address after that is the
+; start of the data belonging to the object.
+; This is an example of how to define a class called CONSTANT
+; which is functionally equivalent to the CONSTANT word defined above.
+; : CONSTANT    CREATE ,   DOES> @ ;
+; At the time of creating the object its value is put into the dictionary
+; using comma. When the constant is executed, the low level interpreter
+; pointer SI is loaded from the first address past the header, and the address
+; behind that is passed via the stack.
+; This is done by dodo. So *all* CREATE DOES> words execute the code dodo,
+; which takes care that specific high level code is executed.
+; Of course there can be no pointer to high level code in a word's DFA
+; because next expects a pointer to machine code.
+
+; The data of course is different for each object, immediately after the
+; code pointer,
+; This is called the "data field" or body in the ISO standard
+; and must not be confused whith the datafield in yourforth's headers.
+; So the high level code pointer is at the post header address, and
+; the body is one cell higher.
+    header  to_BODY,   docol, to_BODY+5*cw, 0, lastlink, ">BODY"
+        dd      to_DFA, _fetch_
+        dd      CELL_plus
+        dd      EXIT
+
+    header  CREATE,   docol, CREATE+5*cw, 0, lastlink, "CREATE"
+        dd      NAME
+        dd      paren_CREATE
+        dd      LIT, dodo, LATEST, to_CFA, _store_
+        dd      LIT, crnoop, _comma_
+        dd      EXIT
+dodo:  lea     ebp,[ebp - 1*cw]    ; Push SI to the return stack
+        mov     [ebp],esi          ;
+        mov     esi,[eax+1*cw]     ; Post header address to SI.
+        lea     eax,[esi+1*cw]     ; Body pointer to AX.
+        mov     esi,[esi]          ; High level code pointer to SI.
+        push    eax                ; Pass address to that code.
+        next
+crnoop: dd      EXIT
+; DOES> just patches the LATEST definition with the address it finds
+; on the return stack. In `` DOES> A B C ; '' that is a pointer to A,
+; exactly the place where we want the object to jump to.
+    header  DOES_from,   docol, DOES_from+5*cw, 0, lastlink, "DOES>"
+        dd      R_from
+        dd      LATEST
+        dd      to_DFA
+        dd      _fetch_         ; Get the Post Header Address.
+        dd      _store_
+        dd      EXIT
+
+; And now for the only object that we have in this source.
+; FORTH is a vocabulary, i.e. a word that changes the
+; starting point CONTEXT of the dictionary search.
+; It just makes it point to a dummy header that is in its data
+; field.
 dovoc:
         dd      CONTEXT
         dd      _store_
@@ -2051,19 +1946,70 @@ dovoc:
     header  FORTH,   dodo, FORTH+5*cw, 0, lastlink, "FORTH"
         dd      dovoc
         ; Dummy header, use the datafield of 0 as an empty string.
-        dd      0, 0, dummymask, TASK, (_zero_+1*cw)
+        dd      0, 0, dummymask, regularlast, (_zero_+1*cw)
 
-    header  TASK,   docol, TASK+5*cw, 0, dot_S, "TASK"
-        dd      EXIT
+; Note that outside of the assembler source we would need an
+; extra word VOCABULARY using CREATE DOES> to define it.
+
+; ------------------------------------------------------------------------------
 initdp:
-        dd endfcode - startfcode
+
+; The string following is a source code file that becomes part of the
+; executable and is compiled at startup
+; The disadvantage here is that some names are known to the assembler only.
+; E.g. the 1 AND in ID. is in fact dummymask, and constants are decimal, such
+; as 493 which is more familar as 755 octal.
+
+LF EQU 0x0a
+        dd endforthcode - startforthcode
+startforthcode:
 ; Reserve some place to prevent overwriting the source during compilation.
-startfcode: db "                                                                                   " , 0x0a
-            db "                                                                                   " , 0x0a
-        db ": FORGET   POSTPONE ' >R 'FORTH >BODY DUP                                          "     , 0x0a
-        db "BEGIN >LFA @ DUP R@ < UNTIL   SWAP >LFA ! R> >NFA @ DP ! ;                         "
-endfcode:
-dictsize       =     endfcode - bm
+    db "                                                              ", LF
+    db "                                                              ", LF
+    db "                                                              ", LF
+    db "                                                              ", LF
+    db "                                                              ", LF
+; What the user uses to control control
+    db ": (BACK HERE ;                                                ", LF
+    db ": BACK) HERE CELL+ - , ;                                      ", LF
+    db ": (FORWARD HERE _ , ;                                         ", LF
+    db ": FORWARD) HERE OVER CELL+ - SWAP ! ;                         ", LF
+    db ": BEGIN (BACK ;                             IMMEDIATE         ", LF
+    db ": THEN FORWARD) ;                           IMMEDIATE         ", LF
+    db ": UNTIL '0BRANCH , BACK) ;                  IMMEDIATE         ", LF
+    db ": AGAIN 'BRANCH , BACK) ;                   IMMEDIATE         ", LF
+    db ": REPEAT 'BRANCH , BACK) FORWARD) ;         IMMEDIATE         ", LF
+    db ": IF '0BRANCH , (FORWARD ;                  IMMEDIATE         ", LF
+    db ": ELSE 'BRANCH , (FORWARD SWAP FORWARD) ;   IMMEDIATE         ", LF
+    db ": WHILE >R '0BRANCH , (FORWARD R> ;         IMMEDIATE         ", LF
+; Ugly looping but indispensible.
+    db ": DO '(DO) , (FORWARD (BACK ;               IMMEDIATE         ", LF
+    db ": LOOP '(LOOP) , BACK) FORWARD) ;           IMMEDIATE         ", LF
+    db ": +LOOP '(+LOOP) , BACK) FORWARD) ;         IMMEDIATE         ", LF
+
+    db ": POSTPONE NAME PRESENT DUP 0= 15 ?ERROR                      ", LF
+    db "   DUP >FFA @ 4 AND 0= IF 'LIT , , ', THEN , ; IMMEDIATE      ", LF
+
+    db ": GET-FILE 2DUP $, DROP 1699506502 , 0 OPEN-FILE THROW >R HERE", LF
+    db "   DUP EM 6 / DUP ALLOT 1000 - R@ READ-FILE THROW R>          ", LF
+    db "   CLOSE-FILE THROW 2DUP + DP ! ;                             ", LF
+    db ": PUT-FILE 493 CREATE-FILE THROW DUP >R WRITE-FILE THROW R>   ", LF
+    db "  CLOSE-FILE THROW ;                                          ", LF
+    db ": INCLUDE NAME HERE >R 'GET-FILE CATCH DUP IF R> DP ! THROW   ", LF
+    db "  ELSE R> DROP DROP THEN EVALUATE ;                           ", LF
+
+    db ": ID.   DUP >FFA @ 1 AND IF DROP ELSE >NFA @ $@ TYPE          ", LF
+    db "    SPACE SPACE SPACE THEN ;                                  ", LF
+    db ": WORDS   0 CONTEXT @ BEGIN >LFA @ DUP DUP 0= UNTIL 2DROP     ", LF
+    db "   BEGIN ID. DUP 0= UNTIL DROP ;                              ", LF
+    db ":  .S  CR &S EMIT &[ EMIT SPACE                               ", LF
+    db "   DSP@ DSP0 BEGIN 2DUP < WHILE 0 CELL+ - DUP @ . REPEAT      ", LF
+    db "   DROP DROP &] EMIT ;                                        ", LF
+    db ": FORGET   POSTPONE ' DUP >NFA @ DP !                         ", LF
+    db "   >LFA @ 'FORTH >BODY >LFA ! ;                               ", LF
+    db ": TASK ;                                                      ", LF
+endforthcode:
+dictsize       =     endforthcode - bm
         rb  forthsize - dictsize - tasksize
         rb  stacksize
 initdsp0:

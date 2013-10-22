@@ -1,4 +1,7 @@
-\ From BYTE magazine: the orginal GILBREATH's sieve benchmark
+\ From BYTE magazine: after GILBREATH's sieve benchmark
+
+\ Counts the primes under 8190.
+\ (The original benchmark counted odd primes.)
 8190 CONSTANT SIZE
 CREATE FLAGS      SIZE ALLOT
 

@@ -1,0 +1,23 @@
+It may be that you can't execute files from the current
+directory. Probably you're using bash and probably your
+file /etc/profile contains a line
+  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+
+This misguided security paranoia setting of the path should be
+changed for normal users to
+
+  PATH=".:/usr/local/bin:/usr/bin:/bin"
+
+[Unless you'r keen on playing hunt_the_wumpus from a text console,
+then you must keep both game directories
+  PATH=".:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"]
+
+Anyway you can fix your PATH for a session with
+set PATH=".:$PATH"
+
+Officially you should find out your shell, and patch your personal
+configuration. Unfortunately your shell is probably bash and its
+documentation is unwieldy.
+
+If you're in despair because you can't get back previous commands
+with arrow up, check out rlwrap. Usage: rlwrap yourforth.
