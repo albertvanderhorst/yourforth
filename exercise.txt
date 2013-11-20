@@ -365,6 +365,17 @@ Answer:
     (All reasoning accepted.)
 
 
+Make a file with a simple test like:
+    "hello there" TYPE CR
+    "yes! what?" TYPE CR
+Now pass it to yourforth using the redirection mechanism.
+Now remove the test for end of pipe in QUIT and repeat the test.
+What do you see?
+Answer:
+What modification to the test file can solve this?
+Answer:
+
+
 Some Linux commands take 5 parameters instead of 3.
 Add a word XOS5 to <your>forth similiar to XOS that takes 5 parameters
 and a command number, knowing that the 4-th parameter goes into

@@ -4,7 +4,7 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.26 $
+;   yourforth $Revision: 6.27 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
@@ -301,6 +301,9 @@ bm:                     ; This is the first address of Forth.
 ; executing the code at that address. There is no safety net. If that
 ; code doesn't cooperate with Forth-as-a-whole your machine crashes.
 ; (exercise)
+; You'll see no symbolic definition for offset names in the assembler.
+; The only offsets that occurs is 1*cw, which means the data set.
+; In high level Forth the offsets are handled by words >CFA >DFA etc.
 ;
 ; To an interpreter strings play of course an important role. Forth
 ; strings are represented as an address and a length. Putting two things
@@ -623,6 +626,125 @@ macro untilto  label
     header  _,   _+5*cw, 0, 0, lastlink, "_"
         push    eax
         next
+; -------------------- low level definitions: stack operations -----------------
+; Stack operations reorder, duplicate or remove items from the data stack
+; without doing a transformation on them. They are essential to Forth, of course.
+    header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
+        pop     eax
+        push    eax
+        push    eax
+        next
+    header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
+        pop     edx
+        pop     eax
+        push    eax
+        push    edx
+        push    eax
+        next
+    header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
+        pop     edx
+        pop     eax
+        push    edx
+        push    eax
+        next
+    header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
+        pop     eax
+        next
+    header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
+        pop     eax
+        pop     ebx
+        push    eax
+        next
+    header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
+        pop     eax
+        pop     eax
+        next
+    header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
+        pop     eax
+        pop     edx
+        push    edx
+        push    eax
+        push    edx
+        push    eax
+        next
+    header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next
+    header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
+        pop     ebx
+        pop     ecx
+        pop     eax
+        pop     edx
+        push     edx
+        push     eax
+        push     ecx
+        push     ebx
+        push    edx
+        push    eax
+        next
+; The return stack can be used for scratch. For an example see SDSWAP
+    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
+        pop     ebx
+        lea     ebp,[ebp - 1*cw]
+        mov     [ebp],ebx
+        next
+    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"
+        mov     eax,[ebp]
+        lea     ebp,[ebp + 1*cw]
+        push    eax
+        next
+    header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
+        mov     eax,[ebp]
+        push    eax
+        next
+; SDSWAP reorders a,b1,b2 on the stack into b1,b2,a.
+; We have no way to directly get b1 into place, but if we first
+; move b2 out of the way to the return stack, we can, by swapping.
+; Now get b2 back, leaving b1,a,b2. That we can handle.
+    header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
+        dd      to_R    ; Get b2 out of the way.
+        dd      SWAP    ; a,b1 --> b1,a
+        dd      R_from  ; b1,a,b2 : almost correct
+        dd      SWAP
+        dd      EXIT
+; ------------------------------------------------------------------------------
+; In yourforth the stack is just a block of memory set aside for the purpose.
+; We need a few words to control them.
+    header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
+        mov     eax,esp
+        push    eax
+        next
+    header  DSP_store,   DSP_store+5*cw, 0, 0, lastlink, "DSP!"
+        pop     eax
+        mov     esp,eax
+        next
+    header  DEPTH,   docol, DEPTH+5*cw, 0, lastlink, "DEPTH"
+        dd      DSP_zero
+        dd      DSP_fetch
+        dd      _minus_
+        dd      LIT, cw, _slash_
+        dd      _one_, _minus_
+        dd      EXIT
+    header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"
+        push    ebp
+        next
+    header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
+        pop     ebp
+        next
+; ---------------------------- operators with results ------------
+; Apart from the reordering or duplicating operators, there is a whole slew of
+; operators that have no side effects, i.e. the only result is on the
+; stack.
+; All the usual logical and arithmetical operators are present in Forth,
+; but in this Forth there is nothing floating point related.
+
 ; 0<> is the most fundamental of logical operators.
 ; It takes a dirty flag, anything not zero, and turns it into a proper
 ; flag, i.e. all bits set. A false flag, zero, remains zero.
@@ -683,7 +805,8 @@ macro untilto  label
         dd      LSHIFT
         dd      EXIT
 
-; The archetype of an operator, pop 2 registers, add them and push the result.
+; The archetype of an arithmetic operator, pop 2 registers, add them
+; and push the result.
     header  _plus_,   _plus_+5*cw, 0, 0, lastlink, "+"
         pop     eax
         pop     ebx
@@ -765,6 +888,10 @@ macro untilto  label
         push    eax
         next
 ; ------------------------------------------------------------------------------
+; Not all basic instruction must be in assembler. The following operators
+; are defined as Forth code, They are simple so you can get used
+; to how Forth code looks if expressed in assembler languages.
+
 ; To get the absolute value, if it is less than zero, negate it.
     header  _ABS_,   docol, _ABS_+5*cw, 0, lastlink, "ABS"
         dd      _DUP_, zero_less    ; Leave condition
@@ -840,94 +967,6 @@ macro untilto  label
         dd      star_slash_MOD
         dd      NIP
         dd      EXIT
-; -------------------- low level definitions: stack operations -----------------
-; Stack operations reorder, duplicate or remove items from the data stack
-; without doing a transformation on them.
-    header  OVER,   OVER+5*cw, 0, 0, lastlink, "OVER"
-        pop     edx
-        pop     eax
-        push    eax
-        push    edx
-        push    eax
-        next
-    header  DROP,   DROP+5*cw, 0, 0, lastlink, "DROP"
-        pop     eax
-        next
-    header  NIP,   NIP+5*cw, 0, 0, lastlink, "NIP"
-        pop     eax
-        pop     ebx
-        push    eax
-        next
-    header  two_DROP,   two_DROP+5*cw, 0, 0, lastlink, "2DROP"
-        pop     eax
-        pop     eax
-        next
-    header  SWAP,   SWAP+5*cw, 0, 0, lastlink, "SWAP"
-        pop     edx
-        pop     eax
-        push    edx
-        push    eax
-        next
-    header  _DUP_,   _DUP_+5*cw, 0, 0, lastlink, "DUP"
-        pop     eax
-        push    eax
-        push    eax
-        next
-    header  two_DUP,   two_DUP+5*cw, 0, 0, lastlink, "2DUP"
-        pop     eax
-        pop     edx
-        push    edx
-        push    eax
-        push    edx
-        push    eax
-        next
-    header  two_SWAP,   two_SWAP+5*cw, 0, 0, lastlink, "2SWAP"
-        pop     ebx
-        pop     ecx
-        pop     eax
-        pop     edx
-        push     ecx
-        push     ebx
-        push    edx
-        push    eax
-        next
-    header  two_OVER,   two_OVER+5*cw, 0, 0, lastlink, "2OVER"
-        pop     ebx
-        pop     ecx
-        pop     eax
-        pop     edx
-        push     edx
-        push     eax
-        push     ecx
-        push     ebx
-        push    edx
-        push    eax
-        next
-; The return stack can be used for scratch. For an example see SDSWAP
-    header  to_R,   to_R+5*cw, 0, 0, lastlink, ">R"
-        pop     ebx
-        lea     ebp,[ebp - 1*cw]
-        mov     [ebp],ebx
-        next
-    header  R_from,   R_from+5*cw, 0, 0, lastlink, "R>"
-        mov     eax,[ebp]
-        lea     ebp,[ebp + 1*cw]
-        push    eax
-        next
-    header  R_fetch ,   R_fetch +5*cw, 0, 0, lastlink, "R@"
-        mov     eax,[ebp]
-        push    eax
-        next
-; SDSWAP reorders a,b1,b2 on the stack into b1,b2,a.
-; We have no way to directly get b1 into place, but if we first
-; move b2 out of the way to the return stack, we can, by swapping.
-; Now get b2 back, leaving b1,a,b2. That we can handle.
-    header  SDSWAP,   docol, SDSWAP+5*cw, 0, lastlink, "SDSWAP"
-        dd      to_R    ; Get b2 out of the way.
-        dd      SWAP    ; a,b1 --> b1,a
-        dd      R_from  ; b1,a,b2 : almost correct
-        dd      SWAP
-        dd      EXIT
 ; --------------------- memory store and fetch ---------------------------------
 
     header  _fetch_,   _fetch_+5*cw, 0, 0, lastlink, "@"
@@ -970,7 +1009,7 @@ macro untilto  label
         pop     eax
         add     [ebx],eax
         next
-; ------------------------------------------------------------------------------
+; ------------------------- string operations --------------------------------
 ; In yourforth itself we have elevated strings slightly to a low abstraction
 ; level, just enough to forget about the individual characters.
 ; We introduced the macro "string" that lay down a string in memory.
@@ -1009,7 +1048,7 @@ macro untilto  label
         dd R_fetch, string_store, R_from
         dd _ALIGN_
         dd EXIT
-; ----------------- misc low level ------------------------------------------
+; ----------------- low level block operations ------------------------------------------
 ; Operations on blocks of memory. It is of some importance that they are fast.
 ; We need to move a block of memory, initialise it and compare two blocks.
 ; They are in fact wrappers around "rep movsb" "rep stosb" and "rep cmpsb".
@@ -1058,28 +1097,11 @@ CORA3:
         push    eax
         next
 ; ------------------------------------------------------------------------------
-    header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
-        mov     eax,esp
-        push    eax
-        next
-    header  DSP_store,   DSP_store+5*cw, 0, 0, lastlink, "DSP!"
-        pop     eax
-        mov     esp,eax
-        next
-    header  DEPTH,   docol, DEPTH+5*cw, 0, lastlink, "DEPTH"
-        dd      DSP_zero
-        dd      DSP_fetch
-        dd      _minus_
-        dd      LIT, cw, _slash_
-        dd      _one_, _minus_
-        dd      EXIT
-    header  RSP_fetch,   RSP_fetch+5*cw, 0, 0, lastlink, "RSP@"
-        push    ebp
-        next
-    header  RSP_store,   RSP_store+5*cw, 0, 0, lastlink, "RSP!"
-        pop     ebp
-        next
-; ------------------------------------------------------------------------------
+; In Forth functions or words are first class citizens. That just means that
+; they can be passed around as is. The token used for this is of course dea.
+; 'fun is comparable to fun without the brackets in c.
+; Then when you want to "call" fun, you need this word. In Forth we say that
+; we execute the word.
     header  EXECUTE,   EXECUTE+5*cw, 0, 0, lastlink, "EXECUTE"
         pop     eax
         jmp     dword[eax]
@@ -1142,6 +1164,214 @@ SSLAS2:
         next
 
 ; ---------------------- high level --------------------------------------------
+; You are now familiar with the low level interpreter. The interaction with the
+; user and the console or terminal is next. It is similar to a shell, in fact Forth
+; is a shell of sorts. The commands are accepted on the standard input, which is
+; file descriptor 0 , and the answers are given on standard output, which is file
+; descriptor 1. In all error situations yourforth prints an error number on standard
+; output. Redirection of input and output works in a standard Unix fashion using
+; pipe and redirect symbols in the line that starts up yourforth, e.g.
+; (cat examples/bench.frt; echo DO-PRIME-ISO) | yourforth
+; This behaves. yourforth knows when the input stops, and doesn't try to print 'OK'.
+; All the line-editing applicable to your terminal just works, as well as cutting
+; and pasting code with the mouse. (exercise).
+
+; The basic parsing revolves around three variables: the start of the parse area,
+; its end, and the parse pointer. Those are three fields in SRC.
+
+; PP points to the last cell of SRC.
+    header  PP,   dobuf, SRC+5*cw + 2*cw, 0, lastlink, "PP"
+    header  SRC,   dobuf, SRC+5*cw, 0, lastlink, "SRC"
+        dd      _, _, _
+; Because we sometimes need the character, sometimes a pointer, PP@@ returns
+; a pointer after the last character fetched and the character itself.
+    header  PP_fetch_fetch,   docol, PP_fetch_fetch+5*cw, 0, lastlink, "PP@@"
+        dd      SRC, CELL_plus, two_fetch
+        dd      OVER, _equal_
+        ifto  then2
+        dd      _zero_
+        goto  else2
+then2:
+        dd      _DUP_
+        dd      C_fetch
+        dd      _one_, PP, plus_store
+else2:
+        dd      EXIT
+
+; The parsing can be nested, The following two words save and restore the
+; total parse state.
+    header  SAVE,   docol, SAVE+5*cw, 0, lastlink, "SAVE"
+        dd      R_from
+        dd      SRC, two_fetch
+        dd      PP, _fetch_
+        dd      to_R, to_R, to_R
+        dd      to_R
+        dd EXIT
+    header  _RESTORE_,   docol, _RESTORE_+5*cw, 0, lastlink, "RESTORE"
+        dd      R_from
+        dd      R_from, R_from, R_from
+        dd      PP, _store_
+        dd      SRC, two_store
+        dd      to_R
+        dd EXIT
+; To complement the above SET-SRC : a word that sets the parse state from a string.
+; This is all we need, a file can be transformed into a string in memory.
+    header  SET_SRC,   docol, SET_SRC+5*cw, 0, lastlink, "SET-SRC"
+        dd      OVER, _plus_
+        dd      OVER, SRC, two_store
+        dd      PP, _store_
+        dd      EXIT
+
+; PP@@ is the basis of parsing numbers, strings and other special notations,
+; and is used extensively by the prefixes. For now we will just use it for the
+; basic syntactic element of Forth, a blank delimited string.
+    header  NAME,   docol, NAME+5*cw, 0, lastlink, "NAME"
+        dd      _
+begin1: dd      DROP
+        dd      PP_fetch_fetch, query_BLANK, _NOT_
+        dd      OVER, SRC, CELL_plus, _fetch_, _equal_
+        dd      _OR_
+        untilto   begin1
+        dd      _
+begin2: dd      DROP
+        dd      PP_fetch_fetch, query_BLANK
+        untilto   begin2
+        dd      OVER, _minus_
+        dd      EXIT
+
+; Irrespective of whether the parse area is a line typed in at the console,
+; a file buffer or a string, the interpreting is based on a NAME.
+; After separating off a blank delimited string it is passed to FOUND that
+; always returns a matching word from the dictionary. This involves some
+; magic that we will cover later. It can't fail. The mini-interpreters in the
+; prefix words may issue an error.
+; Normally the parse pointer is always advanced past the name of the word found,
+; not the name in the input stream. On the other hand prefixes there is left a part
+; to interpret themselves.                                          *
+; So for a normal word we have
+; .......... DROP .......
+;                ^
+;                |
+;               PP
+; and for a prefix like 0x
+; .......... 0x1793 ....
+;              ^
+;              |
+;             PP
+; and for the catchall prefix that is an empty string:
+; .......... 42 ....
+;            ^
+;            |
+;           PP
+; Catchall wants it to be a number, so nonsense words get an error 10.
+; .......... !@#$probablynonsense ....
+;            ^
+;            |
+;           PP
+
+; The word INTERPRET knows nothing. It just EXECUTE 's or compiles, using comma.
+; Comma expands the dictionary space with data. We'll come back to that.
+; STATE regulates this, it is a global control flag.
+; So STATE tells us when we are composing a definition between a colon and a semicolon.
+; Some words are to be executed despite being in this "compilation state".
+; An example is the prefix 0x. It must interpret the remainder till a blank,
+; and then compile the resulting number. Compiling a number is different from
+; just putting it on the stack, so you should expect 0x to be inspecting STATE.
+; That is it for now, more details follow when we treat those prefixes.
+; Other examples are auxiliary words for structured programming.
+; During compilation there must be a way to calculate those pesky offsets
+; for BRANCH automatically. But the we have to do those calculations then and
+; there.
+
+    header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
+begin3:
+        dd      NAME
+        dd      _DUP_
+        whileto   inte8
+        dd      OVER, to_R       ; Remember start of word.
+        dd      FOUND
+;Skip over the part that is matched, this is the whole word, unless it is a prefix
+        dd      _DUP_, to_NFA, _fetch_, _fetch_
+        dd      R_from, _plus_, PP, _store_
+        dd      _DUP_, to_FFA, _fetch_, LIT, immediatemask, _AND_
+        dd      STATE, _fetch_, zero_equal, _OR_
+        ifto  else1
+        dd      EXECUTE
+        goto  endif1
+else1:   dd      _comma_
+endif1: dd      query_STACK
+        goto  begin3
+
+inte8:  dd      DROP, DROP
+        dd      EXIT
+; EVALUATE is a straightforward combination of setting the parse area, and
+; interpreting it. There is one catch. There may be an error during interpretaton,
+; and this could mix up the different sources. In yourforth there are no
+; resources like open files that must be closed, but they would be left open
+; if the error were allowed to propagate to the top level.
+; In yourforth you need it in case you want to handle errors before it leads to a message.
+    header  EVALUATE,   docol, EVALUATE+5*cw, 0, lastlink, "EVALUATE"
+        dd      SAVE
+        dd      SET_SRC
+        dd      LIT, INTERPRET, CATCH
+        dd      _RESTORE_
+        dd      THROW
+        dd      EXIT
+; And then there is the interpret loop: accept user input, interpret line, repeat.
+; It is called QUIT in Forth, a strange name until you realize that you can
+; put QUIT anywhere in a program and restart basic user interaction.
+; This is a seldomly used debugging tool, QUIT leaves the whole program as is,
+; and even the data stack can be inspected. (Only errors clear the data stack, and CLS.)
+; QUIT is the start of everything, you can only INCLUDE a file by typing an INCLUDE
+; command. (But there is a thing called redirection in Linux.)
+; Note that QUIT starts with setting a defined state. STATE is set to interpreting,
+; all nesting is abandonned, and the error handling is reset.
+; We *do* want to terminate by BYE if the user types ^D to end the session and *certainly*
+; if the input ends in the case of redirection. (exercise)
+; (ACCEPT) just returns a string the user types after ending it with <return>,
+; a simple functionality that is not simple internally.
+; Ignoring details we just have
+;       : QUIT BEGIN (ACCEPT) SET-SRC INTERPRET OK AGAIN ;
+    header  QUIT,   docol, QUIT+5*cw, 0, lastlink, "QUIT"
+        dd      left_bracket
+        dd      RSP_zero, RSP_store
+        dd      _zero_, HANDLER, _store_
+QUIT1:
+        dd      LIT, paren_ACCEPT
+        dd      CATCH
+        dd      _DUP_, LIT, -epipe, _equal_
+        ifto  ENDIF7
+        dd      BYE
+ENDIF7:
+        dd      _zero_, MIN, _DUP_, query_ERROR
+        dd      one_plus                ; Include line feed again.
+        dd      SET_SRC
+        dd      INTERPRET
+        dd      OK
+        goto  QUIT1
+        dd      EXIT
+
+; OK is the first word we encounter that has a string literal inside.
+; BRANCH makes us jump over the string. This usage is the reason that
+; there is an alignment inside BRANCH. In this way, we continue at the LIT
+; after the string even if it doesn't precisely fills up cells.
+; You can see that the string macro is compatible with our $@ word.
+    header  OK,   docol, OK+5*cw, 0, lastlink, "OK"
+        dd      STATE
+        dd      _fetch_
+        dd      zero_equal
+        ifto  OK2
+        dd      BRANCH
+sb2:
+        string    " OK"          ; Without the space: un ugly collation.
+        dd      LIT, sb2
+        dd      string_fetch
+        dd      _TYPE_
+        dd      CR
+OK2:
+        dd      EXIT
+
+; ---------------------- high level --------------------------------------------
     header  DIGIT,   docol , DIGIT+5*cw, 0, lastlink, "DIGIT"
         dd      LIT, '0'
         dd      OVER, LIT, '9', _greater_
@@ -1162,31 +1392,6 @@ then1:  dd      _minus_
     header  query_BLANK,   docol, query_BLANK+5*cw, 0, lastlink, "?BLANK"
         dd      _BL_, one_plus, _less_
         dd      EXIT
-    header  PP_fetch_fetch,   docol, PP_fetch_fetch+5*cw, 0, lastlink, "PP@@"
-        dd      SRC, CELL_plus, two_fetch
-        dd      OVER, _equal_
-        ifto  then2
-        dd      _zero_
-        goto  else2
-then2:
-        dd      _DUP_
-        dd      C_fetch
-        dd      _one_, PP, plus_store
-else2:
-        dd      EXIT
-    header  NAME,   docol, NAME+5*cw, 0, lastlink, "NAME"
-        dd      _
-begin1: dd      DROP
-        dd      PP_fetch_fetch, query_BLANK, _NOT_
-        dd      OVER, SRC, CELL_plus, _fetch_, _equal_
-        dd      _OR_
-        untilto   begin1
-        dd      _
-begin2: dd      DROP
-        dd      PP_fetch_fetch, query_BLANK
-        untilto   begin2
-        dd      OVER, _minus_
-        dd      EXIT
     header  PARSE,   docol, PARSE+5*cw, 0, lastlink, "PARSE"
         dd      SRC, CELL_plus, two_fetch
         dd      OVER, _minus_
@@ -1197,11 +1402,6 @@ begin2: dd      DROP
 PARSE8:
         dd      PP, _store_
         dd      EXIT
-; PP points to the last cell of SRC.
-    header  PP,   dobuf, SRC+5*cw + 2*cw, 0, lastlink, "PP"
-    header  SRC,   dobuf, SRC+5*cw, 0, lastlink, "SRC"
-; Three cells: start and end of parse area, parse pointer.
-        dd      _, _, _
     header  CR,   docol, CR+5*cw, 0, lastlink, "CR"
         dd      LIT,0x0A
         dd      EMIT
@@ -1232,7 +1432,7 @@ PARSE8:
         dd      LATEST, to_DFA, _store_
         dd      LIT, docon, LATEST, to_CFA, _store_
         dd      EXIT
-docon:  mov     eax,[eax+1*cw]
+docon:  mov     eax,[eax+1*cw]     ; dea -> data
         push    eax
         next
     header  VARIABLE,   docol, VARIABLE+5*cw, 0, lastlink, "VARIABLE"
@@ -1241,7 +1441,7 @@ docon:  mov     eax,[eax+1*cw]
         dd      _zero_, _comma_
         dd      LIT, dobuf, LATEST, to_CFA, _store_
         dd      EXIT
-dobuf:  mov     eax,[eax+1*cw]
+dobuf:  mov     eax,[eax+1*cw]    ; dea -> data
         push    eax
         next
 ; ------------------------------------------------------------------------------
@@ -1286,6 +1486,24 @@ dobuf:  mov     eax,[eax+1*cw]
 ; ------------------------------------------------------------------------------
     header  STATE,   dobuf, STATE+5*cw, 0, lastlink, "STATE"
         dd      _
+    header  LITERAL,   docol, LITERAL+5*cw, immediatemask, lastlink, "LITERAL"
+        dd      STATE
+        dd      _fetch_
+        ifto  LITE1
+        dd      LIT, LIT, _comma_, _comma_
+LITE1:  dd      EXIT
+    header  left_bracket,   docol, left_bracket+5*cw, immediatemask, lastlink, "["
+        dd      _zero_
+        dd      STATE
+        dd      _store_
+        dd      EXIT
+    header  right_bracket,   docol, right_bracket+5*cw, 0, lastlink, "]"
+        dd      _one_
+        dd      STATE
+        dd      _store_
+        dd      EXIT
+
+; ------------------------------------------------------------------------------
     header  BASE,   dobuf, BASE+5*cw, 0, lastlink, "BASE"
         dd      _
     header  HLD,   dobuf, HLD+5*cw, 0, lastlink, "HLD"
@@ -1329,16 +1547,6 @@ dobuf:  mov     eax,[eax+1*cw]
         dd      EXIT
 ; See also >BODY in the CREATE .. DOES> section.
 ; ------------------------------------------------------------------------------
-    header  left_bracket,   docol, left_bracket+5*cw, immediatemask, lastlink, "["
-        dd      _zero_
-        dd      STATE
-        dd      _store_
-        dd      EXIT
-    header  right_bracket,   docol, right_bracket+5*cw, 0, lastlink, "]"
-        dd      _one_
-        dd      STATE
-        dd      _store_
-        dd      EXIT
     header  HIDDEN,   docol, HIDDEN+5*cw, 0, lastlink, "HIDDEN"
         dd      to_FFA
         dd      LIT,invisiblemask
@@ -1360,19 +1568,6 @@ dobuf:  mov     eax,[eax+1*cw]
         dd      one_plus
         dd      SWAP
         dd      C_fetch
-        dd      EXIT
-; ------------------------------------------------------------------------------
-    header  SET_SRC,   docol, SET_SRC+5*cw, 0, lastlink, "SET-SRC"
-        dd      OVER, _plus_
-        dd      OVER, SRC, two_store
-        dd      PP, _store_
-        dd      EXIT
-    header  EVALUATE,   docol, EVALUATE+5*cw, 0, lastlink, "EVALUATE"
-        dd      SAVE
-        dd      SET_SRC
-        dd      LIT, INTERPRET, CATCH
-        dd      _RESTORE_
-        dd      THROW
         dd      EXIT
 ; ------------------------------------------------------------------------------
     header  HOLD,   docol, HOLD+5*cw, 0, lastlink, "HOLD"
@@ -1570,35 +1765,7 @@ CREA1:  dd      DROP
         dd      CONTEXT, _fetch_
         dd      _LINK_
         dd      EXIT
-    header  LITERAL,   docol, LITERAL+5*cw, immediatemask, lastlink, "LITERAL"
-        dd      STATE
-        dd      _fetch_
-        ifto  LITE1
-        dd      LIT, LIT, _comma_, _comma_
-LITE1:  dd      EXIT
 ; ------------------------------------------------------------------------------
-    header  INTERPRET,   docol, INTERPRET+5*cw, 0, lastlink, "INTERPRET"
-begin3:
-        dd      NAME
-        dd      _DUP_
-        whileto   inte8
-        dd      OVER, to_R       ; Remember start of word.
-        dd      FOUND
-;Skip over the part that is matched, this is the whole word, unless it is a prefix
-        dd      _DUP_, to_NFA, _fetch_, _fetch_
-        dd      R_from, _plus_, PP, _store_
-        dd      _DUP_, to_FFA, _fetch_, LIT, immediatemask, _AND_
-        dd      STATE, _fetch_, zero_equal, _OR_
-        ifto  else1
-        dd      EXECUTE
-        goto  endif1
-else1:   dd      _comma_
-endif1: dd      query_STACK
-        goto  begin3
-
-inte8:  dd      DROP, DROP
-        dd      EXIT
-
     header  IMMEDIATE,   docol, IMMEDIATE+5*cw, 0, lastlink, "IMMEDIATE"
         dd      LATEST
         dd      to_FFA
@@ -1616,39 +1783,6 @@ inte8:  dd      DROP, DROP
         dd      LIT,0x0A
         dd      PARSE
         dd      two_DROP
-        dd      EXIT
-    header  QUIT,   docol, QUIT+5*cw, 0, lastlink, "QUIT"
-        dd      left_bracket
-        dd      RSP_zero, RSP_store
-        dd      _zero_, HANDLER, _store_
-QUIT1:
-        dd      LIT
-        dd      paren_ACCEPT
-        dd      CATCH
-        dd      _DUP_, LIT, -epipe, _equal_
-        ifto  ENDIF7
-        dd      BYE
-ENDIF7:
-        dd      _zero_, MIN, _DUP_, query_ERROR
-        dd      one_plus
-        dd      SET_SRC
-        dd      INTERPRET
-        dd      OK
-        goto  QUIT1
-        dd      EXIT
-    header  OK,   docol, OK+5*cw, 0, lastlink, "OK"
-        dd      STATE
-        dd      _fetch_
-        dd      zero_equal
-        ifto  OK2
-        dd      BRANCH
-sb2:
-        string    " OK"
-        dd      LIT, sb2
-        dd      string_fetch
-        dd      _TYPE_
-        dd      CR
-OK2:
         dd      EXIT
     header  CLS,   docol, CLS+5*cw, 0, lastlink, "CLS"
         dd      DSP_zero, DSP_store
@@ -1669,20 +1803,6 @@ OK2:
         dd      left_bracket, HERE,  string_fetch, EVALUATE
         dd      EXIT
 ; ------------------------------------------------------------------------------
-    header  SAVE,   docol, SAVE+5*cw, 0, lastlink, "SAVE"
-        dd      R_from
-        dd      SRC, two_fetch
-        dd      PP, _fetch_
-        dd      to_R, to_R, to_R
-        dd      to_R
-        dd EXIT
-    header  _RESTORE_,   docol, _RESTORE_+5*cw, 0, lastlink, "RESTORE"
-        dd      R_from
-        dd      R_from, R_from, R_from
-        dd      PP, _store_
-        dd      SRC, two_store
-        dd      to_R
-        dd EXIT
 ; ---------------- file interface ----------------------------------------------
     header  ZEN,   docol, ZEN+5*cw, 0, lastlink, "ZEN"
         dd      LIT, pad0, string_store
