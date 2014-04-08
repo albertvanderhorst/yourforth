@@ -174,7 +174,7 @@ Answer:
 What is contained in APE 's datafield. State the code to inspect it.
 
 "NOTE" (CREATE)
-What is contained in APE 's datafield.
+What is contained in NOTE's datafield.
 Answer:
 "APE" (CREATE)
 1789172  'APE >CFA !

@@ -4,12 +4,12 @@
 ; This is a community effort in the spirit of the Forth Interest Group.
 ; It is public domain and only knows contributors, no copyright holders.
 ; Contributors:  <when contributing, put your name here>
-;   yourforth $Revision: 6.27 $
+;   yourforth $Revision: 6.28 $
 
 ; To build:
 ; wget http://flatassembler.net/fasm-1.70.03.tgz; tar xfz fasm-1.70.03.tgz; fasm/fasm yourforth.fas
 ; That is right. Not only did you brew coffee, you've been to Columbia, picked the beans,
-; and roasted them as well! Next time you only need the last part.
+; and roasted them as well! Next time you only need "fasm/fasm ourforth.fas".
 ; If you're new at Forth you may want to read the Chapter "gentle introduction"
 ; of yourforth.pdf.
 
@@ -301,8 +301,8 @@ bm:                     ; This is the first address of Forth.
 ; executing the code at that address. There is no safety net. If that
 ; code doesn't cooperate with Forth-as-a-whole your machine crashes.
 ; (exercise)
-; You'll see no symbolic definition for offset names in the assembler.
-; The only offsets that occurs is 1*cw, which means the data set.
+; You'll see no symbolic definition for field offsets in the assembler code.
+; The only offsets that occurs is 1*cw, which means the data field offset.
 ; In high level Forth the offsets are handled by words >CFA >DFA etc.
 ;
 ; To an interpreter strings play of course an important role. Forth
@@ -331,7 +331,7 @@ endstring:
 ; and the end of the string as locals, i.e. they are generated new for each
 ; string and are not visible outside the macro's.
 ; DD lays down a 32 bit value. It is short for DD, "define double (16-bits) word ".
-; In yourforth a low of DD's are used, to represent headers as well as interpreted
+; In yourforth a lot of DD's are used, to represent headers as well as interpreted
 ; code. You see that we keep those cells aligned to 32 bit boundaries. This is
 ; not strictly necessary, but it makes inspecting memory so much easier.
 ; <I'm tempted to use a 'fix macro' to redefine DD as DC >
@@ -339,7 +339,6 @@ endstring:
 ; The header macro lays down the 5 fields in memory. You don't need to understand
 ; the following fully yet. The details are introduced gradually as each type of
 ; definition will be explained where it first occurs.
-
 ; All fields are passed to the macro
 ; as is, except for the name that is passed as a string. The string is
 ; to be laid out in memory just like in the string macro and a pointer
@@ -355,16 +354,31 @@ endstring:
 dea:  dd      cfield, dfield, ffield, lfield, nfield
 lastlink EQU dea
 }
+; Learn the five letters cdfln by heart!
+; They stand for code, data, flag, link and name.
+;
+; Let's look at an example first.
+;    header  _BM_,   docon, bm, 0, lastlink, "BM"
+; This is a constant containing the bottom of the memory.
+; _BM_ is the name such as used in the assembler, "BM" is the name
+; within Forth. This string must be visible from Forth, unlike _BM_
+; and bm, that stay within the assembler.
+; docon is the code executed for a constant.
+; bm is the data, i.e. a constant known by the assembler, which is
+; in this case the label representing the bottom of the memory,
+; that we defined above.
+; 0 means that there are no flags. lastlink just means normal linking.
+;
+; Apart from a better overview and taking care of name strings,
 ; "header" makes one other thing easier. It is cumbersome to fill
 ; in lfield with the name of the previous definition. By setting
 ; lastlink -- changing it with every invocation of header -- the name of
 ; the previous definition is always available as "lastlink".
 ; So you will see that almost always all header specifies lastlink
 ; for lfield.
-; As a result a definition can be moved around without changes to its code.
+; As a result a definition can be moved around without changes to its header.
 ; We can always override this by replacing
 ; "lastlink" by the actual value we want to have.
-
 ; "dea" is the name used within the assembler. Remember forthname is a
 ; string like "+" that probably is not an acceptable name for the word
 ; in the assembler. So we need "dea" to use the word in the assembler.
@@ -375,7 +389,7 @@ lastlink EQU dea
 ; Each name in yourforth itself contains any assortion of weird characters and capital
 ; letters, no lower case. Let's take R@ as an example.
 ; It is identified by it dea: 'R@ a denotation, a fixed number.
-; Withing the assembler this number is represented by the name r_fetch.
+; Within the assembler this number is represented by the name r_fetch.
 ; A simpler example is DROP. The assembler name is "DROP", which is the same
 ; number as 'DROP in yourforth.
 ; Here is the renaming convention:
@@ -396,7 +410,7 @@ lastlink EQU dea
 ; fetch and store are used in forth names that fetch something from memory
 ; or store something in memory.
 ;
-; A denotation, a constant value that is generated on the fly by
+; A denotation is a constant value that is generated on the fly by
 ; the compiler or interpreter.
 ; Because this is difficult, we postpone it.
 
@@ -439,9 +453,11 @@ epipe   =     0x20
 ;  assembly program and we will use SI for it.
 ;  Then of course we need a data stack, for which we use
 ;  the Intel stack, and the stack pointer is just SP.
-;  This leaves us with the return stack, that is keeps track of
-;  where we are when SI is needed to interpret another high
-;  level definition from the current one. Intel has run out of stacks
+;  This leaves us with the return stack, that keeps track of
+;  where we are. Whenever SI is needed to interpret another high
+;  level definition, the previous value is stored there, and restored
+;  when we want to continue with the calling definition.
+;  Intel has run out of stacks
 ;  already, but we can emulate a stack using the BP register.
 ;  It just means that we have to use a couple of instructions to push
 ;  SI, or pop it.
@@ -466,7 +482,8 @@ macro   next {
 ; making it point to the next Forth instruction.
 ; [Actually this is a bit tricky. This requires that the so called
 ; direction bit is set to forward, using the instruction cld. After
-; executing the instruction std, lodsd is switched to decrementing.]
+; executing the instruction std, lodsd is switched to decrementing.
+; We keep the forward direction always.]
 ; Then we jump to what is contained in the code field of the dea, so actually
 ; [eax+0*cw] . We rely on that code to end again with a ``next'', and if
 ; it needs to use SI (e.g. for nesting), it must restore it beforehand.
@@ -474,7 +491,7 @@ macro   next {
 ; Executing the code is started with an eax that contains the dea of the
 ; word. So even if the code field is filled with the same pointer,
 ; the objects data is different and results in different data or even different
-; action. Object buff's will recognize this, it is just a self pointer.
+; action. OO fan's will recognize this, it is just a self pointer.
 
         cld     ; This direction must never change, or next stops working
         mov     esp, [DSP_zero+1*cw]
@@ -507,7 +524,7 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
 
 ; [One last remark. Because BYE is our first definition, you may expect it to
 ; have a link of 0 and to be it last in the linked list. But we want the
-; word FORTH and the denotations to come last yet not discuss them until later.]
+; word FORTH and the denotations to come last, yet not discuss them until later.]
 ;
 ; EXIT is the reverse of docol. ( In the above case EXIT is not reached.)
 ; This is our first example of a low level word, or "code definition".
@@ -524,7 +541,7 @@ docol:  lea     ebp,[ebp - 1*cw]        ; Push SI on the return stack
 ; Note that the data field is not used and the content of AX is not used.
 
 ; Because you understand Intel assembly language a bit, I present you
-; ;; with a table of the 5 instructions of the virtual machine:
+; with a table of the 5 instructions of the virtual machine:
 ;     Forth machine      cells            Intel equivalent
 ;     DEA, invocation     1               call XXX
 ;     EXIT                1               rts
@@ -582,7 +599,7 @@ BRAN1:  lodsd
 ZBRAN1: add     esi,eax
         next
 ; This completes the virtual Forth machine that is used in yourforth.
-; You can however at all times add anything that you come up with.
+; You can however at all times add anything that you can think off.
 
 ; Probably you will find 0BRANCH confusing and hard to find out what
 ; code is executed with what flag.
@@ -606,8 +623,8 @@ macro untilto  label
 ; For whileto the code following
 ; is part of the loop, so we stay in the loop. The label is where we want
 ; to jump out of the loop.
-; For untilto the code following is outside of a loop, so we jump out.
-; Now the label is the start of the loop.
+; For untilto the code following is outside of a loop, so we fall through
+; on a true condition. Now the label is the start of the loop.
 ;  Don't worry, Forthers hate complicated control structures. In the
 ;  code of <your>forth you will not find a single nested loop.
 ;
@@ -619,6 +636,7 @@ macro untilto  label
 ; they are mostly written in assembler.
 ; Examples are operations like + or <.
 
+; This words does nothing.
     header  NOOP,   NOOP+5*cw, 0, 0, lastlink, "NOOP"
        next
 ; Another word that does almost nothing, it pushes a "whatever" value to the
@@ -715,8 +733,8 @@ macro untilto  label
         dd      SWAP
         dd      EXIT
 ; ------------------------------------------------------------------------------
-; In yourforth the stack is just a block of memory set aside for the purpose.
-; We need a few words to control them.
+; In yourforth a stack is just a block of memory set aside for the purpose.
+; We need a few words to control the stacks.
     header  DSP_fetch,   DSP_fetch+5*cw, 0, 0, lastlink, "DSP@"
         mov     eax,esp
         push    eax
@@ -1449,8 +1467,8 @@ dobuf:  mov     eax,[eax+1*cw]    ; dea -> data
     header  _one_,   docon, 1, 0, lastlink, "1"
     header  _BL_,   docon, ' ', 0, lastlink, "BL"
 ; ------------------------------------------------------------------------------
-    header  _EM_,   docon, em, 0, lastlink, "EM"
     header  _BM_,   docon, bm, 0, lastlink, "BM"
+    header  _EM_,   docon, em, 0, lastlink, "EM"
     header  DSP_zero,   docon, initdsp0 , 0, lastlink, "DSP0"
     header  RSP_zero,   docon, initrsp0  , 0, lastlink, "RSP0"
     header  CIB,   docon, initcib , 0, lastlink, "CIB"
@@ -2116,8 +2134,8 @@ dovoc:
         ; Dummy header, use the datafield of 0 as an empty string.
         dd      0, 0, dummymask, regularlast, (_zero_+1*cw)
 
-; Note that outside of this assembler source we would need an
-; extra word VOCABULARY using CREATE DOES> to define it.
+; Note that outside of this assembler source we would need the above
+; word NAMESPACE using CREATE DOES> to define it.
 
 ; ------------------------------------------------------------------------------
 initdp:
@@ -2134,7 +2152,8 @@ initdp:
 LF EQU 0x0a
         dd endforthcode - startforthcode
 startforthcode:
-; Reserve some place to prevent overwriting the source during compilation.
+; Reserve some place.
+; In this way the source is not overwritten before it has been compiled.
     db "                                                              ", LF
     db "                                                              ", LF
     db "                                                              ", LF
