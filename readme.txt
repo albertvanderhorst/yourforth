@@ -28,3 +28,11 @@ yourforth.html  : usage information
 isoforth.txt    : what if I want to go standard?
 pitfalls.txt    : linux do and don't information
 examples/       : directory with examples
+
+The file lina.pdf is documentation of the big sister program lina.
+It describes features, in particular the library in block, that are
+not present in yourforth. The glossary is however in accordance 
+with yourforth, and may serve as documentation for yourforth.
+If you're serious with your forth, you may want to use the 
+generic ciforth system, that will allow you to make this kind f
+documentation for it.
